@@ -60,6 +60,7 @@ class languageGenerator {
                     fs.readFile(removeFile, { encoding: 'utf8' }, (_, data) => {
                         const removeContent = JSON.parse(data);
                         for (const k in removeContent) {
+                            // TODO: check if this really works
                             delete content[removeContent[k]];
                         }
                     });
