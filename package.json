@@ -1,0 +1,22 @@
+{
+  "name": "memepack-builder",
+  "version": "0.1.0",
+  "description": "Build memified Minecraft resource pack",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint src/*.ts src/**/*.ts --fix",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "compressing": "^1.5.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.41",
+    "@typescript-eslint/eslint-plugin": "^4.22.0",
+    "@typescript-eslint/parser": "^4.22.0",
+    "eslint": "^7.24.0",
+    "typescript": "^4.2.4"
+  }
+}
