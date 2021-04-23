@@ -3,12 +3,12 @@ import { BuildOptions, ModuleOverview } from '../types';
 import { generateJavaLegacy, generateJSON } from '../util/languageGenerator';
 import { packBuilder } from './base';
 
+// TODO: move these settings to config
 const latestJEPackFormat = 7;
 const legacyJEPackFormat = 3;
+const defaultFileName = 'meme-resourcepack';
 
 export class javaBuilder extends packBuilder {
-    // TODO: move this default name to config
-    defaultFileName = 'meme-resourcepack';
     modPath: string;
 
     /**
@@ -47,12 +47,35 @@ export class javaBuilder extends packBuilder {
         if (!this.validateOptions()) {
             return;
         }
-        this.options.output = `${this.options.output}/${this.defaultFileName}.zip`;
+        this._normalizeOptions();
         this.mergeCollectionIntoResource();
         const extraFiles = ['pack.png', 'LICENSE'];
         const extraContent: Record<string, string> = {};
         this._addLanguage(extraFiles, extraContent);
         await this._build(extraFiles, extraContent);
+    }
+
+    getLanguageContent(langFilePath: string): string {
+        const options = this.options;
+        if (['normal', 'compat'].includes(options.type)) {
+            return generateJSON(langFilePath, this.moduleOverview, options.modules.resource, options.mod);
+        }
+        else if (options.type === 'legacy') {
+            return generateJavaLegacy(langFilePath, this.moduleOverview, options.modules.resource, options.mod);
+        }
+        else {
+            return '';
+        }
+    }
+
+    _normalizeOptions(): void {
+        const options = this.options;
+        if (options.mod) {
+            options.mod = options.mod.map((value) => {
+                return `${this.modPath}/${value}`;
+            });
+        }
+        options.output = `${options.output}/${defaultFileName}.zip`;
     }
 
     _addLanguage(fileList: string[], contentList: Record<string, string>): void {
@@ -77,31 +100,19 @@ export class javaBuilder extends packBuilder {
     _processMcMetaFile(): any {
         const mcmetaFile = `${this.resourcePath}/pack.mcmeta`;
         let parsedData: any;
+        const type = this.options.type;
         readFile(mcmetaFile, { encoding: 'utf8' }, (err, data) => {
             if (err) {
                 this._appendLog(err.message);
                 return;
             }
-                parsedData = JSON.parse(data);
-                if (this.options.type === 'compat') {
-                    delete parsedData.language;
-                }
-                const packFormat = this.options.type === 'legacy' ? 3 : this.options.format;
-                // TODO: move this number to config
-                parsedData.pack.pack_format = packFormat || 7;
+            parsedData = JSON.parse(data);
+            if (type === 'compat') {
+                delete parsedData.language;
+            }
+            const packFormat = type === 'legacy' ? legacyJEPackFormat : this.options.format;
+            parsedData.pack.pack_format = packFormat || latestJEPackFormat;
         });
         return parsedData;
-    }
-
-    getLanguageContent(langFilePath: string): string {
-        if (['normal', 'compat'].includes(this.options.type)) {
-            return generateJSON(langFilePath, this.moduleOverview, this.options.modules.resource, this.options.mod);
-        }
-        else if (this.options.type === 'legacy') {
-            return generateJavaLegacy(langFilePath, this.moduleOverview, this.options.modules.resource, this.options.mod);
-        }
-        else {
-            return '';
-        }
     }
 }

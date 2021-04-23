@@ -4,10 +4,10 @@ import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types';
 import { generateBedrock } from '../util/languageGenerator';
 import { packBuilder } from './base'
 
-export class bedrockBuilder extends packBuilder {
-    // TODO: move this default name to config
-    defaultFileName = 'meme-resourcepack';
+// TODO: move these default settings to config
+const defaultFileName = 'meme-resourcepack';
 
+export class bedrockBuilder extends packBuilder {
     /**
      *
      */
@@ -31,7 +31,7 @@ export class bedrockBuilder extends packBuilder {
         if (!this.validateOptions()) {
             return;
         }
-        this.options.output = `${this.options.output}/${this.defaultFileName}.${this.options.type}`;
+        this._normalizeOptions();
         this.mergeCollectionIntoResource();
         const extraFiles = ['pack_icon.png', 'LICENSE', 'manifest.json', 'textures/map/map_background.png'];
         const extraContent = {
@@ -40,17 +40,6 @@ export class bedrockBuilder extends packBuilder {
         };
         this._addLanguage(extraFiles, extraContent);
         await this._build(extraFiles, extraContent, ['item_texture.json', 'terrain_texture.json']);
-    }
-
-    _addLanguage(fileList: string[], contentList: Record<string, string>): void {
-        const langContent = this.getLanguageContent('texts/zh_ME.lang');
-        if (this.options.compatible) {
-            contentList['texts/zh_CN.lang'] = langContent;
-        }
-        else {
-            fileList.push('texts/language_names.json', 'texts/languages.json', 'texts/zh_CN.lang')
-            contentList['texts/zh_ME.lang'] = langContent;
-        }
     }
 
     getTexture(textureFileName: string): string {
@@ -73,5 +62,21 @@ export class bedrockBuilder extends packBuilder {
 
     getLanguageContent(langFilePath: string): string {
         return generateBedrock(`${this.resourcePath}/${langFilePath}`, this.moduleOverview, this.options.modules.resource)
+    }
+
+    _normalizeOptions(): void {
+        const options = this.options;
+        options.output = `${options.output}/${defaultFileName}.${options.type}`;
+    }
+
+    _addLanguage(fileList: string[], contentList: Record<string, string>): void {
+        const langContent = this.getLanguageContent('texts/zh_ME.lang');
+        if (this.options.compatible) {
+            contentList['texts/zh_CN.lang'] = langContent;
+        }
+        else {
+            fileList.push('texts/language_names.json', 'texts/languages.json', 'texts/zh_CN.lang')
+            contentList['texts/zh_ME.lang'] = langContent;
+        }
     }
 }

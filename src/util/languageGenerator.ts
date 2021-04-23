@@ -54,27 +54,25 @@ class languageGenerator {
         for (const module of modules) {
             const addFile = `${modulePath}/${module}/add.json`;
             readFile(addFile, { encoding: 'utf8' }, (err, data) => {
-                if (!err) {
-                    const addContent = JSON.parse(data);
-                    for (const k in addContent) {
-                        content[k] = addContent[k];
-                    }
-                }
-                else {
+                if (err) {
                     this._appendLog(err.message);
+                    return;
+                }
+                const addContent = JSON.parse(data);
+                for (const k in addContent) {
+                    content[k] = addContent[k];
                 }
             });
             const removeFile = `${modulePath}/${module}/remove.json`;
             readFile(removeFile, { encoding: 'utf8' }, (err, data) => {
-                if (!err) {
-                    const removeContent = JSON.parse(data);
-                    for (const k in removeContent) {
-                        // TODO: check if this really works
-                        delete content[removeContent[k]];
-                    }
-                }
-                else {
+                if (err) {
                     this._appendLog(err.message);
+                    return;
+                }
+                const removeContent = JSON.parse(data);
+                for (const k in removeContent) {
+                    // TODO: check if this really works
+                    delete content[removeContent[k]];
                 }
             });
         }
@@ -85,7 +83,11 @@ class languageGenerator {
         if (this.modFiles) {
             for (const mod of this.modFiles) {
                 let modContent: Record<string, string> = {};
-                readFile(`${mod}`, { encoding: 'utf8' }, (_, data) => {
+                readFile(`${mod}`, { encoding: 'utf8' }, (err, data) => {
+                    if (err) {
+                        this._appendLog(err.message);
+                        return;
+                    }
                     if (mod.endsWith('.lang')) {
                         modContent = this.langToJSON(data);
                     }
