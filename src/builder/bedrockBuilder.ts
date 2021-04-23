@@ -5,6 +5,7 @@ import { generateBedrock } from '../util/languageGenerator';
 import { packBuilder } from './base'
 
 export class bedrockBuilder extends packBuilder {
+    // TODO: move this default name to config
     defaultFileName = 'meme-resourcepack';
 
     /**

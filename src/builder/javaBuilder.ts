@@ -7,6 +7,7 @@ const latestJEPackFormat = 7;
 const legacyJEPackFormat = 3;
 
 export class javaBuilder extends packBuilder {
+    // TODO: move this default name to config
     defaultFileName = 'meme-resourcepack';
     modPath: string;
 
