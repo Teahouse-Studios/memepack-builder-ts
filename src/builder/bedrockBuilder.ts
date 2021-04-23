@@ -1,6 +1,6 @@
 
-import { readFile, stat } from 'node:fs';
-import { BuildOptions, ModuleOverview } from '../types';
+import { readFile } from 'node:fs';
+import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types';
 import { generateBedrock } from '../util/languageGenerator';
 import { packBuilder } from './base'
 
@@ -53,17 +53,17 @@ export class bedrockBuilder extends packBuilder {
     }
 
     getTexture(textureFileName: string): string {
-        const texture: Record<string, Record<string, any>> = { texture_data: {} };
+        const texture: BedrockTextureFile = { texture_data: {} };
         for (const module of this.options.modules.resource) {
             const path = `${this.moduleOverview.modulePath}/${module}/${textureFileName}`;
-            stat(path, (_, stats) => {
-                if (stats.isFile()) {
-                    readFile(path, { encoding: 'utf8' }, (_, data) => {
-                        const parsedData = JSON.parse(data)
-                        for (const k in parsedData) {
-                            texture.texture_data[k] = parsedData[k];
-                        }
-                    });
+            readFile(path, { encoding: 'utf8' }, (err, data) => {
+                if (err) {
+                    this._appendLog(err.message);
+                    return;
+                }
+                const parsedData = JSON.parse(data);
+                for (const k in parsedData) {
+                    texture.texture_data[k] = parsedData[k];
                 }
             });
         }

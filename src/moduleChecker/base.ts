@@ -1,4 +1,4 @@
-import { stat } from "node:fs";
+import { readdir, readFile, stat } from "node:fs";
 import { ModuleOverview } from "../types";
 
 export class moduleChecker {
@@ -11,43 +11,45 @@ export class moduleChecker {
         this.moduleInfo = this.validateModules;
     }
 
+    _appendLog(entry: string): void {
+        this.log.push(entry);
+    }
+
     validateModules(): ModuleOverview {
-        const overview = {
+        const overview: ModuleOverview = {
             modulePath: this.modulePath,
             modules: {
-                collection: {},
-                resource: {}
+                collection: [],
+                resource: []
             }
         };
-
+        readdir(this.modulePath, (err, files) => {
+            if (err) {
+                this._appendLog(err.message);
+                return;
+            }
+            for (const file of files) {
+                readFile(`${this.modulePath}/${file}/module_manifest.json`, { encoding: 'utf8' }, (err, data) => {
+                    if (err) {
+                        this._appendLog(err.message);
+                        return;
+                    }
+                    const parsedData = JSON.parse(data);
+                    const moduleType: string = parsedData.type;
+                    delete parsedData['type'];
+                    switch (moduleType) {
+                        case 'collection':
+                            overview.modules.collection.push(parsedData);
+                            break;
+                        case 'resource':
+                            overview.modules.resource.push(parsedData);
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+        });
         return overview;
-    }
-
-    _flattenCollection() {
-        ;
-    }
-
-    _existResourceDirs(moduleName: string): boolean {
-        const resDirs = ['assets', 'sounds', 'credits', 'models', 'textures'];
-        for (const dir of resDirs) {
-            stat(`${this.modulePath}/${moduleName}/${dir}`, (_, stats) => {
-                if (stats.isDirectory()) {
-                    return true;
-                }
-            });
-        }
-        return false;
-    }
-
-    _existLangFiles(moduleName: string): boolean {
-        const langFiles = ['add.json', 'remove.json'];
-        for (const file of langFiles) {
-            stat(`${this.modulePath}/${moduleName}/${file}`, (_, stats) => {
-                if (stats.isFile()) {
-                    return true;
-                }
-            });
-        }
-        return false;
     }
 }

@@ -1,4 +1,4 @@
-import { readFile, stat } from 'node:fs';
+import { readFile } from 'node:fs';
 import { BuildOptions, ModuleOverview } from '../types';
 import { generateJavaLegacy, generateJSON } from '../util/languageGenerator';
 import { packBuilder } from './base';
@@ -7,7 +7,7 @@ const latestJEPackFormat = 7;
 const legacyJEPackFormat = 3;
 
 export class javaBuilder extends packBuilder {
-    defaultFileName = 'meme-resourcepack.zip';
+    defaultFileName = 'meme-resourcepack';
     modPath: string;
 
     /**
@@ -46,7 +46,7 @@ export class javaBuilder extends packBuilder {
         if (!this.validateOptions()) {
             return;
         }
-        this.options.output = `${this.options.output}/${this.defaultFileName}`;
+        this.options.output = `${this.options.output}/${this.defaultFileName}.zip`;
         this.mergeCollectionIntoResource();
         const extraFiles = ['pack.png', 'LICENSE'];
         const extraContent: Record<string, string> = {};
@@ -76,17 +76,18 @@ export class javaBuilder extends packBuilder {
     _processMcMetaFile(): any {
         const mcmetaFile = `${this.resourcePath}/pack.mcmeta`;
         let parsedData: any;
-        stat(mcmetaFile, (_, stats) => {
-            if (stats.isFile()) {
-                readFile(mcmetaFile, { encoding: 'utf8' }, (_, data) => {
-                    parsedData = JSON.parse(data);
-                    if (this.options.type === 'compat') {
-                        delete parsedData.language;
-                    }
-                    const packFormat = this.options.type === 'legacy' ? 3 : this.options.format;
-                    parsedData.pack.pack_format = packFormat || 7;
-                })
+        readFile(mcmetaFile, { encoding: 'utf8' }, (err, data) => {
+            if (err) {
+                this._appendLog(err.message);
+                return;
             }
+                parsedData = JSON.parse(data);
+                if (this.options.type === 'compat') {
+                    delete parsedData.language;
+                }
+                const packFormat = this.options.type === 'legacy' ? 3 : this.options.format;
+                // TODO: move this number to config
+                parsedData.pack.pack_format = packFormat || 7;
         });
         return parsedData;
     }

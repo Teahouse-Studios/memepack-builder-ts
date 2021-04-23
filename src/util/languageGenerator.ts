@@ -1,4 +1,4 @@
-import * as fs from 'fs';
+import { readFile } from "node:fs";
 import { ModuleOverview } from "../types";
 
 export function generateJSON(filePath: string, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): string {
@@ -18,6 +18,7 @@ class languageGenerator {
     moduleOverview: ModuleOverview;
     modules?: string[];
     modFiles?: string[];
+    log: string[] = [];
 
     constructor(filePath: string, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]) {
         this.filePath = filePath;
@@ -26,9 +27,13 @@ class languageGenerator {
         this.modFiles = modFiles;
     }
 
+    _appendLog(entry: string): void {
+        this.log.push(entry);
+    }
+
     getContent(): Record<string, string> {
         let content: Record<string, string> = {};
-        fs.readFile(this.filePath, { flag: 'r', encoding: 'utf8' }, (_, data) => {
+        readFile(this.filePath, { flag: 'r', encoding: 'utf8' }, (_, data) => {
             if (this.filePath.endsWith('.json')) {
                 content = JSON.parse(data);
             }
@@ -44,26 +49,28 @@ class languageGenerator {
         const modulePath = this.moduleOverview.modulePath;
         for (const module of modules) {
             const addFile = `${modulePath}/${module}/add.json`;
-            fs.stat(addFile, (_, stats) => {
-                if (stats.isFile()) {
-                    fs.readFile(addFile, { encoding: 'utf8' }, (_, data) => {
-                        const addContent = JSON.parse(data);
-                        for (const k in addContent) {
-                            content[k] = addContent[k];
-                        }
-                    });
+            readFile(addFile, { encoding: 'utf8' }, (err, data) => {
+                if (!err) {
+                    const addContent = JSON.parse(data);
+                    for (const k in addContent) {
+                        content[k] = addContent[k];
+                    }
+                }
+                else {
+                    this._appendLog(err.message);
                 }
             });
             const removeFile = `${modulePath}/${module}/remove.json`;
-            fs.stat(removeFile, (_, stats) => {
-                if (stats.isFile()) {
-                    fs.readFile(removeFile, { encoding: 'utf8' }, (_, data) => {
-                        const removeContent = JSON.parse(data);
-                        for (const k in removeContent) {
-                            // TODO: check if this really works
-                            delete content[removeContent[k]];
-                        }
-                    });
+            readFile(removeFile, { encoding: 'utf8' }, (err, data) => {
+                if (!err) {
+                    const removeContent = JSON.parse(data);
+                    for (const k in removeContent) {
+                        // TODO: check if this really works
+                        delete content[removeContent[k]];
+                    }
+                }
+                else {
+                    this._appendLog(err.message);
                 }
             });
         }
@@ -74,7 +81,7 @@ class languageGenerator {
         if (this.modFiles) {
             for (const mod of this.modFiles) {
                 let modContent: Record<string, string> = {};
-                fs.readFile(`${mod}`, { encoding: 'utf8' }, (_, data) => {
+                readFile(`${mod}`, { encoding: 'utf8' }, (_, data) => {
                     if (mod.endsWith('.lang')) {
                         modContent = this.langToJSON(data);
                     }

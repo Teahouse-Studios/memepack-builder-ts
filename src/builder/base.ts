@@ -38,7 +38,9 @@ export class packBuilder {
             zipStream.addEntry(`${this.resourcePath}/${file}`, { relativePath: `${file}` });
         }
         for (const file in extraContent) {
-            zipStream.addEntry(Buffer.from(extraContent[file], 'utf8'), { relativePath: file });
+            if (extraContent[file] !== '') {
+                zipStream.addEntry(Buffer.from(extraContent[file], 'utf8'), { relativePath: file });
+            }
         }
         for (const module of modules) {
             const fileList: string[] = [];
@@ -71,9 +73,17 @@ export class packBuilder {
     }
 
     async _readFileList(path: string, fileList: string[]): Promise<void> {
-        fs.readdir(path, async (_, files) => {
-            for await (const file of files) {
-                fs.stat(`${path}${file}`, async (_, stats) => {
+        fs.readdir(path, async (err, files) => {
+            if (err) {
+                this._appendLog(err.message);
+                return;
+            }
+            for (const file of files) {
+                fs.stat(`${path}${file}`, async (err, stats) => {
+                    if (err) {
+                        this._appendLog(err.message);
+                        return;
+                    }
                     if (stats.isDirectory()) {
                         await this._readFileList(`${path}${file}/`, fileList);
                     }
@@ -86,12 +96,14 @@ export class packBuilder {
     }
 
     mergeCollectionIntoResource(): void {
-        const collection = this.options.modules.collection || [];
+        const selectedCollection = this.options.modules.collection || [];
         const resource = this.options.modules.resource;
-        for (const item of collection) {
-            for (const containedItem of this.moduleOverview.modules.collection[item].contains || []) {
-                if (!resource.includes(containedItem)) {
-                    resource.push(containedItem);
+        for (const item of this.moduleOverview.modules.collection.filter((value) => {
+            return selectedCollection.includes(value.name);
+        })) {
+            for (const containedModule of item.contains || []) {
+                if (!resource.includes(containedModule)) {
+                    resource.push(containedModule);
                 }
             }
         }

@@ -8,3 +8,6 @@
 
 // name
 export const name = 'memepack-builder';
+export { bedrockBuilder } from './builder/bedrockBuilder';
+export { javaBuilder } from './builder/javaBuilder';
+export { moduleChecker } from './moduleChecker/base';
