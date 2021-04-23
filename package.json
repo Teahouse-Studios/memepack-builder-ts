@@ -7,7 +7,7 @@
     "build": "yarn clear && tsc",
     "clear": "rm -rf ./dist",
     "lint": "eslint src/*.ts src/**/*.ts",
-    "preety": "eslint --fix src/*.ts src/**/*.ts",
+    "pretty": "eslint --fix src/*.ts src/**/*.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "MysticNebula70 <mysticnebula70@teahou.se>",
