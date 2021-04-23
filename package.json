@@ -2,15 +2,17 @@
   "name": "memepack-builder",
   "version": "0.1.0",
   "description": "Build memified Minecraft resource pack",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "lint": "eslint src/*.ts src/**/*.ts --fix",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "yarn clear && tsc",
     "clear": "rm -rf ./dist",
-    "build": "yarn clear && tsc"
+    "lint": "eslint src/*.ts src/**/*.ts",
+    "preety": "eslint --fix src/*.ts src/**/*.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "MysticNebula70 <mysticnebula70@teahou.se>",
+  "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
+  "license": "Apache-2.0",
   "dependencies": {
     "compressing": "^1.5.1"
   },
