@@ -33,7 +33,11 @@ class languageGenerator {
 
     getContent(): Record<string, string> {
         let content: Record<string, string> = {};
-        readFile(this.filePath, { flag: 'r', encoding: 'utf8' }, (_, data) => {
+        readFile(this.filePath, { flag: 'r', encoding: 'utf8' }, (err, data) => {
+            if (err) {
+                this._appendLog(err.message);
+                return;
+            }
             if (this.filePath.endsWith('.json')) {
                 content = JSON.parse(data);
             }
