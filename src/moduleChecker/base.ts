@@ -24,7 +24,7 @@ export class moduleChecker {
             }
         };
         for (const file of fs.readdirSync(this.modulePath)) {
-            const parsedData = JSON.parse(fs.readFileSync(`${this.modulePath}/${file}/module_manifest.json`, { encoding: 'utf8' }));
+            const parsedData = require(`${this.modulePath}/${file}/module_manifest.json`);
             const moduleType: string = parsedData.type;
             delete parsedData['type'];
             switch (moduleType) {

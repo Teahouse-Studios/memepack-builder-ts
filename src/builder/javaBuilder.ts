@@ -1,12 +1,6 @@
-import * as fs from 'fs';
 import { BuildOptions, ModuleOverview } from '../types';
 import { generateJavaLegacy, generateJSON } from '../util/languageGenerator';
 import { packBuilder } from './base';
-
-// TODO: move these settings to config
-const latestJEPackFormat = 7;
-const legacyJEPackFormat = 3;
-const defaultFileName = 'meme-resourcepack';
 
 export class javaBuilder extends packBuilder {
     modPath: string;
@@ -20,6 +14,8 @@ export class javaBuilder extends packBuilder {
     }
 
     validateOptions(): boolean {
+        const latestJEPackFormat = this.config.latestJEPackFormat;
+        const legacyJEPackFormat = this.config.legacyJEPackFormat;
         const jeRequiredOptions = ['type', 'modules', 'mod', 'output', 'hash'];
         const options = this.options;
         for (const option of jeRequiredOptions) {
@@ -89,7 +85,7 @@ export class javaBuilder extends packBuilder {
                 return `${this.modPath}/${value}`;
             });
         }
-        options.output = `${options.output}/${defaultFileName}.zip`;
+        options.output = `${options.output}/${this.config.defaultFileName}.zip`;
     }
 
     async _addLanguage(fileList: string[], contentList: Record<string, string>): Promise<void> {
@@ -115,13 +111,13 @@ export class javaBuilder extends packBuilder {
     }
 
     _processMcMetaFile(): any {
-        const parsedData: any = JSON.parse(fs.readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' }));
+        const parsedData: any = require(`${this.resourcePath}/pack.mcmeta`);
         const type = this.options.type;
         if (type === 'compat') {
             delete parsedData.language;
         }
-        const packFormat = type === 'legacy' ? legacyJEPackFormat : this.options.format;
-        parsedData.pack.pack_format = packFormat || latestJEPackFormat;
+        const packFormat = type === 'legacy' ? this.config.legacyJEPackFormat : this.options.format;
+        parsedData.pack.pack_format = packFormat || this.config.latestJEPackFormat;
         return parsedData;
     }
 }

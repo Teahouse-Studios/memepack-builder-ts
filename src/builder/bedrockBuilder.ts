@@ -1,11 +1,7 @@
-
-import { readFile } from 'fs';
+import { existsSync } from 'fs';
 import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types';
 import { generateBedrock } from '../util/languageGenerator';
 import { packBuilder } from './base'
-
-// TODO: move these default settings to config
-const defaultFileName = 'meme-resourcepack';
 
 export class bedrockBuilder extends packBuilder {
     /**
@@ -45,19 +41,15 @@ export class bedrockBuilder extends packBuilder {
     async getTexture(textureFileName: string): Promise<string> {
         const texture: BedrockTextureFile = { texture_data: {} };
         for (const module of this.options.modules.resource) {
-            const path = `${this.moduleOverview.modulePath}/${module}/${textureFileName}`;
-            readFile(path, { encoding: 'utf8' }, (err, data) => {
-                if (err) {
-                    this._appendLog(err.message);
-                    return;
+            const path = `${this.moduleOverview.modulePath}/${module}/textures/${textureFileName}`;
+            if (existsSync(path)) {
+                const data = require(path).texture_data;
+                for (const k in data) {
+                    texture.texture_data[k] = data[k];
                 }
-                const parsedData = JSON.parse(data);
-                for (const k in parsedData) {
-                    texture.texture_data[k] = parsedData[k];
-                }
-            });
+            }
         }
-        return JSON.stringify(texture);
+        return JSON.stringify(texture, null, 4);
     }
 
     async getLanguageContent(langFilePath: string, withModules: boolean): Promise<string> {
@@ -70,7 +62,7 @@ export class bedrockBuilder extends packBuilder {
 
     _normalizeOptions(): void {
         const options = this.options;
-        options.output = `${options.output}/${defaultFileName}.${options.type}`;
+        options.output = `${options.output}/${this.config.defaultFileName}.${options.type}`;
     }
 
     async _addLanguage(fileList: string[], contentList: Record<string, string>): Promise<void> {

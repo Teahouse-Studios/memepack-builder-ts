@@ -6,15 +6,18 @@
 import * as fs from 'fs';
 import { createHash } from 'crypto';
 import { zip } from 'compressing';
-import { BuildOptions, ModuleOverview } from '../types';
+import { BuilderConfig, BuildOptions, ModuleOverview } from '../types';
+import { normalize } from 'path';
 
 export class packBuilder {
+    config: BuilderConfig;
     resourcePath: string;
     moduleOverview: ModuleOverview;
     options: BuildOptions;
     log: string[] = [];
 
     constructor(resourcePath: string, moduleOverview: ModuleOverview, options: BuildOptions) {
+        this.config = require(normalize(`${__dirname}/../config.json`));
         this.resourcePath = resourcePath;
         this.moduleOverview = moduleOverview;
         this.options = options;
@@ -71,7 +74,7 @@ export class packBuilder {
 
         let name = this.options.output;
         if (this.options?.hash) {
-            const hash = createHash('sha256').update(this.options.toString(), 'utf8').digest('hex').slice(0, 7);
+            const hash = createHash('sha256').update(JSON.stringify(this.options), 'utf8').digest('hex').slice(0, 7);
             name = name.replace(/\.(\w+)$/ig, `.${hash}.$1`);
         }
 
