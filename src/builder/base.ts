@@ -28,6 +28,9 @@ export class packBuilder {
         excludedFileNames = excludedFileNames || [];
         excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json');
         const modulePath = this.moduleOverview.modulePath;
+        const validModules = this.moduleOverview.modules.resource.map(value => {
+            return value.name;
+        });
         const zipStream = new zip.Stream();
 
         extraFiles = extraFiles || [];
@@ -43,14 +46,17 @@ export class packBuilder {
             }
         }
         for (const module of modules) {
-            const fileList: string[] = [];
-            const destFileList: string[] = [];
-            await this._readFileList(`${modulePath}/${module}/`, fileList);
+            if (!validModules.includes(module)) {
+                this._appendLog(`Warning: Module "${module}" does not exist, skipping.`);
+                continue;
+            }
+            let fileList: string[] = [];
+            let destFileList: string[] = [];
+            this._readFileList(`${modulePath}/${module}/`, fileList);
+            const re = new RegExp(`${excludedFileNames.join('|')}$`);
             for (const file of fileList) {
-                for (const exclude of excludedFileNames) {
-                    if (file.endsWith(exclude)) {
-                        continue;
-                    }
+                if (re.test(file)) {
+                    continue;
                 }
                 const destFilePath = file.replace(`${modulePath}/${module}/`, '');
                 if (!destFileList.includes(destFilePath)) {
@@ -69,41 +75,36 @@ export class packBuilder {
             name = name.replace(/\.(\w+)$/ig, `.${hash}.$1`);
         }
 
-        zipStream.pipe(fs.createWriteStream(`${name}`));
+        zipStream.pipe(fs.createWriteStream(`${name}`, { flags: 'w', encoding: 'utf8' }));
     }
 
-    async _readFileList(path: string, fileList: string[]): Promise<void> {
-        fs.readdir(path, async (err, files) => {
-            if (err) {
-                this._appendLog(err.message);
-                return;
+    _readFileList(path: string, fileList: string[]): void {
+        for (const file of fs.readdirSync(path)) {
+            const stat = fs.statSync(`${path}${file}`);
+            if (stat.isDirectory()) {
+                this._readFileList(`${path}${file}/`, fileList);
             }
-            for (const file of files) {
-                fs.stat(`${path}${file}`, async (err, stats) => {
-                    if (err) {
-                        this._appendLog(err.message);
-                        return;
-                    }
-                    if (stats.isDirectory()) {
-                        await this._readFileList(`${path}${file}/`, fileList);
-                    }
-                    if (stats.isFile()) {
-                        fileList.push(`${path}${file}`);
-                    }
-                });
+            if (stat.isFile()) {
+                fileList.push(`${path}${file}`);
             }
-        });
+        }
     }
 
     mergeCollectionIntoResource(): void {
-        const selectedCollection = this.options.modules.collection || [];
-        const resource = this.options.modules.resource;
-        for (const item of this.moduleOverview.modules.collection.filter((value) => {
-            return selectedCollection.includes(value.name);
-        })) {
-            for (const containedModule of item.contains || []) {
-                if (!resource.includes(containedModule)) {
-                    resource.push(containedModule);
+        const selectedCollections = this.options.modules.collection || [];
+        const selectedResources = this.options.modules.resource;
+        const collections = this.moduleOverview.modules.collection;
+        for (const item of selectedCollections) {
+            const target = collections.find(value => {
+                return value.name === item;
+            });
+            if (!target) {
+                this._appendLog(`Warning: Module "${item}" does not exist, skipping.`);
+                continue;
+            }
+            for (const containedModule of target?.contains || []) {
+                if (!selectedResources.includes(containedModule)) {
+                    selectedResources.push(containedModule);
                 }
             }
         }

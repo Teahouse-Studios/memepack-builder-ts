@@ -1,26 +1,40 @@
-import { readFile } from "node:fs";
-import { ModuleOverview } from "../types";
+import * as fs from "fs";
+import { LanguageGeneratorResult, ModuleOverview } from "../types";
 
-export function generateJSON(filePath: string, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): string {
-    return new languageGenerator(filePath, moduleOverview, modules, modFiles).generateJSON();
+export async function generateJSON(filePath: string, withModules: boolean, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): Promise<LanguageGeneratorResult> {
+    const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles);
+    const content = await gen.generateJSON(withModules);
+    return { content: content, log: gen.log };
 }
 
-export function generateJavaLegacy(filePath: string, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): string {
-    return new languageGenerator(filePath, moduleOverview, modules, modFiles).generateJavaLegacy();
+export async function generateJavaLegacy(filePath: string, withModules: boolean, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): Promise<LanguageGeneratorResult> {
+    const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles);
+    return { content: await gen.generateJavaLegacy(withModules), log: gen.log };
+
 }
 
-export function generateBedrock(filePath: string, moduleOverview: ModuleOverview, modules?: string[]): string {
-    return new languageGenerator(filePath, moduleOverview, modules).generateBedrock();
+export async function generateBedrock(filePath: string, withModules: boolean, moduleOverview: ModuleOverview, modules?: string[]): Promise<LanguageGeneratorResult> {
+    const gen = new languageGenerator(filePath, moduleOverview, modules);
+    return { content: await gen.generateBedrock(withModules), log: gen.log };
+}
+
+function ensureAscii(value: string): string {
+    const arr: string[] = [];
+    for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i);
+        arr[i] = code < 128 ? value[i] : `\\u${code.toString(16).padStart(4, '0')}`;
+    }
+    return arr.join('');
 }
 
 class languageGenerator {
     filePath: string;
-    moduleOverview: ModuleOverview;
+    moduleOverview?: ModuleOverview;
     modules?: string[];
     modFiles?: string[];
     log: string[] = [];
 
-    constructor(filePath: string, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]) {
+    constructor(filePath: string, moduleOverview?: ModuleOverview, modules?: string[], modFiles?: string[]) {
         this.filePath = filePath;
         this.moduleOverview = moduleOverview;
         this.modules = modules;
@@ -33,48 +47,34 @@ class languageGenerator {
 
     getContent(): Record<string, string> {
         let content: Record<string, string> = {};
-        readFile(this.filePath, { flag: 'r', encoding: 'utf8' }, (err, data) => {
-            if (err) {
-                this._appendLog(err.message);
-                return;
-            }
-            if (this.filePath.endsWith('.json')) {
-                content = JSON.parse(data);
-            }
-            else if (this.filePath.endsWith('.lang')) {
-                content = this.langToJSON(data);
-            }
-        });
+        const data = fs.readFileSync(this.filePath, { flag: 'r', encoding: 'utf8' });
+        if (this.filePath.endsWith('.json')) {
+            content = JSON.parse(data);
+        }
+        else if (this.filePath.endsWith('.lang')) {
+            content = this.langToJSON(data);
+        }
         return content;
     }
 
     mergeModules(content: Record<string, string>): Record<string, string> {
         const modules = this.modules || [];
-        const modulePath = this.moduleOverview.modulePath;
+        const modulePath = this.moduleOverview?.modulePath || '';
         for (const module of modules) {
             const addFile = `${modulePath}/${module}/add.json`;
-            readFile(addFile, { encoding: 'utf8' }, (err, data) => {
-                if (err) {
-                    this._appendLog(err.message);
-                    return;
-                }
-                const addContent = JSON.parse(data);
+            if (fs.existsSync(addFile)) {
+                const addContent = JSON.parse(fs.readFileSync(addFile, { encoding: 'utf8' }));
                 for (const k in addContent) {
                     content[k] = addContent[k];
                 }
-            });
+            }
             const removeFile = `${modulePath}/${module}/remove.json`;
-            readFile(removeFile, { encoding: 'utf8' }, (err, data) => {
-                if (err) {
-                    this._appendLog(err.message);
-                    return;
-                }
-                const removeContent = JSON.parse(data);
+            if (fs.existsSync(removeFile)) {
+                const removeContent = JSON.parse(fs.readFileSync(removeFile, { encoding: 'utf8' }));
                 for (const k in removeContent) {
-                    // TODO: check if this really works
                     delete content[removeContent[k]];
                 }
-            });
+            }
         }
         return content;
     }
@@ -83,18 +83,13 @@ class languageGenerator {
         if (this.modFiles) {
             for (const mod of this.modFiles) {
                 let modContent: Record<string, string> = {};
-                readFile(`${mod}`, { encoding: 'utf8' }, (err, data) => {
-                    if (err) {
-                        this._appendLog(err.message);
-                        return;
-                    }
-                    if (mod.endsWith('.lang')) {
-                        modContent = this.langToJSON(data);
-                    }
-                    if (mod.endsWith('.json')) {
-                        modContent = JSON.parse(data);
-                    }
-                });
+                const data = fs.readFileSync(`${mod}`, { encoding: 'utf8' });
+                if (mod.endsWith('.lang')) {
+                    modContent = this.langToJSON(data);
+                }
+                if (mod.endsWith('.json')) {
+                    modContent = JSON.parse(data);
+                }
                 for (const k in modContent) {
                     content[k] = modContent[k];
                 }
@@ -103,46 +98,50 @@ class languageGenerator {
         return content;
     }
 
-    generateJSON() {
-        const content = this.getContent();
-        return this.ensureAscii(JSON.stringify(this.mergeModules(content)));
+    async generateJSON(withModules: boolean) {
+        let content = this.getContent();
+        if (withModules) {
+            content = this.mergeModules(content);
+        }
+        return ensureAscii(JSON.stringify(content, null, 4));
     }
 
-    generateJavaLegacy() {
-        const content = this.getContent();
-        return this.JSONToLang(this.mergeModules(content));
+    async generateJavaLegacy(withModules: boolean) {
+        let content = this.getContent();
+        if (withModules) {
+            content = this.mergeModules(content);
+        }
+        return this.JSONToLang(content);
     }
 
-    generateBedrock() {
-        const content = this.getContent();
-        return this.JSONToLang(this.mergeModules(content)).replace(/\n/g, '\t#\n');
+    async generateBedrock(withModules: boolean) {
+        let content = this.getContent();
+        if (withModules) {
+            content = this.mergeModules(content);
+        }
+        return this.JSONToLang(content).replace(/\n/g, '\t#\n');
     }
 
     langToJSON(content: string) {
         const result: Record<string, string> = {};
-        content.replace(/\r\n/g, '\n').split('\n').forEach((value) => {
+        for (const value of content.replace(/\r\n/g, '\n').split('\n')) {
             if (value.trim() !== '' && !value.startsWith('#')) {
-                const keyValuePair = value.split('=');
+                const keyValuePair = value.split('=', 2);
+                if (keyValuePair.length < 2) {
+                    this._appendLog(`Warning: Invalid entry "${value}".`);
+                    continue;
+                }
                 result[keyValuePair[0].trim()] = keyValuePair[1].trim();
             }
-        });
+        }
         return result;
     }
 
     JSONToLang(object: Record<string, string>) {
         const arr = [];
         for (const k in object) {
-            arr.push(`${k}=${object[k]}\n`);
+            arr.push(`${k}=${object[k]}`);
         }
         return arr.join('\n');
-    }
-
-    ensureAscii(str: string) {
-        const arr: string[] = [];
-        for (let i = 0; i < str.length; i++) {
-            const code = str.charCodeAt(i);
-            arr[i] = code < 128 ? str[i] : `\\u${code.toString(16)}`;
-        }
-        return arr.join('');
     }
 }

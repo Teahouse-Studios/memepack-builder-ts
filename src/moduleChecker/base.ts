@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs";
+import * as fs from "fs";
 import { ModuleOverview } from "../types";
 
 export class moduleChecker {
@@ -23,33 +23,21 @@ export class moduleChecker {
                 resource: []
             }
         };
-        readdir(this.modulePath, (err, files) => {
-            if (err) {
-                this._appendLog(err.message);
-                return;
+        for (const file of fs.readdirSync(this.modulePath)) {
+            const parsedData = JSON.parse(fs.readFileSync(`${this.modulePath}/${file}/module_manifest.json`, { encoding: 'utf8' }));
+            const moduleType: string = parsedData.type;
+            delete parsedData['type'];
+            switch (moduleType) {
+                case 'collection':
+                    overview.modules.collection.push(parsedData);
+                    break;
+                case 'resource':
+                    overview.modules.resource.push(parsedData);
+                    break;
+                default:
+                    break;
             }
-            for (const file of files) {
-                readFile(`${this.modulePath}/${file}/module_manifest.json`, { encoding: 'utf8' }, (err, data) => {
-                    if (err) {
-                        this._appendLog(err.message);
-                        return;
-                    }
-                    const parsedData = JSON.parse(data);
-                    const moduleType: string = parsedData.type;
-                    delete parsedData['type'];
-                    switch (moduleType) {
-                        case 'collection':
-                            overview.modules.collection.push(parsedData);
-                            break;
-                        case 'resource':
-                            overview.modules.resource.push(parsedData);
-                            break;
-                        default:
-                            break;
-                    }
-                });
-            }
-        });
+        }
         return overview;
     }
 }
