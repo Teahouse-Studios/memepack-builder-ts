@@ -50,8 +50,8 @@ export class packBuilder {
                 this._appendLog(`Warning: Module "${module}" does not exist, skipping.`);
                 continue;
             }
-            let fileList: string[] = [];
-            let destFileList: string[] = [];
+            const fileList: string[] = [];
+            const destFileList: string[] = [];
             this._readFileList(`${modulePath}/${module}/`, fileList);
             const re = new RegExp(`${excludedFileNames.join('|')}$`);
             for (const file of fileList) {

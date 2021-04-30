@@ -115,7 +115,7 @@ export class javaBuilder extends packBuilder {
     }
 
     _processMcMetaFile(): any {
-        let parsedData: any = JSON.parse(fs.readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' }));
+        const parsedData: any = JSON.parse(fs.readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' }));
         const type = this.options.type;
         if (type === 'compat') {
             delete parsedData.language;
