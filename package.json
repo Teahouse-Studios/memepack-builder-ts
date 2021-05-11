@@ -7,10 +7,9 @@
     "build": "yarn clear && tsc",
     "clear": "rm -rf ./dist",
     "lint": "eslint src/*.ts src/**/*.ts",
-    "pretty": "eslint --fix src/*.ts src/**/*.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "pretty": "eslint --fix src/*.ts src/**/*.ts"
   },
-  "author": "MysticNebula70 <mysticnebula70@teahou.se>",
+  "author": "MysticNebula70 <alpha513001@gmail.com>",
   "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
   "license": "Apache-2.0",
   "dependencies": {
@@ -22,5 +21,9 @@
     "@typescript-eslint/parser": "^4.22.0",
     "eslint": "^7.24.0",
     "typescript": "^4.2.4"
-  }
+  },
+  "keywords": [
+    "minecraft",
+    "resourcepack"
+  ]
 }
