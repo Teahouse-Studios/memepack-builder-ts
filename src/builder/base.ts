@@ -1,5 +1,5 @@
 /**
- * @method packBuilder
+ * @method PackBuilder
  * @param {Object}
  */
 
@@ -7,9 +7,9 @@ import * as fs from 'fs';
 import { createHash } from 'crypto';
 import { zip } from 'compressing';
 import { BuilderConfig, BuildOptions, ModuleOverview } from '../types';
-import { normalize } from 'path';
+import { defaultConfig } from '../constants/defaultConfig';
 
-export class packBuilder {
+export class PackBuilder {
     config: BuilderConfig;
     resourcePath: string;
     moduleOverview: ModuleOverview;
@@ -17,14 +17,16 @@ export class packBuilder {
     log: string[] = [];
 
     constructor(resourcePath: string, moduleOverview: ModuleOverview, options: BuildOptions) {
-        this.config = require(normalize(`${__dirname}/../config.json`));
+        this.config = fs.existsSync(`${process.env.HOME}/memepack-builder.config.json`) ?
+            require(`${process.env.HOME}/.memepack-builder.config.json`) :
+            defaultConfig;
         this.resourcePath = resourcePath;
         this.moduleOverview = moduleOverview;
         this.options = options;
     }
 
-    _appendLog(entry: string): void {
-        this.log.push(entry);
+    _appendLog(entry: string | string[]): void {
+        this.log.push(...entry);
     }
 
     async _build(extraFiles?: string[], extraContent?: Record<string, string>, excludedFileNames?: string[]): Promise<void> {

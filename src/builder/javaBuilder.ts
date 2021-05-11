@@ -1,8 +1,8 @@
 import { BuildOptions, ModuleOverview } from '../types';
 import { generateJavaLegacy, generateJSON } from '../util/languageGenerator';
-import { packBuilder } from './base';
+import { PackBuilder } from './base';
 
-export class javaBuilder extends packBuilder {
+export class JavaBuilder extends PackBuilder {
     modPath: string;
 
     /**
@@ -61,16 +61,12 @@ export class javaBuilder extends packBuilder {
         });
         if (['normal', 'compat'].includes(options.type)) {
             const result = await generateJSON(langFilePath, withModules, this.moduleOverview, languageModules, options.mod);
-            result.log.forEach(element => {
-                this._appendLog(element);
-            });
+            this._appendLog(result.log);
             return result.content;
         }
         else if (options.type === 'legacy') {
             const result = await generateJavaLegacy(langFilePath, withModules, this.moduleOverview, languageModules, options.mod);
-            result.log.forEach(element => {
-                this._appendLog(element);
-            });
+            this._appendLog(result.log);
             return result.content;
         }
         else {

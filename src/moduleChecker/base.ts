@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import { ModuleOverview } from "../types";
 
-export class moduleChecker {
+export class ModuleChecker {
     modulePath: string;
     log: string[] = [];
     moduleInfo: () => ModuleOverview;
@@ -11,8 +11,8 @@ export class moduleChecker {
         this.moduleInfo = this.validateModules;
     }
 
-    _appendLog(entry: string): void {
-        this.log.push(entry);
+    _appendLog(entry: string | string[]): void {
+        this.log.push(...entry);
     }
 
     validateModules(): ModuleOverview {

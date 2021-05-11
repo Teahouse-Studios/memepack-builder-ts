@@ -41,8 +41,8 @@ class languageGenerator {
         this.modFiles = modFiles;
     }
 
-    _appendLog(entry: string): void {
-        this.log.push(entry);
+    _appendLog(entry: string | string[]): void {
+        this.log.push(...entry);
     }
 
     getContent(): Record<string, string> {

@@ -1,9 +1,9 @@
 import { existsSync } from 'fs';
 import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types';
 import { generateBedrock } from '../util/languageGenerator';
-import { packBuilder } from './base'
+import { PackBuilder } from './base'
 
-export class bedrockBuilder extends packBuilder {
+export class BedrockBuilder extends PackBuilder {
     /**
      *
      */
@@ -54,9 +54,7 @@ export class bedrockBuilder extends packBuilder {
 
     async getLanguageContent(langFilePath: string, withModules: boolean): Promise<string> {
         const result = await generateBedrock(`${this.resourcePath}/${langFilePath}`, withModules, this.moduleOverview, this.options.modules.resource);
-        result.log.forEach(element => {
-            this._appendLog(element);
-        });
+        this._appendLog(result.log);
         return result.content;
     }
 
