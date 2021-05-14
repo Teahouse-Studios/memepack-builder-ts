@@ -3,7 +3,7 @@
  * @param {Object}
  */
 
-import * as fs from 'fs';
+import fs from 'fs';
 import { createHash } from 'crypto';
 import { zip } from 'compressing';
 import { BuilderConfig, BuildOptions, ModuleOverview } from '../types';

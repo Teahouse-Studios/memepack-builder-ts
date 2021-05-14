@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import fs from 'fs';
 import { BuildOptions, ModuleOverview } from '../types';
 import { generateJavaLegacy, generateJSON } from '../util/languageGenerator';
 import { PackBuilder } from './base';
@@ -108,7 +108,7 @@ export class JavaBuilder extends PackBuilder {
     }
 
     _processMcMetaFile(): any {
-        const parsedData: any = JSON.parse(readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' }));
+        const parsedData: any = JSON.parse(fs.readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' }));
         const type = this.options.type;
         if (type === 'compat') {
             delete parsedData.language;

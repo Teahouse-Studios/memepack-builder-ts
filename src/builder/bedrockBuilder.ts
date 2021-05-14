@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'fs';
+import fs from 'fs';
 import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types';
 import { generateBedrock } from '../util/languageGenerator';
 import { PackBuilder } from './base'
@@ -42,8 +42,8 @@ export class BedrockBuilder extends PackBuilder {
         const texture: BedrockTextureFile = { texture_data: {} };
         for (const module of this.options.modules.resource) {
             const path = `${this.moduleOverview.modulePath}/${module}/textures/${textureFileName}`;
-            if (existsSync(path)) {
-                const data = JSON.parse(readFileSync(path, { encoding: 'utf8' })).texture_data
+            if (fs.existsSync(path)) {
+                const data = JSON.parse(fs.readFileSync(path, { encoding: 'utf8' })).texture_data
                 for (const k in data) {
                     texture.texture_data[k] = data[k];
                 }

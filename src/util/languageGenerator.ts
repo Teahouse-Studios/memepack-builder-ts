@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import fs from "fs";
 import { LanguageGeneratorResult, ModuleOverview } from "../types";
 
 export async function generateJSON(filePath: string, withModules: boolean, moduleOverview: ModuleOverview, modules?: string[], modFiles?: string[]): Promise<LanguageGeneratorResult> {
