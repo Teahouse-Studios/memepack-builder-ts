@@ -18,7 +18,7 @@ export class PackBuilder {
 
     constructor(resourcePath: string, moduleOverview: ModuleOverview, options: BuildOptions) {
         this.config = fs.existsSync(`${process.env.HOME}/memepack-builder.config.json`) ?
-            require(`${process.env.HOME}/.memepack-builder.config.json`) :
+            JSON.parse(fs.readFileSync(`${process.env.HOME}/.memepack-builder.config.json`, { encoding: 'utf8' })) :
             defaultConfig;
         this.resourcePath = resourcePath;
         this.moduleOverview = moduleOverview;
