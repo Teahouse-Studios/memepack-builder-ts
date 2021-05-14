@@ -72,7 +72,12 @@ class languageGenerator {
             if (fs.existsSync(removeFile)) {
                 const removeContent = JSON.parse(fs.readFileSync(removeFile, { encoding: 'utf8' }));
                 for (const k in removeContent) {
-                    delete content[removeContent[k]];
+                    if (content[removeContent[k]]) {
+                        delete content[removeContent[k]];
+                    }
+                    else {
+                        this.log.push(`Key "${removeContent[k]}" does not exist, skipping.`)
+                    }
                 }
             }
         }

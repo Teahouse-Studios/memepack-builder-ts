@@ -15,7 +15,7 @@ export class BedrockBuilder extends PackBuilder {
         const beRequiredOptions = ['type', 'compatible', 'modules', 'output', 'hash'];
         const options = this.options;
         for (const option of beRequiredOptions) {
-            if (!options.hasOwnProperty(option)) {
+            if (!(option in options)) {
                 this._appendLog(`Warning: Missing required argument "${option}".`);
                 return false;
             }

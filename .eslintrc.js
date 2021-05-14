@@ -16,7 +16,6 @@ module.exports = {
         "@typescript-eslint"
     ],
     "rules": {
-        '@typescript-eslint/no-explicit-any': 0,
-        'no-prototype-builtins': 0
+        "@typescript-eslint/no-explicit-any": 0
     }
 };

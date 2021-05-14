@@ -20,7 +20,7 @@ export class JavaBuilder extends PackBuilder {
         const jeRequiredOptions = ['type', 'modules', 'mod', 'output', 'hash'];
         const options = this.options;
         for (const option of jeRequiredOptions) {
-            if (!options.hasOwnProperty(option)) {
+            if (!(option in options)) {
                 this._appendLog(`Warning: Missing required argument "${option}".`);
                 return false;
             }
