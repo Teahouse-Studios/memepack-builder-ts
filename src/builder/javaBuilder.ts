@@ -31,8 +31,8 @@ export class JavaBuilder extends PackBuilder {
             this._appendLog(`Warning: Did not specify "pack_format". Assuming value is "${options.format}".`)
         }
         else {
-            if ((options.type === 'legacy' && options.format !== legacyJEPackFormat)
-                || (['normal', 'compat'].includes(options.type) && options.format <= legacyJEPackFormat)) {
+            if ((options.type === 'legacy' && options.format !== legacyJEPackFormat) ||
+                (['normal', 'compat'].includes(options.type) && options.format <= legacyJEPackFormat)) {
                 this._appendLog(`Error: Type "${options.type}" does not match pack_format ${options.format}.`)
                 return false;
             }
