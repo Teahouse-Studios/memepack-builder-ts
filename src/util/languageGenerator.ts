@@ -27,7 +27,7 @@ function ensureAscii(value: string): string {
     return arr.join('');
 }
 
-class languageGenerator {
+export class languageGenerator {
     filePath: string;
     moduleOverview?: ModuleOverview;
     modules?: string[];
@@ -103,7 +103,7 @@ class languageGenerator {
         return content;
     }
 
-    async generateJSON(withModules: boolean) {
+    async generateJSON(withModules: boolean): Promise<string> {
         let content = this.getContent();
         if (withModules) {
             content = this.mergeModules(content);
@@ -111,7 +111,7 @@ class languageGenerator {
         return ensureAscii(JSON.stringify(content, null, 4));
     }
 
-    async generateJavaLegacy(withModules: boolean) {
+    async generateJavaLegacy(withModules: boolean): Promise<string> {
         let content = this.getContent();
         if (withModules) {
             content = this.mergeModules(content);
@@ -119,7 +119,7 @@ class languageGenerator {
         return this.JSONToLang(content);
     }
 
-    async generateBedrock(withModules: boolean) {
+    async generateBedrock(withModules: boolean): Promise<string> {
         let content = this.getContent();
         if (withModules) {
             content = this.mergeModules(content);
@@ -127,7 +127,7 @@ class languageGenerator {
         return this.JSONToLang(content).replace(/\n/g, '\t#\n');
     }
 
-    langToJSON(content: string) {
+    langToJSON(content: string): Record<string, string> {
         const result: Record<string, string> = {};
         for (const value of content.replace(/\r\n/g, '\n').split('\n')) {
             if (value.trim() !== '' && !value.startsWith('#')) {
@@ -142,7 +142,7 @@ class languageGenerator {
         return result;
     }
 
-    JSONToLang(object: Record<string, string>) {
+    JSONToLang(object: Record<string, string>): string {
         const arr = [];
         for (const k in object) {
             arr.push(`${k}=${object[k]}`);

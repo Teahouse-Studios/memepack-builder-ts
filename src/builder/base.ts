@@ -17,7 +17,7 @@ export class PackBuilder {
     log: string[] = [];
 
     constructor(resourcePath: string, moduleOverview: ModuleOverview, options: BuildOptions) {
-        this.config = fs.existsSync(`${process.env.HOME}/memepack-builder.config.json`) ?
+        this.config = fs.existsSync(`${process.env.HOME}/.memepack-builder.config.json`) ?
             JSON.parse(fs.readFileSync(`${process.env.HOME}/.memepack-builder.config.json`, { encoding: 'utf8' })) :
             defaultConfig;
         this.resourcePath = resourcePath;
@@ -29,25 +29,20 @@ export class PackBuilder {
         this.log.push(...entry);
     }
 
-    async _build(extraFiles?: string[], extraContent?: Record<string, string>, excludedFileNames?: string[]): Promise<void> {
-        excludedFileNames = excludedFileNames || [];
+    async _build(extraFiles: string[] = [], extraContent: Record<string, string> = {}, excludedFileNames: string[] = []): Promise<void> {
         excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json');
         const modulePath = this.moduleOverview.modulePath;
         const validModules = this.moduleOverview.modules.resource.map(value => {
             return value.name;
         });
         const zipStream = new zip.Stream();
-
-        extraFiles = extraFiles || [];
         const modules = this.options.modules.resource;
-        extraContent = extraContent || {};
-
         for (const file of extraFiles) {
             zipStream.addEntry(`${this.resourcePath}/${file}`, { relativePath: `${file}` });
         }
-        for (const file in extraContent) {
-            if (extraContent[file] !== '') {
-                zipStream.addEntry(Buffer.from(extraContent[file], 'utf8'), { relativePath: file });
+        for (const entry in extraContent) {
+            if (extraContent[entry] !== '') {
+                zipStream.addEntry(Buffer.from(extraContent[entry], 'utf8'), { relativePath: entry });
             }
         }
         for (const module of modules) {
@@ -58,7 +53,7 @@ export class PackBuilder {
             const fileList: string[] = [];
             const destFileList: string[] = [];
             this._readFileList(`${modulePath}/${module}/`, fileList);
-            const re = new RegExp(`${excludedFileNames.join('|')}$`);
+            const re = new RegExp(`${excludedFileNames.join('|')}$`, 'g');
             for (const file of fileList) {
                 if (re.test(file)) {
                     continue;

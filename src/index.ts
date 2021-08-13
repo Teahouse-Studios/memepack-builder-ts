@@ -6,16 +6,14 @@
  * @license Apache-2.0
  */
 
-import { BedrockBuilder } from './builder/bedrockBuilder';
-import { JavaBuilder } from './builder/javaBuilder';
-import { ModuleChecker } from './moduleChecker/base';
+import { BedrockBuilder, JavaBuilder } from './builder';
+import { ModuleChecker } from './moduleChecker';
 import { BuildOptions } from './types';
 
 // name
 export const name = 'memepack-builder';
-export { BedrockBuilder } from './builder/bedrockBuilder';
-export { JavaBuilder } from './builder/javaBuilder';
-export { ModuleChecker } from './moduleChecker/base';
+export { BedrockBuilder, JavaBuilder } from './builder';
+export { ModuleChecker } from './moduleChecker';
 export * as util from './util';
 
 export class MemepackBuilder {
