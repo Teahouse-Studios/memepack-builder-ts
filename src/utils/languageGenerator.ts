@@ -1,37 +1,37 @@
 import fs from 'fs'
 import { LanguageGeneratorResult, ModuleOverview } from '../types'
 
-export async function generateJSON(
+export function generateJSON(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
-  modules?: string[],
-  modFiles?: string[]
-): Promise<LanguageGeneratorResult> {
+  modules: string[] = [],
+  modFiles: string[] = []
+): LanguageGeneratorResult {
   const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles)
-  const content = await gen.generateJSON(withModules)
+  const content = gen.generateJSON(withModules)
   return { content: content, log: gen.log }
 }
 
-export async function generateJavaLegacy(
+export function generateJavaLegacy(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
-  modules?: string[],
-  modFiles?: string[]
-): Promise<LanguageGeneratorResult> {
+  modules: string[] = [],
+  modFiles: string[] = []
+): LanguageGeneratorResult {
   const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles)
-  return { content: await gen.generateJavaLegacy(withModules), log: gen.log }
+  return { content: gen.generateJavaLegacy(withModules), log: gen.log }
 }
 
-export async function generateBedrock(
+export function generateBedrock(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
-  modules?: string[]
-): Promise<LanguageGeneratorResult> {
+  modules: string[] = []
+): LanguageGeneratorResult {
   const gen = new languageGenerator(filePath, moduleOverview, modules)
-  return { content: await gen.generateBedrock(withModules), log: gen.log }
+  return { content: gen.generateBedrock(withModules), log: gen.log }
 }
 
 function ensureAscii(value: string): string {
@@ -46,20 +46,21 @@ function ensureAscii(value: string): string {
 export class languageGenerator {
   filePath: string
   moduleOverview?: ModuleOverview
-  modules?: string[]
-  modFiles?: string[]
-  log: string[] = []
+  modules: string[]
+  modFiles: string[]
+  log: string[]
 
   constructor(
     filePath: string,
     moduleOverview?: ModuleOverview,
-    modules?: string[],
-    modFiles?: string[]
+    modules: string[] = [],
+    modFiles: string[] = []
   ) {
     this.filePath = filePath
     this.moduleOverview = moduleOverview
     this.modules = modules
     this.modFiles = modFiles
+    this.log = []
   }
 
   _appendLog(entry: string | string[]): void {
@@ -126,7 +127,7 @@ export class languageGenerator {
     return content
   }
 
-  async generateJSON(withModules: boolean): Promise<string> {
+  generateJSON(withModules: boolean): string {
     let content = this.getContent()
     if (withModules) {
       content = this.mergeModules(content)
@@ -134,7 +135,7 @@ export class languageGenerator {
     return ensureAscii(JSON.stringify(content, null, 4))
   }
 
-  async generateJavaLegacy(withModules: boolean): Promise<string> {
+  generateJavaLegacy(withModules: boolean): string {
     let content = this.getContent()
     if (withModules) {
       content = this.mergeModules(content)
@@ -142,7 +143,7 @@ export class languageGenerator {
     return this.JSONToLang(content)
   }
 
-  async generateBedrock(withModules: boolean): Promise<string> {
+  generateBedrock(withModules: boolean): string {
     let content = this.getContent()
     if (withModules) {
       content = this.mergeModules(content)

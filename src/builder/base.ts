@@ -7,25 +7,25 @@ import fs from 'fs'
 import { createHash } from 'crypto'
 import { zip } from 'compressing'
 import { BuilderConfig, BuildOptions, ModuleOverview } from '../types'
-import { defaultConfig } from '../constants/defaultConfig'
+import { defaultConfig } from '../constants'
 
 export class PackBuilder {
   config: BuilderConfig
   resourcePath: string
   moduleOverview: ModuleOverview
-  options: BuildOptions
+  options: BuildOptions | Record<string, never>
   log: string[] = []
 
   constructor(
     resourcePath: string,
     moduleOverview: ModuleOverview,
-    options: BuildOptions
+    options: BuildOptions | Record<string, never> = {}
   ) {
     this.config = fs.existsSync(
-      `${process.env.HOME}/.memepack-builder.config.json`
+      `${process.env.HOME || process.env.USERPROFILE}/.memepack-builder.json`
     )
       ? JSON.parse(
-          fs.readFileSync(`${process.env.HOME}/.memepack-builder.config.json`, {
+          fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
             encoding: 'utf8',
           })
         )
@@ -39,18 +39,31 @@ export class PackBuilder {
     this.log.push(...entry)
   }
 
+  _clearLog(): void {
+    this.log = []
+  }
+
   async _build(
     extraFiles: string[] = [],
     extraContent: Record<string, string> = {},
     excludedFileNames: string[] = []
   ): Promise<void> {
+    this._clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
     const validModules = this.moduleOverview.modules.resource.map((value) => {
       return value.name
     })
+    let name = this.options?.output || ''
+    if (this.options?.hash) {
+      const hash = createHash('sha256')
+        .update(JSON.stringify(this.options), 'utf8')
+        .digest('hex')
+        .slice(0, 7)
+      name = name.replace(/\.(\w+)$/gi, `.${hash}.$1`)
+    }
+    this._appendLog(`Building ${name}.`)
     const zipStream = new zip.Stream()
-    const modules = this.options.modules.resource
     for (const file of extraFiles) {
       zipStream.addEntry(`${this.resourcePath}/${file}`, {
         relativePath: `${file}`,
@@ -63,9 +76,11 @@ export class PackBuilder {
         })
       }
     }
-    for (const module of modules) {
+    for (const module of this.mergeCollectionIntoResource()) {
       if (!validModules.includes(module)) {
-        this._appendLog(`Warning: Module "${module}" does not exist, skipping.`)
+        this._appendLog(
+          `Warning: Resource module "${module}" does not exist, skipping.`
+        )
         continue
       }
       const fileList: string[] = []
@@ -85,19 +100,10 @@ export class PackBuilder {
         }
       }
     }
-
-    let name = this.options.output
-    if (this.options?.hash) {
-      const hash = createHash('sha256')
-        .update(JSON.stringify(this.options), 'utf8')
-        .digest('hex')
-        .slice(0, 7)
-      name = name.replace(/\.(\w+)$/gi, `.${hash}.$1`)
-    }
-
     zipStream.pipe(
       fs.createWriteStream(`${name}`, { flags: 'w', encoding: 'utf8' })
     )
+    this._appendLog(`Successfully built ${name}.`)
   }
 
   _readFileList(path: string, fileList: string[]): void {
@@ -112,23 +118,24 @@ export class PackBuilder {
     }
   }
 
-  mergeCollectionIntoResource(): void {
-    const selectedCollections = this.options.modules.collection || []
-    const selectedResources = this.options.modules.resource
+  mergeCollectionIntoResource(): string[] {
+    const selectedCollections = this.options?.modules.collection || []
+    const selectedResources = new Set(this.options?.modules.resource)
     const collections = this.moduleOverview.modules.collection
     for (const item of selectedCollections) {
       const target = collections.find((value) => {
         return value.name === item
       })
       if (!target) {
-        this._appendLog(`Warning: Module "${item}" does not exist, skipping.`)
+        this._appendLog(
+          `Warning: Collection module "${item}" does not exist, skipping.`
+        )
         continue
       }
       for (const containedModule of target?.contains || []) {
-        if (!selectedResources.includes(containedModule)) {
-          selectedResources.push(containedModule)
-        }
+        selectedResources.add(containedModule)
       }
     }
+    return Array.from(selectedResources)
   }
 }

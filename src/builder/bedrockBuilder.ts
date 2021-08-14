@@ -1,6 +1,7 @@
 import fs from 'fs'
+import { resolve } from 'path'
 import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types'
-import { generateBedrock } from '../util/languageGenerator'
+import { generateBedrock } from '../utils'
 import { PackBuilder } from './base'
 
 export class BedrockBuilder extends PackBuilder {
@@ -10,7 +11,7 @@ export class BedrockBuilder extends PackBuilder {
   constructor(
     resourcePath: string,
     moduleOverview: ModuleOverview,
-    options: BuildOptions
+    options: BuildOptions | Record<string, never> = {}
   ) {
     super(resourcePath, moduleOverview, options)
   }
@@ -33,32 +34,25 @@ export class BedrockBuilder extends PackBuilder {
     return true
   }
 
-  async build(): Promise<void> {
+  build(): void {
     if (!this.validateOptions()) {
       return
     }
     this._normalizeOptions()
     this.mergeCollectionIntoResource()
-    const extraFiles = [
-      'pack_icon.png',
-      'LICENSE',
-      'manifest.json',
-      'textures/map/map_background.png',
-    ]
+    const extraFiles = ['pack_icon.png', 'manifest.json']
     const extraContent = {
-      'textures/item_texture.json': await this.getTexture('item_texture.json'),
-      'textures/terrain_texture.json': await this.getTexture(
-        'terrain_texture.json'
-      ),
+      'textures/item_texture.json': this.getTexture('item_texture.json'),
+      'textures/terrain_texture.json': this.getTexture('terrain_texture.json'),
     }
-    await this._addLanguage(extraFiles, extraContent)
-    await this._build(extraFiles, extraContent, [
+    this._addLanguage(extraFiles, extraContent)
+    this._build(extraFiles, extraContent, [
       'item_texture.json',
       'terrain_texture.json',
     ])
   }
 
-  async getTexture(textureFileName: string): Promise<string> {
+  getTexture(textureFileName: string): string {
     const texture: BedrockTextureFile = { texture_data: {} }
     for (const module of this.options.modules.resource) {
       const path = `${this.moduleOverview.modulePath}/${module}/textures/${textureFileName}`
@@ -71,14 +65,15 @@ export class BedrockBuilder extends PackBuilder {
         }
       }
     }
-    return JSON.stringify(texture, null, 4)
+    if (texture.texture_data === {}) {
+      return ''
+    } else {
+      return JSON.stringify(texture, null, 4)
+    }
   }
 
-  async getLanguageContent(
-    langFilePath: string,
-    withModules: boolean
-  ): Promise<string> {
-    const result = await generateBedrock(
+  getLanguageContent(langFilePath: string, withModules: boolean): string {
+    const result = generateBedrock(
       `${this.resourcePath}/${langFilePath}`,
       withModules,
       this.moduleOverview,
@@ -90,14 +85,15 @@ export class BedrockBuilder extends PackBuilder {
 
   _normalizeOptions(): void {
     const options = this.options
-    options.output = `${options.output}/${this.config.defaultFileName}.${options.type}`
+    options.output = resolve(
+      './',
+      `${options.output}`,
+      `${this.config.defaultFileName}.${options.type}`
+    )
   }
 
-  async _addLanguage(
-    fileList: string[],
-    contentList: Record<string, string>
-  ): Promise<void> {
-    const langContent = await this.getLanguageContent('texts/zh_ME.lang', true)
+  _addLanguage(fileList: string[], contentList: Record<string, string>): void {
+    const langContent = this.getLanguageContent('texts/zh_ME.lang', true)
     if (this.options.compatible) {
       contentList['texts/zh_CN.lang'] = langContent
     } else {

@@ -14,7 +14,7 @@ import { BuildOptions } from './types'
 export const name = 'memepack-builder'
 export { BedrockBuilder, JavaBuilder } from './builder'
 export { ModuleChecker } from './moduleChecker'
-export * as util from './util'
+export * as utils from './utils'
 
 export class MemepackBuilder {
   builder: BedrockBuilder | JavaBuilder
@@ -25,7 +25,7 @@ export class MemepackBuilder {
     platform: 'je' | 'be',
     resourcePath: string,
     modulePath: string,
-    buildOptions: BuildOptions,
+    buildOptions?: BuildOptions,
     modPath?: string
   ) {
     this.log = []
@@ -49,8 +49,11 @@ export class MemepackBuilder {
     }
   }
 
-  async build(): Promise<void> {
-    await this.builder.build()
+  build(clearLog = true): void {
+    if (clearLog) {
+      this.log = []
+    }
+    this.builder.build()
     this.log.push(...this.builder.log)
   }
 }

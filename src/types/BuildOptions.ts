@@ -1,6 +1,6 @@
 import { SelectedModules } from './SelectedModules'
 
-export interface BuildOptions extends Object {
+export interface BuildOptions {
   platform: string
   type: string
   output: string
