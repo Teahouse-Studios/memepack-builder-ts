@@ -1,4 +1,4 @@
 export interface SelectedModules {
-    collection?: string[];
-    resource: string[];
+  collection?: string[]
+  resource: string[]
 }

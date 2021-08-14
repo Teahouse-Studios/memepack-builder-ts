@@ -1,1 +1,1 @@
-export { ModuleChecker } from './base';
+export { ModuleChecker } from './base'

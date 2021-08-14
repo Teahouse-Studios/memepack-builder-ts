@@ -1,4 +1,4 @@
 export interface LanguageGeneratorResult {
-    content: string,
-    log: string[]
+  content: string
+  log: string[]
 }

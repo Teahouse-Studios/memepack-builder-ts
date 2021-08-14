@@ -1,1 +1,1 @@
-export * from './languageGenerator';
+export * from './languageGenerator'

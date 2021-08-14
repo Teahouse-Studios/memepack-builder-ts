@@ -1,3 +1,3 @@
 export interface BedrockTextureFile {
-    texture_data: Record<string, any>
+  texture_data: Record<string, any>
 }
