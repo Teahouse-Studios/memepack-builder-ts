@@ -5,13 +5,18 @@ import { generateBedrock } from '../utils'
 import { PackBuilder } from './base'
 
 export class BedrockBuilder extends PackBuilder {
+  declare options: BuildOptions & {
+    type: 'mcpack' | 'zip'
+  }
   /**
    *
    */
   constructor(
     resourcePath: string,
     moduleOverview: ModuleOverview,
-    options: BuildOptions | Record<string, never> = {}
+    options?: BuildOptions & {
+      type: 'mcpack' | 'zip'
+    }
   ) {
     super(resourcePath, moduleOverview, options)
   }
@@ -85,10 +90,10 @@ export class BedrockBuilder extends PackBuilder {
 
   _normalizeOptions(): void {
     const options = this.options
-    options.output = resolve(
+    options.outputName = resolve(
       './',
-      `${options.output}`,
-      `${this.config.defaultFileName}.${options.type}`
+      `${options.outputDir}`,
+      `${options.outputName || this.config.defaultFileName}.${options.type}`
     )
   }
 

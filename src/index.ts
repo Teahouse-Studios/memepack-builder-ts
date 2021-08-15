@@ -34,18 +34,40 @@ export class MemepackBuilder {
     this.log.push(...this.moduleChecker.log)
     switch (platform) {
       case 'be':
-        this.builder = new BedrockBuilder(resourcePath, overview, buildOptions)
+        if (buildOptions && !['mcpack', 'zip'].includes(buildOptions.type)) {
+          throw 'Platform does not match type.'
+        }
+        this.builder = new BedrockBuilder(
+          resourcePath,
+          overview,
+          buildOptions as
+            | (BuildOptions & {
+                type: 'mcpack' | 'zip'
+              })
+            | undefined
+        )
         break
       case 'je':
-      default:
+        if (
+          buildOptions &&
+          !['normal', 'compat', 'legacy'].includes(buildOptions.type)
+        ) {
+          throw 'Platform does not match type.'
+        }
         modPath = modPath || ''
         this.builder = new JavaBuilder(
           resourcePath,
           overview,
           modPath,
-          buildOptions
+          buildOptions as
+            | (BuildOptions & {
+                type: 'normal' | 'compat' | 'legacy'
+              })
+            | undefined
         )
         break
+      default:
+        throw 'Unknown platform.'
     }
   }
 

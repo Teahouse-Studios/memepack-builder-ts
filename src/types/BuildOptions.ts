@@ -1,9 +1,9 @@
 import { SelectedModules } from './SelectedModules'
 
 export interface BuildOptions {
-  platform: string
-  type: string
-  output: string
+  type: 'normal' | 'compat' | 'legacy' | 'mcpack' | 'zip'
+  outputDir: string
+  outputName?: string
   modules: SelectedModules
   mod?: string[]
   format?: number

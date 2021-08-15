@@ -8,18 +8,19 @@ import { createHash } from 'crypto'
 import { zip } from 'compressing'
 import { BuilderConfig, BuildOptions, ModuleOverview } from '../types'
 import { defaultConfig } from '../constants'
+import path from 'path'
 
 export class PackBuilder {
   config: BuilderConfig
   resourcePath: string
   moduleOverview: ModuleOverview
-  options: BuildOptions | Record<string, never>
+  options: BuildOptions
   log: string[] = []
 
   constructor(
     resourcePath: string,
     moduleOverview: ModuleOverview,
-    options: BuildOptions | Record<string, never> = {}
+    options?: BuildOptions
   ) {
     this.config = fs.existsSync(
       `${process.env.HOME || process.env.USERPROFILE}/.memepack-builder.json`
@@ -32,7 +33,13 @@ export class PackBuilder {
       : defaultConfig
     this.resourcePath = resourcePath
     this.moduleOverview = moduleOverview
-    this.options = options
+    this.options = options || {
+      type: 'normal',
+      outputDir: path.resolve('./'),
+      modules: {
+        resource: [],
+      },
+    }
   }
 
   _appendLog(entry: string | string[]): void {
@@ -54,7 +61,9 @@ export class PackBuilder {
     const validModules = this.moduleOverview.modules.resource.map((value) => {
       return value.name
     })
-    let name = this.options?.output || ''
+    let name =
+      this.options.outputName ||
+      path.resolve(this.options.outputDir, `${this.config.defaultFileName}.zip`)
     if (this.options?.hash) {
       const hash = createHash('sha256')
         .update(JSON.stringify(this.options), 'utf8')

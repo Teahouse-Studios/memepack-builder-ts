@@ -5,6 +5,9 @@ import { generateJavaLegacy, generateJSON } from '../utils'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
+  declare options: BuildOptions & {
+    type: 'normal' | 'compat' | 'legacy'
+  }
   modPath: string
 
   /**
@@ -14,7 +17,9 @@ export class JavaBuilder extends PackBuilder {
     resourcePath: string,
     moduleOverview: ModuleOverview,
     modPath: string,
-    options: BuildOptions | Record<string, never> = {}
+    options?: BuildOptions & {
+      type: 'normal' | 'compat' | 'legacy'
+    }
   ) {
     super(resourcePath, moduleOverview, options)
     this.modPath = modPath
@@ -106,10 +111,10 @@ export class JavaBuilder extends PackBuilder {
         return `${this.modPath}/${value}`
       })
     }
-    options.output = resolve(
+    options.outputName = resolve(
       './',
-      `${options.output}`,
-      `${this.config.defaultFileName}.zip`
+      `${options.outputDir}`,
+      `${options.outputName || this.config.defaultFileName}.zip`
     )
   }
 
