@@ -1,5 +1,62 @@
 # memepack-builder-ts
 
+[简体中文](./doc/README.zh-hans.md)
+
+This library provides a builder for packing Memified Chinese Resourcepack.
+
+## Installation
+
+```bash
+# npm
+npm install memepack-builder
+# yarn
+yarn add memepack-builder
+```
+
+## Usage
+
+### `class MemepackBuilder(platform: 'je' | 'be', resourcePath: string, modulePath: string, buildOptions?: BuildOptions, modPath?: string)`
+
+Main wrapper class for building packs.
+
+#### `MemepackBuilder.build(clearLog = true): void`
+
+Build method. If `clearLog` is true, will clear previous build logs. Default is true.
+
+#### `MemepackBuilder.builder: JavaBuilder | BedrockBuilder`
+
+The real builder. Build options are passed to this builder. If you want to change build options after an instance created, use `<instanceName>.builder.options` to change.
+
+#### `MemepackBuilder.log: string[]`
+
+Build logs.
+
+### Example
+
+``` js
+const module = require('memepack-builder')
+const options = {
+  type: 'normal',
+  modules: {
+    resource: [],
+    collection: []
+  },
+  mod: [],
+  sfw: true,
+  outputDir: '/path/to/output/directory',
+  format: 7,
+  hash: true
+}
+const builder = new module.MemepackBuilder(
+  'je',
+  '/path/to/resource/',
+  '/path/to/modules/',
+  options,
+  '/path/to/mods/'
+)
+builder.build()
+```
+
 ## License
 
 > Copyright 2021 MysticNebula70 & Teahouse Studios
