@@ -22,7 +22,7 @@ export class JavaBuilder extends PackBuilder {
     }
   ) {
     super(resourcePath, moduleOverview, options)
-    this.modPath = modPath
+    this.modPath = resolve(modPath)
   }
 
   validateOptions(): boolean {
@@ -108,11 +108,10 @@ export class JavaBuilder extends PackBuilder {
     const options = this.options
     if (options.mod) {
       options.mod = options.mod.map((value) => {
-        return `${this.modPath}/${value}`
+        return resolve(this.modPath, value)
       })
     }
     options.outputName = resolve(
-      './',
       `${options.outputDir}`,
       `${options.outputName || this.config.defaultFileName}.zip`
     )

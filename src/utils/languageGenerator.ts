@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { resolve } from 'path'
 import { LanguageGeneratorResult, ModuleOverview } from '../types'
 
 export function generateJSON(
@@ -56,7 +57,7 @@ export class languageGenerator {
     modules: string[] = [],
     modFiles: string[] = []
   ) {
-    this.filePath = filePath
+    this.filePath = resolve(filePath)
     this.moduleOverview = moduleOverview
     this.modules = modules
     this.modFiles = modFiles
@@ -82,7 +83,7 @@ export class languageGenerator {
     const modules = this.modules || []
     const modulePath = this.moduleOverview?.modulePath || ''
     for (const module of modules) {
-      const addFile = `${modulePath}/${module}/add.json`
+      const addFile = resolve(modulePath, module, 'add.json')
       if (fs.existsSync(addFile)) {
         const addContent = JSON.parse(
           fs.readFileSync(addFile, { encoding: 'utf8' })
@@ -91,7 +92,7 @@ export class languageGenerator {
           content[k] = addContent[k]
         }
       }
-      const removeFile = `${modulePath}/${module}/remove.json`
+      const removeFile = resolve(modulePath, module, 'remove.json')
       if (fs.existsSync(removeFile)) {
         const removeContent = JSON.parse(
           fs.readFileSync(removeFile, { encoding: 'utf8' })

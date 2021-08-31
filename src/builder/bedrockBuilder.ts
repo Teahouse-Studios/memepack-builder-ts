@@ -91,7 +91,6 @@ export class BedrockBuilder extends PackBuilder {
   _normalizeOptions(): void {
     const options = this.options
     options.outputName = resolve(
-      './',
       `${options.outputDir}`,
       `${options.outputName || this.config.defaultFileName}.${options.type}`
     )

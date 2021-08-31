@@ -1,4 +1,5 @@
 import fs from 'fs'
+import { resolve } from 'path'
 import { ModuleOverview } from '../types'
 
 export class ModuleChecker {
@@ -7,7 +8,7 @@ export class ModuleChecker {
   moduleInfo: () => ModuleOverview
 
   constructor(modulePath: string) {
-    this.modulePath = modulePath
+    this.modulePath = resolve(modulePath)
     this.moduleInfo = this.validateModules
   }
 

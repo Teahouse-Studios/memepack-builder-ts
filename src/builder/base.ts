@@ -31,11 +31,11 @@ export class PackBuilder {
           })
         )
       : defaultConfig
-    this.resourcePath = resourcePath
+    this.resourcePath = path.resolve(resourcePath)
     this.moduleOverview = moduleOverview
     this.options = options || {
       type: 'normal',
-      outputDir: path.resolve('./'),
+      outputDir: path.resolve('.'),
       modules: {
         resource: [],
       },
@@ -95,12 +95,14 @@ export class PackBuilder {
       const fileList: string[] = []
       const destFileList: string[] = []
       this._readFileList(`${modulePath}/${module}/`, fileList)
-      const re = new RegExp(`${excludedFileNames.join('|')}$`, 'g')
+      const re = new RegExp(`(${excludedFileNames.join('|')})$`, 'g')
       for (const file of fileList) {
         if (re.test(file)) {
           continue
         }
-        const destFilePath = file.replace(`${modulePath}/${module}/`, '')
+        const destFilePath = file
+          .replace(path.resolve(modulePath, module), '')
+          .replace(/^[/\\]*/g, '')
         if (!destFileList.includes(destFilePath)) {
           zipStream.addEntry(file, { relativePath: destFilePath })
           destFileList.push(destFilePath)
@@ -115,14 +117,14 @@ export class PackBuilder {
     this._appendLog(`Successfully built ${name}.`)
   }
 
-  _readFileList(path: string, fileList: string[]): void {
-    for (const file of fs.readdirSync(path)) {
-      const stat = fs.statSync(`${path}${file}`)
+  _readFileList(prefix: string, fileList: string[]): void {
+    for (const file of fs.readdirSync(prefix)) {
+      const stat = fs.statSync(path.resolve(prefix, file))
       if (stat.isDirectory()) {
-        this._readFileList(`${path}${file}/`, fileList)
+        this._readFileList(path.resolve(prefix, file), fileList)
       }
       if (stat.isFile()) {
-        fileList.push(`${path}${file}`)
+        fileList.push(path.resolve(prefix, file))
       }
     }
   }
