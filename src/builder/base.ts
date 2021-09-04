@@ -117,11 +117,14 @@ export class PackBuilder {
         }
       }
     }
-    zipStream.pipe(
-      fs.createWriteStream(`${path.resolve(this.options.outputDir, name)}`, { flags: 'w', encoding: 'utf8' })
-    )
-    this._appendLog(`Successfully built ${name}.`)
-    return { name }
+    return new Promise((r) => {
+      zipStream.pipe(
+        fs.createWriteStream(`${path.resolve(this.options.outputDir, name)}`, { flags: 'w', encoding: 'utf8' })
+      ).on('finish', () => {
+        this._appendLog(`Successfully built ${name}.`)
+        r({ name })
+      })
+    })
   }
 
   _readFileList(prefix: string, fileList: string[]): void {
