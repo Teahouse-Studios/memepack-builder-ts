@@ -1,6 +1,6 @@
 {
   "name": "memepack-builder",
-  "version": "0.1.0-alpha.3",
+  "version": "0.1.0-alpha.4",
   "description": "Build memified Minecraft resource pack",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
