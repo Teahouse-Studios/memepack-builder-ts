@@ -26,10 +26,10 @@ export class PackBuilder {
       `${process.env.HOME || process.env.USERPROFILE}/.memepack-builder.json`
     )
       ? JSON.parse(
-          fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
-            encoding: 'utf8',
-          })
-        )
+        fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
+          encoding: 'utf8',
+        })
+      )
       : defaultConfig
     this.resourcePath = path.resolve(resourcePath)
     this.moduleOverview = moduleOverview
@@ -43,7 +43,11 @@ export class PackBuilder {
   }
 
   _appendLog(entry: string | string[]): void {
-    this.log.push(...entry)
+    if (Array.isArray(entry)) {
+      this.log = this.log.concat(entry)
+    } else {
+      this.log.push(entry)
+    }
   }
 
   _clearLog(): void {
@@ -54,7 +58,9 @@ export class PackBuilder {
     extraFiles: string[] = [],
     extraContent: Record<string, string> = {},
     excludedFileNames: string[] = []
-  ): Promise<void> {
+  ): Promise<{
+    name: string
+  }> {
     this._clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
@@ -63,7 +69,7 @@ export class PackBuilder {
     })
     let name =
       this.options.outputName ||
-      path.resolve(this.options.outputDir, `${this.config.defaultFileName}.zip`)
+      `${this.config.defaultFileName}.zip`
     if (this.options?.hash) {
       const hash = createHash('sha256')
         .update(JSON.stringify(this.options), 'utf8')
@@ -112,9 +118,10 @@ export class PackBuilder {
       }
     }
     zipStream.pipe(
-      fs.createWriteStream(`${name}`, { flags: 'w', encoding: 'utf8' })
+      fs.createWriteStream(`${path.resolve(this.options.outputDir, name)}`, { flags: 'w', encoding: 'utf8' })
     )
     this._appendLog(`Successfully built ${name}.`)
+    return { name }
   }
 
   _readFileList(prefix: string, fileList: string[]): void {

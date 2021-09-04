@@ -71,11 +71,12 @@ export class MemepackBuilder {
     }
   }
 
-  build(clearLog = true): void {
+  async build(clearLog = true): Promise<{name: string} | undefined> {
     if (clearLog) {
       this.log = []
     }
-    this.builder.build()
+    const r = this.builder.build()
     this.log.push(...this.builder.log)
+    return r
   }
 }

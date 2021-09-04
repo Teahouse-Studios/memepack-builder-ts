@@ -28,7 +28,7 @@ export class JavaBuilder extends PackBuilder {
   validateOptions(): boolean {
     const latestJEPackFormat = this.config.latestJEPackFormat
     const legacyJEPackFormat = this.config.legacyJEPackFormat
-    const jeRequiredOptions = ['type', 'modules', 'mod', 'output', 'hash']
+    const jeRequiredOptions = ['type', 'modules', 'mod', 'sfw', 'format', 'outputDir']
     const options = this.options
     for (const option of jeRequiredOptions) {
       if (!(option in options)) {
@@ -58,7 +58,7 @@ export class JavaBuilder extends PackBuilder {
     return true
   }
 
-  build(): void {
+  async build() {
     if (!this.validateOptions()) {
       return
     }
@@ -67,7 +67,7 @@ export class JavaBuilder extends PackBuilder {
     const extraFiles = ['pack.png', 'LICENSE']
     const extraContent: Record<string, string> = {}
     this._addLanguage(extraFiles, extraContent)
-    this._build(extraFiles, extraContent)
+    return this._build(extraFiles, extraContent)
   }
 
   getLanguageContent(langFilePath: string, withModules: boolean): string {
@@ -111,10 +111,6 @@ export class JavaBuilder extends PackBuilder {
         return resolve(this.modPath, value)
       })
     }
-    options.outputName = resolve(
-      `${options.outputDir}`,
-      `${options.outputName || this.config.defaultFileName}.zip`
-    )
   }
 
   _addLanguage(fileList: string[], contentList: Record<string, string>): void {

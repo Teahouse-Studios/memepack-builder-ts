@@ -26,7 +26,7 @@ export class BedrockBuilder extends PackBuilder {
       'type',
       'compatible',
       'modules',
-      'output',
+      'outputDir',
       'hash',
     ]
     const options = this.options
@@ -39,9 +39,9 @@ export class BedrockBuilder extends PackBuilder {
     return true
   }
 
-  build(): void {
+  async build(): Promise<{ name: string }> {
     if (!this.validateOptions()) {
-      return
+      throw new Error("failed to validate")
     }
     this._normalizeOptions()
     this.mergeCollectionIntoResource()
@@ -51,7 +51,7 @@ export class BedrockBuilder extends PackBuilder {
       'textures/terrain_texture.json': this.getTexture('terrain_texture.json'),
     }
     this._addLanguage(extraFiles, extraContent)
-    this._build(extraFiles, extraContent, [
+    return this._build(extraFiles, extraContent, [
       'item_texture.json',
       'terrain_texture.json',
     ])
@@ -90,10 +90,9 @@ export class BedrockBuilder extends PackBuilder {
 
   _normalizeOptions(): void {
     const options = this.options
-    options.outputName = resolve(
-      `${options.outputDir}`,
+    options.outputName =
       `${options.outputName || this.config.defaultFileName}.${options.type}`
-    )
+
   }
 
   _addLanguage(fileList: string[], contentList: Record<string, string>): void {
