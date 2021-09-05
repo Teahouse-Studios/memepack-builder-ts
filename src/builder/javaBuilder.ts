@@ -65,7 +65,7 @@ export class JavaBuilder extends PackBuilder {
     return true
   }
 
-  async build(): Promise<{ name: string, buf: Buffer }> {
+  async build(): Promise<{ name: string; buf: Buffer }> {
     if (!this.validateOptions()) {
       throw new Error('Failed to validate')
     }

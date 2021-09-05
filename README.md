@@ -19,13 +19,15 @@ yarn add memepack-builder
 
 Main wrapper class for building packs.
 
-#### `MemepackBuilder.build(clearLog = true): void`
+#### `MemepackBuilder.build(clearLog = true): Promise<{ name: string; buf: Buffer }>`
 
 Build method. If `clearLog` is true, will clear previous build logs. Default is true.
 
+Returns a `Promise` which will return pack name and content (as a `Buffer`) when fulfilled.
+
 #### `MemepackBuilder.builder: JavaBuilder | BedrockBuilder`
 
-The real builder. Build options are passed to this builder. If you want to change build options after an instance created, use `<instanceName>.builder.options` to change.
+The real builder. Build options are passed to this builder. If you want to change build options after an instance created, change `<instanceName>.builder.options`.
 
 #### `MemepackBuilder.log: string[]`
 
@@ -49,12 +51,12 @@ const options = {
 }
 const builder = new module.MemepackBuilder(
   'je',
-  '/path/to/resource/',
+  '/path/to/main/resources/',
   '/path/to/modules/',
   options,
   '/path/to/mods/'
 )
-builder.build()
+const { name, buf } = await builder.build()
 ```
 
 ## License

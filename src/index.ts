@@ -71,7 +71,7 @@ export class MemepackBuilder {
     }
   }
 
-  async build(clearLog = true): Promise<{ name: string, buf: Buffer }> {
+  async build(clearLog = true): Promise<{ name: string; buf: Buffer }> {
     if (clearLog) {
       this.log = []
     }

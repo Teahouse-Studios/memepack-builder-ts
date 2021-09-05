@@ -121,9 +121,13 @@ export class PackBuilder {
         })
         .on('end', () => {
           const buf = Buffer.concat(bufs)
-          let name = this.options.outputName || `${this.config.defaultFileName}.zip`
+          let name =
+            this.options.outputName || `${this.config.defaultFileName}.zip`
           if (this.options?.hash) {
-            name = name.replace(/\.(\w+)$/gi, `.${hash.digest('hex').slice(0, 7)}.$1`)
+            name = name.replace(
+              /\.(\w+)$/gi,
+              `.${hash.digest('hex').slice(0, 7)}.$1`
+            )
           }
           this.appendLog(`Successfully built ${name}.`)
           r({
