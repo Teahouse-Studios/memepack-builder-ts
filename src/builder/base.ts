@@ -42,7 +42,7 @@ export class PackBuilder {
     }
   }
 
-  _appendLog(entry: string | string[]): void {
+  appendLog(entry: string | string[]): void {
     if (Array.isArray(entry)) {
       this.log = this.log.concat(entry)
     } else {
@@ -50,11 +50,11 @@ export class PackBuilder {
     }
   }
 
-  _clearLog(): void {
+  clearLog(): void {
     this.log = []
   }
 
-  async _build(
+  async build(
     extraFiles: string[] = [],
     extraContent: Record<string, string> = {},
     excludedFileNames: string[] = []
@@ -62,21 +62,13 @@ export class PackBuilder {
     name: string
     buf: Buffer
   }> {
-    this._clearLog()
+    this.clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
     const validModules = this.moduleOverview.modules.resource.map((value) => {
       return value.name
     })
-    let name = this.options.outputName || `${this.config.defaultFileName}.zip`
-    if (this.options?.hash) {
-      const hash = createHash('sha256')
-        .update(JSON.stringify(this.options), 'utf8')
-        .digest('hex')
-        .slice(0, 7)
-      name = name.replace(/\.(\w+)$/gi, `.${hash}.$1`)
-    }
-    this._appendLog(`Building ${name}.`)
+    this.appendLog(`Building pack.`)
     const zipStream = new zip.Stream()
     for (const file of extraFiles) {
       zipStream.addEntry(`${this.resourcePath}/${file}`, {
@@ -92,14 +84,14 @@ export class PackBuilder {
     }
     for (const module of this.mergeCollectionIntoResource()) {
       if (!validModules.includes(module)) {
-        this._appendLog(
+        this.appendLog(
           `Warning: Resource module "${module}" does not exist, skipping.`
         )
         continue
       }
       const fileList: string[] = []
       const destFileList: string[] = []
-      this._readFileList(`${modulePath}/${module}/`, fileList)
+      this.#readFileList(`${modulePath}/${module}/`, fileList)
       const re = new RegExp(`(${excludedFileNames.join('|')})$`, 'g')
       for (const file of fileList) {
         if (re.test(file)) {
@@ -112,34 +104,41 @@ export class PackBuilder {
           zipStream.addEntry(file, { relativePath: destFilePath })
           destFileList.push(destFilePath)
         } else {
-          this._appendLog(`Warning: Duplicated "${destFilePath}", skipping.`)
+          this.appendLog(`Warning: Duplicated "${destFilePath}", skipping.`)
         }
       }
     }
     return new Promise((r) => {
       const bufs: Buffer[] = []
+      const hash = createHash('sha256')
       zipStream
         .on('readable', () => {
           let buf: Buffer
           while ((buf = zipStream.read())) {
             bufs.push(buf)
+            hash.update(buf)
           }
         })
         .on('end', () => {
-          this._appendLog(`Successfully built ${name}.`)
+          const buf = Buffer.concat(bufs)
+          let name = this.options.outputName || `${this.config.defaultFileName}.zip`
+          if (this.options?.hash) {
+            name = name.replace(/\.(\w+)$/gi, `.${hash.digest('hex').slice(0, 7)}.$1`)
+          }
+          this.appendLog(`Successfully built ${name}.`)
           r({
             name,
-            buf: Buffer.concat(bufs),
+            buf,
           })
         })
     })
   }
 
-  _readFileList(prefix: string, fileList: string[]): void {
+  #readFileList(prefix: string, fileList: string[]): void {
     for (const file of fs.readdirSync(prefix)) {
       const stat = fs.statSync(path.resolve(prefix, file))
       if (stat.isDirectory()) {
-        this._readFileList(path.resolve(prefix, file), fileList)
+        this.#readFileList(path.resolve(prefix, file), fileList)
       }
       if (stat.isFile()) {
         fileList.push(path.resolve(prefix, file))
@@ -156,7 +155,7 @@ export class PackBuilder {
         return value.name === item
       })
       if (!target) {
-        this._appendLog(
+        this.appendLog(
           `Warning: Collection module "${item}" does not exist, skipping.`
         )
         continue

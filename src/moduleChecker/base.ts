@@ -12,7 +12,7 @@ export class ModuleChecker {
     this.moduleInfo = this.validateModules
   }
 
-  _appendLog(entry: string | string[]): void {
+  appendLog(entry: string | string[]): void {
     this.log.push(...entry)
   }
 

@@ -31,7 +31,7 @@ export class BedrockBuilder extends PackBuilder {
     const options = this.options
     for (const option of beRequiredOptions) {
       if (!(option in options)) {
-        this._appendLog(`Warning: Missing required argument "${option}".`)
+        this.appendLog(`Warning: Missing required argument "${option}".`)
         return false
       }
     }
@@ -42,21 +42,21 @@ export class BedrockBuilder extends PackBuilder {
     if (!this.validateOptions()) {
       throw new Error('Failed to validate')
     }
-    this._normalizeOptions()
+    this.#normalizeOptions()
     this.mergeCollectionIntoResource()
     const extraFiles = ['pack_icon.png', 'manifest.json']
     const extraContent = {
-      'textures/item_texture.json': this.getTexture('item_texture.json'),
-      'textures/terrain_texture.json': this.getTexture('terrain_texture.json'),
+      'textures/item_texture.json': this.#getTexture('item_texture.json'),
+      'textures/terrain_texture.json': this.#getTexture('terrain_texture.json'),
     }
-    this._addLanguage(extraFiles, extraContent)
-    return this._build(extraFiles, extraContent, [
+    this.#addLanguage(extraFiles, extraContent)
+    return super.build(extraFiles, extraContent, [
       'item_texture.json',
       'terrain_texture.json',
     ])
   }
 
-  getTexture(textureFileName: string): string {
+  #getTexture(textureFileName: string): string {
     const texture: BedrockTextureFile = { texture_data: {} }
     for (const module of this.options.modules.resource) {
       const path = `${this.moduleOverview.modulePath}/${module}/textures/${textureFileName}`
@@ -76,26 +76,26 @@ export class BedrockBuilder extends PackBuilder {
     }
   }
 
-  getLanguageContent(langFilePath: string, withModules: boolean): string {
+  #getLanguageContent(langFilePath: string, withModules: boolean): string {
     const result = generateBedrock(
       `${this.resourcePath}/${langFilePath}`,
       withModules,
       this.moduleOverview,
       this.options.modules.resource
     )
-    this._appendLog(result.log)
+    this.appendLog(result.log)
     return result.content
   }
 
-  _normalizeOptions(): void {
+  #normalizeOptions(): void {
     const options = this.options
     options.outputName = `${
       options.outputName || this.config.defaultFileName
     }.${options.type}`
   }
 
-  _addLanguage(fileList: string[], contentList: Record<string, string>): void {
-    const langContent = this.getLanguageContent('texts/zh_ME.lang', true)
+  #addLanguage(fileList: string[], contentList: Record<string, string>): void {
+    const langContent = this.#getLanguageContent('texts/zh_ME.lang', true)
     if (this.options.compatible) {
       contentList['texts/zh_CN.lang'] = langContent
     } else {
