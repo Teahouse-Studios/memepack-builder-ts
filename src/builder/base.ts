@@ -126,6 +126,7 @@ export class PackBuilder {
           }
         })
         .on('end', () => {
+          this._appendLog(`Successfully built ${name}.`)
           r({
             name,
             buf: Buffer.concat(bufs),
