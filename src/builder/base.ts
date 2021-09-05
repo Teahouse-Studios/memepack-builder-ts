@@ -26,10 +26,10 @@ export class PackBuilder {
       `${process.env.HOME || process.env.USERPROFILE}/.memepack-builder.json`
     )
       ? JSON.parse(
-        fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
-          encoding: 'utf8',
-        })
-      )
+          fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
+            encoding: 'utf8',
+          })
+        )
       : defaultConfig
     this.resourcePath = path.resolve(resourcePath)
     this.moduleOverview = moduleOverview
@@ -60,6 +60,7 @@ export class PackBuilder {
     excludedFileNames: string[] = []
   ): Promise<{
     name: string
+    buf: Buffer
   }> {
     this._clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
@@ -67,9 +68,7 @@ export class PackBuilder {
     const validModules = this.moduleOverview.modules.resource.map((value) => {
       return value.name
     })
-    let name =
-      this.options.outputName ||
-      `${this.config.defaultFileName}.zip`
+    let name = this.options.outputName || `${this.config.defaultFileName}.zip`
     if (this.options?.hash) {
       const hash = createHash('sha256')
         .update(JSON.stringify(this.options), 'utf8')
@@ -118,12 +117,20 @@ export class PackBuilder {
       }
     }
     return new Promise((r) => {
-      zipStream.pipe(
-        fs.createWriteStream(`${path.resolve(this.options.outputDir, name)}`, { flags: 'w', encoding: 'utf8' })
-      ).on('finish', () => {
-        this._appendLog(`Successfully built ${name}.`)
-        r({ name })
-      })
+      const bufs: Buffer[] = []
+      zipStream
+        .on('readable', () => {
+          let buf: Buffer
+          while ((buf = zipStream.read())) {
+            bufs.push(buf)
+          }
+        })
+        .on('end', () => {
+          r({
+            name,
+            buf: Buffer.concat(bufs),
+          })
+        })
     })
   }
 

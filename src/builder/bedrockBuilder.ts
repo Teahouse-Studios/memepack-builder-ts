@@ -1,5 +1,4 @@
 import fs from 'fs'
-import { resolve } from 'path'
 import { BedrockTextureFile, BuildOptions, ModuleOverview } from '../types'
 import { generateBedrock } from '../utils'
 import { PackBuilder } from './base'
@@ -39,9 +38,9 @@ export class BedrockBuilder extends PackBuilder {
     return true
   }
 
-  async build(): Promise<{ name: string }> {
+  async build(): Promise<{ name: string, buf: Buffer }> {
     if (!this.validateOptions()) {
-      throw new Error("failed to validate")
+      throw new Error('Failed to validate')
     }
     this._normalizeOptions()
     this.mergeCollectionIntoResource()
@@ -90,9 +89,9 @@ export class BedrockBuilder extends PackBuilder {
 
   _normalizeOptions(): void {
     const options = this.options
-    options.outputName =
-      `${options.outputName || this.config.defaultFileName}.${options.type}`
-
+    options.outputName = `${
+      options.outputName || this.config.defaultFileName
+    }.${options.type}`
   }
 
   _addLanguage(fileList: string[], contentList: Record<string, string>): void {

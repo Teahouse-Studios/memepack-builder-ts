@@ -28,7 +28,14 @@ export class JavaBuilder extends PackBuilder {
   validateOptions(): boolean {
     const latestJEPackFormat = this.config.latestJEPackFormat
     const legacyJEPackFormat = this.config.legacyJEPackFormat
-    const jeRequiredOptions = ['type', 'modules', 'mod', 'sfw', 'format', 'outputDir']
+    const jeRequiredOptions = [
+      'type',
+      'modules',
+      'mod',
+      'sfw',
+      'format',
+      'outputDir',
+    ]
     const options = this.options
     for (const option of jeRequiredOptions) {
       if (!(option in options)) {
@@ -58,9 +65,9 @@ export class JavaBuilder extends PackBuilder {
     return true
   }
 
-  async build() {
+  async build(): Promise<{ name: string, buf: Buffer }> {
     if (!this.validateOptions()) {
-      return
+      throw new Error('Failed to validate')
     }
     this._normalizeOptions()
     this.mergeCollectionIntoResource()
