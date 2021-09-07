@@ -21,14 +21,14 @@
     "compressing": "^1.5.1"
   },
   "devDependencies": {
-    "@types/node": "^16.6.1",
-    "@typescript-eslint/eslint-plugin": "^4.29.1",
-    "@typescript-eslint/parser": "^4.29.1",
+    "@types/node": "^16.7.13",
+    "@typescript-eslint/eslint-plugin": "^4.31.0",
+    "@typescript-eslint/parser": "^4.31.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.3.2",
     "rimraf": "^3.0.2",
-    "typescript": "^4.3.0"
+    "typescript": "^4.4.2"
   },
   "keywords": [
     "minecraft",
