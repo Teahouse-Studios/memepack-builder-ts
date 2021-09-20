@@ -79,6 +79,7 @@ export class PackBuilder {
       if (extraContent[entry] !== '') {
         zipStream.addEntry(Buffer.from(extraContent[entry], 'utf8'), {
           relativePath: entry,
+          mtime: new Date(0),
         })
       }
     }
