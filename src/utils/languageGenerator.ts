@@ -1,38 +1,37 @@
-import fs from 'fs'
+import fse from 'fs-extra'
 import { resolve } from 'path'
 import { LanguageGeneratorResult, ModuleOverview } from '../types'
 
-export function generateJSON(
+export async function generateJSON(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
   modules: string[] = [],
   modFiles: string[] = []
-): LanguageGeneratorResult {
+): Promise<LanguageGeneratorResult> {
   const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles)
-  const content = gen.generateJSON(withModules)
-  return { content: content, log: gen.log }
+  return { content: await gen.generateJSON(withModules), log: gen.log }
 }
 
-export function generateJavaLegacy(
+export async function generateJavaLegacy(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
   modules: string[] = [],
   modFiles: string[] = []
-): LanguageGeneratorResult {
+): Promise<LanguageGeneratorResult> {
   const gen = new languageGenerator(filePath, moduleOverview, modules, modFiles)
-  return { content: gen.generateJavaLegacy(withModules), log: gen.log }
+  return { content: await gen.generateJavaLegacy(withModules), log: gen.log }
 }
 
-export function generateBedrock(
+export async function generateBedrock(
   filePath: string,
   withModules: boolean,
   moduleOverview: ModuleOverview,
   modules: string[] = []
-): LanguageGeneratorResult {
+): Promise<LanguageGeneratorResult> {
   const gen = new languageGenerator(filePath, moduleOverview, modules)
-  return { content: gen.generateBedrock(withModules), log: gen.log }
+  return { content: await gen.generateBedrock(withModules), log: gen.log }
 }
 
 function ensureAscii(value: string): string {
@@ -64,39 +63,38 @@ export class languageGenerator {
     this.log = []
   }
 
-  _appendLog(entry: string | string[]): void {
+  #appendLog(entry: string | string[]): void {
     this.log.push(...entry)
   }
 
-  getContent(): Record<string, string> {
+  async getContent(): Promise<Record<string, string>> {
     let content: Record<string, string> = {}
-    const data = fs.readFileSync(this.filePath, { flag: 'r', encoding: 'utf8' })
     if (this.filePath.endsWith('.json')) {
-      content = JSON.parse(data)
+      content = await fse.readJSON(this.filePath, { encoding: 'utf8' })
     } else if (this.filePath.endsWith('.lang')) {
-      content = this.langToJSON(data)
+      content = this.langToJSON(
+        await fse.readFile(this.filePath, { encoding: 'utf8' })
+      )
     }
     return content
   }
 
-  mergeModules(content: Record<string, string>): Record<string, string> {
+  async mergeModules(
+    content: Record<string, string>
+  ): Promise<Record<string, string>> {
     const modules = this.modules || []
     const modulePath = this.moduleOverview?.modulePath || ''
     for (const module of modules) {
-      const addFile = resolve(modulePath, module, 'add.json')
-      if (fs.existsSync(addFile)) {
-        const addContent = JSON.parse(
-          fs.readFileSync(addFile, { encoding: 'utf8' })
-        )
+      try {
+        const addFile = resolve(modulePath, module, 'add.json')
+        const removeFile = resolve(modulePath, module, 'remove.json')
+        const addContent = await fse.readJSON(addFile, { encoding: 'utf8' })
+        const removeContent = await fse.readJSON(removeFile, {
+          encoding: 'utf8',
+        })
         for (const k in addContent) {
           content[k] = addContent[k]
         }
-      }
-      const removeFile = resolve(modulePath, module, 'remove.json')
-      if (fs.existsSync(removeFile)) {
-        const removeContent = JSON.parse(
-          fs.readFileSync(removeFile, { encoding: 'utf8' })
-        )
         for (const k in removeContent) {
           if (content[removeContent[k]]) {
             delete content[removeContent[k]]
@@ -104,21 +102,26 @@ export class languageGenerator {
             this.log.push(`Key "${removeContent[k]}" does not exist, skipping.`)
           }
         }
+      } catch (e) {
+        continue
       }
     }
     return content
   }
 
-  mergeMods(content: Record<string, string>): Record<string, string> {
+  async mergeMods(
+    content: Record<string, string>
+  ): Promise<Record<string, string>> {
     if (this.modFiles) {
       for (const mod of this.modFiles) {
         let modContent: Record<string, string> = {}
-        const data = fs.readFileSync(`${mod}`, { encoding: 'utf8' })
-        if (mod.endsWith('.lang')) {
-          modContent = this.langToJSON(data)
-        }
         if (mod.endsWith('.json')) {
-          modContent = JSON.parse(data)
+          modContent = await fse.readJSON(mod, { encoding: 'utf8' })
+        }
+        if (mod.endsWith('.lang')) {
+          modContent = this.langToJSON(
+            await fse.readFile(mod, { encoding: 'utf8' })
+          )
         }
         for (const k in modContent) {
           content[k] = modContent[k]
@@ -128,26 +131,26 @@ export class languageGenerator {
     return content
   }
 
-  generateJSON(withModules: boolean): string {
-    let content = this.getContent()
+  async generateJSON(withModules: boolean): Promise<string> {
+    let content = await this.getContent()
     if (withModules) {
-      content = this.mergeModules(content)
+      content = await this.mergeModules(content)
     }
     return ensureAscii(JSON.stringify(content, null, 4))
   }
 
-  generateJavaLegacy(withModules: boolean): string {
-    let content = this.getContent()
+  async generateJavaLegacy(withModules: boolean): Promise<string> {
+    let content = await this.getContent()
     if (withModules) {
-      content = this.mergeModules(content)
+      content = await this.mergeModules(content)
     }
     return this.JSONToLang(content)
   }
 
-  generateBedrock(withModules: boolean): string {
-    let content = this.getContent()
+  async generateBedrock(withModules: boolean): Promise<string> {
+    let content = await this.getContent()
     if (withModules) {
-      content = this.mergeModules(content)
+      content = await this.mergeModules(content)
     }
     return this.JSONToLang(content).replace(/\n/g, '\t#\n')
   }
@@ -158,7 +161,7 @@ export class languageGenerator {
       if (value.trim() !== '' && !value.startsWith('#')) {
         const keyValuePair = value.split('=', 2)
         if (keyValuePair.length < 2) {
-          this._appendLog(`Warning: Invalid entry "${value}".`)
+          this.#appendLog(`Warning: Invalid entry "${value}".`)
           continue
         }
         result[keyValuePair[0].trim()] = keyValuePair[1].trim()

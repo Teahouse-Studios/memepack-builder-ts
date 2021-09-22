@@ -1,14 +1,14 @@
-import fs from 'fs'
-import { resolve } from 'path'
+import fse from 'fs-extra'
+import path from 'path'
 import { ModuleOverview } from '../types'
 
 export class ModuleChecker {
   modulePath: string
   log: string[] = []
-  moduleInfo: () => ModuleOverview
+  moduleInfo: () => Promise<ModuleOverview>
 
   constructor(modulePath: string) {
-    this.modulePath = resolve(modulePath)
+    this.modulePath = path.resolve(modulePath)
     this.moduleInfo = this.validateModules
   }
 
@@ -16,7 +16,7 @@ export class ModuleChecker {
     this.log.push(...entry)
   }
 
-  validateModules(): ModuleOverview {
+  async validateModules(): Promise<ModuleOverview> {
     const overview: ModuleOverview = {
       modulePath: this.modulePath,
       modules: {
@@ -24,11 +24,10 @@ export class ModuleChecker {
         resource: [],
       },
     }
-    for (const file of fs.readdirSync(this.modulePath)) {
-      const parsedData = JSON.parse(
-        fs.readFileSync(`${this.modulePath}/${file}/module_manifest.json`, {
-          encoding: 'utf8',
-        })
+    for (const file of await fse.readdir(this.modulePath)) {
+      const parsedData = await fse.readJSON(
+        path.resolve(this.modulePath, file, 'module_manifest.json'),
+        { encoding: 'utf8' }
       )
       const moduleType: string = parsedData.type
       delete parsedData['type']

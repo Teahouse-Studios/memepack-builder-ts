@@ -18,10 +18,15 @@
   "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
   "license": "Apache-2.0",
   "dependencies": {
-    "compressing": "^1.5.1"
+    "fs-extra": "^10.0.0",
+    "klaw": "^4.0.1",
+    "yazl": "^2.5.1"
   },
   "devDependencies": {
-    "@types/node": "^16.9.4",
+    "@types/fs-extra": "^9.0.13",
+    "@types/klaw": "^3.0.2",
+    "@types/node": "^16.9.6",
+    "@types/yazl": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
     "eslint": "^7.32.0",

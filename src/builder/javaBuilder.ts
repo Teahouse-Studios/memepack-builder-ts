@@ -1,28 +1,20 @@
-import fs from 'fs'
-import { resolve } from 'path'
-import { BuildOptions, ModuleOverview } from '../types'
+import fse from 'fs-extra'
+import path from 'path'
+import { JEBuildOptions, ModuleOverview } from '../types'
 import { generateJavaLegacy, generateJSON } from '../utils'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
-  declare options: BuildOptions & {
-    type: 'normal' | 'compat' | 'legacy'
-  }
   modPath: string
 
-  /**
-   *
-   */
   constructor(
-    resourcePath: string,
-    moduleOverview: ModuleOverview,
-    modPath: string,
-    options?: BuildOptions & {
-      type: 'normal' | 'compat' | 'legacy'
-    }
+    resourcePath?: string,
+    moduleOverview?: ModuleOverview,
+    modPath?: string,
+    options?: JEBuildOptions
   ) {
     super(resourcePath, moduleOverview, options)
-    this.modPath = resolve(modPath)
+    this.modPath = path.resolve(modPath || './mods')
   }
 
   validateOptions(): boolean {
@@ -77,7 +69,10 @@ export class JavaBuilder extends PackBuilder {
     return super.build(extraFiles, extraContent)
   }
 
-  #getLanguageContent(langFilePath: string, withModules: boolean): string {
+  async #getLanguageContent(
+    langFilePath: string,
+    withModules: boolean
+  ): Promise<string> {
     const options = this.options
     const languageModules = options.modules.resource.filter((name) => {
       return this.moduleOverview.modules.resource.find((value) => {
@@ -87,7 +82,7 @@ export class JavaBuilder extends PackBuilder {
       })
     })
     if (['normal', 'compat'].includes(options.type)) {
-      const result = generateJSON(
+      const result = await generateJSON(
         langFilePath,
         withModules,
         this.moduleOverview,
@@ -97,7 +92,7 @@ export class JavaBuilder extends PackBuilder {
       this.appendLog(result.log)
       return result.content
     } else if (options.type === 'legacy') {
-      const result = generateJavaLegacy(
+      const result = await generateJavaLegacy(
         langFilePath,
         withModules,
         this.moduleOverview,
@@ -115,22 +110,25 @@ export class JavaBuilder extends PackBuilder {
     const options = this.options
     if (options.mod) {
       options.mod = options.mod.map((value) => {
-        return resolve(this.modPath, value)
+        return path.resolve(this.modPath, value)
       })
     }
   }
 
-  #addLanguage(fileList: string[], contentList: Record<string, string>): void {
+  async #addLanguage(
+    fileList: string[],
+    contentList: Record<string, string>
+  ): Promise<void> {
     switch (this.options.type) {
       case 'normal':
         fileList.push('pack.mcmeta')
         contentList['assets/minecraft/lang/zh_meme.json'] =
-          this.#getLanguageContent(
+          await this.#getLanguageContent(
             `${this.resourcePath}/assets/minecraft/lang/zh_meme.json`,
             true
           )
         contentList['assets/realms/lang/zh_meme.json'] =
-          this.#getLanguageContent(
+          await this.#getLanguageContent(
             `${this.resourcePath}/assets/realms/lang/zh_meme.json`,
             false
           )
@@ -142,14 +140,15 @@ export class JavaBuilder extends PackBuilder {
           4
         )
         contentList['assets/minecraft/lang/zh_cn.json'] =
-          this.#getLanguageContent(
+          await this.#getLanguageContent(
             `${this.resourcePath}/assets/minecraft/lang/zh_meme.json`,
             true
           )
-        contentList['assets/realms/lang/zh_cn.json'] = this.#getLanguageContent(
-          `${this.resourcePath}/assets/realms/lang/zh_cn.json`,
-          false
-        )
+        contentList['assets/realms/lang/zh_cn.json'] =
+          await this.#getLanguageContent(
+            `${this.resourcePath}/assets/realms/lang/zh_cn.json`,
+            false
+          )
         break
       case 'legacy':
         contentList['pack.mcmeta'] = JSON.stringify(
@@ -158,31 +157,33 @@ export class JavaBuilder extends PackBuilder {
           4
         )
         contentList['assets/minecraft/lang/zh_cn.lang'] =
-          this.#getLanguageContent(
+          await this.#getLanguageContent(
             `${this.resourcePath}/assets/minecraft/lang/zh_meme.json`,
             true
           )
-        contentList['assets/realms/lang/zh_cn.lang'] = this.#getLanguageContent(
-          `${this.resourcePath}/assets/realms/lang/zh_cn.lang`,
-          false
-        )
+        contentList['assets/realms/lang/zh_cn.lang'] =
+          await this.#getLanguageContent(
+            `${this.resourcePath}/assets/realms/lang/zh_cn.lang`,
+            false
+          )
         break
       default:
         break
     }
   }
 
-  #processMcMetaFile(): any {
-    const parsedData: any = JSON.parse(
-      fs.readFileSync(`${this.resourcePath}/pack.mcmeta`, { encoding: 'utf8' })
+  async #processMcMetaFile(): Promise<any> {
+    const data: any = await fse.readJSON(
+      path.resolve(this.resourcePath, 'pack.mcmeta'),
+      { encoding: 'utf8' }
     )
     const type = this.options.type
     if (type === 'compat') {
-      delete parsedData.language
+      delete data.language
     }
     const packFormat =
       type === 'legacy' ? this.config.legacyJEPackFormat : this.options.format
-    parsedData.pack.pack_format = packFormat || this.config.latestJEPackFormat
-    return parsedData
+    data.pack.pack_format = packFormat || this.config.latestJEPackFormat
+    return data
   }
 }

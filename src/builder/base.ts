@@ -3,36 +3,41 @@
  * @param {Object}
  */
 
-import fs from 'fs'
-import { createHash } from 'crypto'
-import { zip } from 'compressing'
-import { BuilderConfig, BuildOptions, ModuleOverview } from '../types'
-import { defaultConfig } from '../constants'
+import fse from 'fs-extra'
+import klaw from 'klaw'
 import path from 'path'
+import { createHash } from 'crypto'
+import { ZipFile } from 'yazl'
+import { homedir } from 'os'
+import {
+  BuilderConfig,
+  JEBuildOptions,
+  BEBuildOptions,
+  ModuleOverview,
+} from '../types'
+import { defaultConfig } from '../constants'
 
 export class PackBuilder {
   config: BuilderConfig
   resourcePath: string
   moduleOverview: ModuleOverview
-  options: BuildOptions
+  options: JEBuildOptions | BEBuildOptions
   log: string[] = []
 
   constructor(
-    resourcePath: string,
-    moduleOverview: ModuleOverview,
-    options?: BuildOptions
+    resourcePath?: string,
+    moduleOverview?: ModuleOverview,
+    options?: JEBuildOptions | BEBuildOptions
   ) {
-    this.config = fs.existsSync(
-      `${process.env.HOME || process.env.USERPROFILE}/.memepack-builder.json`
-    )
-      ? JSON.parse(
-          fs.readFileSync(`${process.env.HOME}/.memepack-builder.json`, {
-            encoding: 'utf8',
-          })
-        )
-      : defaultConfig
-    this.resourcePath = path.resolve(resourcePath)
-    this.moduleOverview = moduleOverview
+    this.config = defaultConfig
+    this.resourcePath = path.resolve(resourcePath || '.')
+    this.moduleOverview = moduleOverview || {
+      modulePath: path.resolve('./modules'),
+      modules: {
+        resource: [],
+        collection: [],
+      },
+    }
     this.options = options || {
       type: 'normal',
       outputDir: path.resolve('.'),
@@ -62,6 +67,14 @@ export class PackBuilder {
     name: string
     buf: Buffer
   }> {
+    try {
+      this.config = await fse.readJSON(
+        path.resolve(homedir(), '.memepack-builder.json'),
+        { encoding: 'utf8' }
+      )
+    } catch (e) {
+      null
+    }
     this.clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
@@ -69,16 +82,13 @@ export class PackBuilder {
       return value.name
     })
     this.appendLog(`Building pack.`)
-    const zipStream = new zip.Stream()
-    for (const file of extraFiles) {
-      zipStream.addEntry(`${this.resourcePath}/${file}`, {
-        relativePath: `${file}`,
-      })
-    }
+    const zipFile = new ZipFile()
+    extraFiles.forEach((value) => {
+      zipFile.addFile(path.resolve(this.resourcePath, value), value)
+    })
     for (const entry in extraContent) {
       if (extraContent[entry] !== '') {
-        zipStream.addEntry(Buffer.from(extraContent[entry], 'utf8'), {
-          relativePath: entry,
+        zipFile.addBuffer(Buffer.from(extraContent[entry], 'utf8'), entry, {
           mtime: new Date(0),
         })
       }
@@ -91,31 +101,35 @@ export class PackBuilder {
         continue
       }
       const fileList: string[] = []
-      const destFileList: string[] = []
-      this.#readFileList(`${modulePath}/${module}/`, fileList)
-      const re = new RegExp(`(${excludedFileNames.join('|')})$`, 'g')
-      for (const file of fileList) {
-        if (re.test(file)) {
-          continue
+      klaw(path.resolve(modulePath, module)).on('data', (item) => {
+        if (
+          item.stats.isFile() &&
+          excludedFileNames.every((value) => {
+            !item.path.endsWith(value)
+          })
+        ) {
+          fileList.push(item.path)
         }
-        const destFilePath = file
-          .replace(path.resolve(modulePath, module), '')
-          .replace(/^[/\\]*/g, '')
-        if (!destFileList.includes(destFilePath)) {
-          zipStream.addEntry(file, { relativePath: destFilePath })
-          destFileList.push(destFilePath)
+      })
+      const destFileList: string[] = []
+      for (const file of fileList) {
+        const destPath = path.relative(modulePath, file)
+        if (!destFileList.includes(destPath)) {
+          zipFile.addFile(file, destPath)
+          destFileList.push(destPath)
         } else {
-          this.appendLog(`Warning: Duplicated "${destFilePath}", skipping.`)
+          this.appendLog(`Warning: Duplicated "${destPath}", skipping.`)
         }
       }
     }
+    zipFile.end()
     return new Promise((r) => {
       const bufs: Buffer[] = []
       const hash = createHash('sha256')
-      zipStream
+      zipFile.outputStream
         .on('readable', () => {
           let buf: Buffer
-          while ((buf = zipStream.read())) {
+          while ((buf = zipFile.outputStream.read() as Buffer)) {
             bufs.push(buf)
             hash.update(buf)
           }
@@ -131,24 +145,9 @@ export class PackBuilder {
             )
           }
           this.appendLog(`Successfully built ${name}.`)
-          r({
-            name,
-            buf,
-          })
+          r({ name, buf })
         })
     })
-  }
-
-  #readFileList(prefix: string, fileList: string[]): void {
-    for (const file of fs.readdirSync(prefix)) {
-      const stat = fs.statSync(path.resolve(prefix, file))
-      if (stat.isDirectory()) {
-        this.#readFileList(path.resolve(prefix, file), fileList)
-      }
-      if (stat.isFile()) {
-        fileList.push(path.resolve(prefix, file))
-      }
-    }
   }
 
   mergeCollectionIntoResource(): string[] {

@@ -1,7 +1,6 @@
 import { SelectedModules } from './SelectedModules'
 
-export interface BuildOptions {
-  type: 'normal' | 'compat' | 'legacy' | 'mcpack' | 'zip'
+export interface BaseBuildOptions {
   outputDir: string
   outputName?: string
   modules: SelectedModules
@@ -11,3 +10,8 @@ export interface BuildOptions {
   compatible?: boolean
   hash?: boolean
 }
+
+export type JEBuildOptions = BaseBuildOptions & {
+  type: 'normal' | 'compat' | 'legacy'
+}
+export type BEBuildOptions = BaseBuildOptions & { type: 'mcpack' | 'zip' }

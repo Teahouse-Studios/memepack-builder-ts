@@ -25,9 +25,9 @@ Build method. If `clearLog` is true, will clear previous build logs. Default is 
 
 Returns a `Promise` which will return pack name and content (as a `Buffer`) when fulfilled.
 
-#### `MemepackBuilder.builder: JavaBuilder | BedrockBuilder`
+#### `MemepackBuilder.options: JEBuildOptions | BEBuildOptions`
 
-The real builder. Build options are passed to this builder. If you want to change build options after an instance created, change `<instanceName>.builder.options`.
+Maps to internal builder's options.
 
 #### `MemepackBuilder.log: string[]`
 
