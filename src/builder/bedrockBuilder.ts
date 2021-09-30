@@ -73,10 +73,10 @@ export class BedrockBuilder extends PackBuilder {
           texture.texture_data[k] = data[k]
         }
       } catch (e) {
-        null
+        console.error(e)
       }
     }
-    if (texture.texture_data === {}) {
+    if (!Object.keys(texture.texture_data).length) {
       return ''
     } else {
       return JSON.stringify(texture, null, 4)
