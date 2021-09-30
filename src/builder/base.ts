@@ -100,6 +100,12 @@ export class PackBuilder {
         )
         continue
       }
+      if (!fse.pathExistsSync(path.resolve(modulePath, module))) {
+        this.appendLog(
+          `Warning: Resource module "${module}" does not exist on file system, skipping.`
+        )
+        continue
+      }
       const fileList: string[] = []
       klaw(path.resolve(modulePath, module)).on('data', (item) => {
         if (

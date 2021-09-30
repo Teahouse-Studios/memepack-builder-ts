@@ -31,6 +31,7 @@ export class ModuleChecker {
       )
       const moduleType: string = parsedData.type
       delete parsedData['type']
+      parsedData['name'] = file // use folder name instead of name in manifest
       switch (moduleType) {
         case 'collection':
           overview.modules.collection.push(parsedData)
