@@ -25,10 +25,10 @@
   "devDependencies": {
     "@types/fs-extra": "^9.0.13",
     "@types/klaw": "^3.0.2",
-    "@types/node": "^16.9.6",
+    "@types/node": "^16.10.2",
     "@types/yazl": "^2.4.2",
-    "@typescript-eslint/eslint-plugin": "^4.31.1",
-    "@typescript-eslint/parser": "^4.31.1",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "@typescript-eslint/parser": "^4.33.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.4.1",
