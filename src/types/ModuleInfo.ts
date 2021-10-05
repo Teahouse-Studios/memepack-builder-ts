@@ -5,4 +5,6 @@ export interface ModuleInfo {
   contains?: string[]
   incompatibleWith?: string[]
   classifier: string[]
+  dirName: string
+  type: string
 }

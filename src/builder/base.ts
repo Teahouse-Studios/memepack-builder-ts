@@ -14,6 +14,7 @@ import {
   JEBuildOptions,
   BEBuildOptions,
   ModuleOverview,
+  ModuleInfo,
 } from '../types'
 import { defaultConfig } from '../constants'
 
@@ -78,9 +79,6 @@ export class PackBuilder {
     this.clearLog()
     excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
-    const validModules = this.moduleOverview.modules.resource.map((value) => {
-      return value.name
-    })
     this.appendLog(`Building pack.`)
     const zipFile = new ZipFile()
     extraFiles.forEach((value) => {
@@ -94,20 +92,8 @@ export class PackBuilder {
       }
     }
     for (const module of this.mergeCollectionIntoResource()) {
-      if (!validModules.includes(module)) {
-        this.appendLog(
-          `Warning: Resource module "${module}" does not exist, skipping.`
-        )
-        continue
-      }
-      if (!fse.pathExistsSync(path.resolve(modulePath, module))) {
-        this.appendLog(
-          `Warning: Resource module "${module}" does not exist on file system, skipping.`
-        )
-        continue
-      }
       const fileList: string[] = []
-      klaw(path.resolve(modulePath, module)).on('data', (item) => {
+      klaw(path.resolve(modulePath, module.dirName)).on('data', (item) => {
         if (
           item.stats.isFile() &&
           excludedFileNames.every((value) => {
@@ -156,24 +142,34 @@ export class PackBuilder {
     })
   }
 
-  mergeCollectionIntoResource(): string[] {
-    const selectedCollections = this.options?.modules.collection || []
-    const selectedResources = new Set(this.options?.modules.resource)
-    const collections = this.moduleOverview.modules.collection
-    for (const item of selectedCollections) {
-      const target = collections.find((value) => {
-        return value.name === item
-      })
+  #checkExists(source: string[], check: ModuleInfo[]): ModuleInfo[] {
+    const res: ModuleInfo[] = []
+    for (const item of source) {
+      const target = check.find((value) => value.name === item)
       if (!target) {
-        this.appendLog(
-          `Warning: Collection module "${item}" does not exist, skipping.`
-        )
+        this.appendLog(`Warning: Module "${item}" does not exist, skipping.`)
         continue
       }
-      for (const containedModule of target?.contains || []) {
-        selectedResources.add(containedModule)
+      res.push(target)
+    }
+    return res
+  }
+
+  mergeCollectionIntoResource(): ModuleInfo[] {
+    const optCollections = this.options?.modules.collection || []
+    const optResources = this.options?.modules.resource || []
+    const modules = this.moduleOverview.modules
+    const resultResources = new Set<ModuleInfo>(
+      this.#checkExists(optResources, modules.resource)
+    )
+    for (const { contains } of this.#checkExists(
+      optCollections,
+      modules.collection
+    )) {
+      for (const item of this.#checkExists(contains || [], modules.resource)) {
+        resultResources.add(item)
       }
     }
-    return Array.from(selectedResources)
+    return Array.from(resultResources)
   }
 }

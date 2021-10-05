@@ -157,14 +157,15 @@ export class languageGenerator {
 
   langToJSON(content: string): Record<string, string> {
     const result: Record<string, string> = {}
-    for (const value of content.replace(/\r\n/g, '\n').split('\n')) {
-      if (value.trim() !== '' && !value.startsWith('#')) {
+    for (let value of content.replace(/\r\n/g, '\n').split('\n')) {
+      value = value.replace(/##.*$/g, '').trim()
+      if (value !== '') {
         const keyValuePair = value.split('=', 2)
         if (keyValuePair.length < 2) {
           this.#appendLog(`Warning: Invalid entry "${value}".`)
           continue
         }
-        result[keyValuePair[0].trim()] = keyValuePair[1].trim()
+        result[keyValuePair[0]] = keyValuePair[1].replace(/\t?#?$/g, '')
       }
     }
     return result
