@@ -15,6 +15,7 @@ import {
   BEBuildOptions,
   ModuleOverview,
   ModuleInfo,
+  ModuleType,
 } from '../types'
 import { defaultConfig } from '../constants'
 
@@ -25,25 +26,27 @@ export class PackBuilder {
   options: JEBuildOptions | BEBuildOptions
   log: string[] = []
 
-  constructor(
-    resourcePath?: string,
-    moduleOverview?: ModuleOverview,
+  constructor({
+    resourcePath,
+    moduleOverview,
+    options,
+  }: {
+    resourcePath?: string
+    moduleOverview?: ModuleOverview
     options?: JEBuildOptions | BEBuildOptions
-  ) {
+  } = {}) {
     this.config = defaultConfig
     this.resourcePath = path.resolve(resourcePath || '.')
     this.moduleOverview = moduleOverview || {
       modulePath: path.resolve('./modules'),
-      modules: {
-        resource: [],
-        collection: [],
-      },
+      modules: [],
     }
     this.options = options || {
       type: 'normal',
       outputDir: path.resolve('.'),
       modules: {
         resource: [],
+        collection: [],
       },
     }
   }
@@ -61,9 +64,9 @@ export class PackBuilder {
   }
 
   async build(
-    extraFiles: string[] = [],
-    extraContent: Record<string, string> = {},
-    excludedFileNames: string[] = []
+    files: string[] = [],
+    content: Record<string, string> = {},
+    excludedFiles: string[] = []
   ): Promise<{
     name: string
     buf: Buffer
@@ -77,16 +80,16 @@ export class PackBuilder {
       null
     }
     this.clearLog()
-    excludedFileNames.push('add.json', 'remove.json', 'module_manifest.json')
+    excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
-    this.appendLog(`Building pack.`)
+    this.appendLog(`Building pack...`)
     const zipFile = new ZipFile()
-    extraFiles.forEach((value) => {
-      zipFile.addFile(path.resolve(this.resourcePath, value), value)
-    })
-    for (const entry in extraContent) {
-      if (extraContent[entry] !== '') {
-        zipFile.addBuffer(Buffer.from(extraContent[entry], 'utf8'), entry, {
+    for (const k of files) {
+      zipFile.addFile(path.resolve(this.resourcePath, k), k)
+    }
+    for (const k in content) {
+      if (content[k] !== '') {
+        zipFile.addBuffer(Buffer.from(content[k], 'utf8'), k, {
           mtime: new Date(0),
         })
       }
@@ -96,7 +99,7 @@ export class PackBuilder {
       klaw(path.resolve(modulePath, module.dirName)).on('data', (item) => {
         if (
           item.stats.isFile() &&
-          excludedFileNames.every((value) => {
+          excludedFiles.every((value) => {
             !item.path.endsWith(value)
           })
         ) {
@@ -142,6 +145,13 @@ export class PackBuilder {
     })
   }
 
+  moduleNameToInfo(type: ModuleType): ModuleInfo[] {
+    return this.#checkExists(
+      this.options.modules[type],
+      this.moduleOverview.modules
+    )
+  }
+
   #checkExists(source: string[], check: ModuleInfo[]): ModuleInfo[] {
     const res: ModuleInfo[] = []
     for (const item of source) {
@@ -156,17 +166,22 @@ export class PackBuilder {
   }
 
   mergeCollectionIntoResource(): ModuleInfo[] {
+    const resourceModules = this.moduleOverview.modules.filter(
+      (value) => value.type === 'resource'
+    )
+    const collectionModules = this.moduleOverview.modules.filter(
+      (value) => value.type === 'collection'
+    )
     const optCollections = this.options?.modules.collection || []
     const optResources = this.options?.modules.resource || []
-    const modules = this.moduleOverview.modules
     const resultResources = new Set<ModuleInfo>(
-      this.#checkExists(optResources, modules.resource)
+      this.#checkExists(optResources, resourceModules)
     )
     for (const { contains } of this.#checkExists(
       optCollections,
-      modules.collection
+      collectionModules
     )) {
-      for (const item of this.#checkExists(contains || [], modules.resource)) {
+      for (const item of this.#checkExists(contains || [], resourceModules)) {
         resultResources.add(item)
       }
     }

@@ -1,9 +1,10 @@
-import { SelectedModules } from './SelectedModules'
-
 export interface BaseBuildOptions {
   outputDir: string
   outputName?: string
-  modules: SelectedModules
+  modules: {
+    resource: string[]
+    collection: string[]
+  }
   mod?: string[]
   format?: number
   sfw?: boolean

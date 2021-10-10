@@ -7,40 +7,46 @@
  */
 
 import { BedrockBuilder, JavaBuilder } from './builder'
-import { ModuleChecker } from './moduleChecker'
+import { ModuleParser } from './ModuleParser'
 import { JEBuildOptions, BEBuildOptions } from './types'
 
 // name
 export const name = 'memepack-builder'
 export { BedrockBuilder, JavaBuilder } from './builder'
-export { ModuleChecker } from './moduleChecker'
+export { ModuleParser } from './ModuleParser'
 export * as utils from './utils'
 
 export class MemepackBuilder {
   #builder: BedrockBuilder | JavaBuilder
-  #moduleChecker: ModuleChecker
+  #moduleParser: ModuleParser
   log: string[]
 
-  constructor(
-    platform: 'je' | 'be',
-    resourcePath?: string,
-    modulePath?: string,
-    buildOptions?: JEBuildOptions | BEBuildOptions,
+  constructor({
+    platform,
+    resourcePath,
+    modulePath,
+    buildOptions,
+    modPath,
+  }: {
+    platform: 'je' | 'be'
+    resourcePath?: string
+    modulePath?: string
+    buildOptions?: JEBuildOptions | BEBuildOptions
     modPath?: string
-  ) {
+  }) {
     this.log = []
-    this.#moduleChecker = new ModuleChecker(modulePath || './modules')
-    this.log.push(...this.#moduleChecker.log)
+    this.#moduleParser = new ModuleParser(modulePath || './modules')
+    this.log.push(...this.#moduleParser.log)
     switch (platform) {
       case 'be':
         if (buildOptions && !['mcpack', 'zip'].includes(buildOptions.type)) {
           throw 'Platform does not match type.'
         }
-        this.#builder = new BedrockBuilder(
+        this.#builder = new BedrockBuilder({
           resourcePath,
-          undefined,
-          buildOptions as BEBuildOptions | undefined
-        )
+          moduleOverview: undefined,
+          options: buildOptions as BEBuildOptions | undefined,
+        })
         break
       case 'je':
         if (
@@ -73,7 +79,7 @@ export class MemepackBuilder {
     if (clearLog) {
       this.log = []
     }
-    this.#builder.moduleOverview = await this.#moduleChecker.validateModules()
+    this.#builder.moduleOverview = await this.#moduleParser.validateModules()
     const r = this.#builder.build()
     this.log.push(...this.#builder.log)
     return r
