@@ -1,7 +1,7 @@
 import fse from 'fs-extra'
 import path from 'path'
 import { JEBuildOptions, ModuleOverview, NameContentList } from '../types'
-import { generateJSON, JSONToJELang } from '../utils'
+import { ensureAscii, generateJSON, JSONToJELang } from '../utils'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
@@ -102,7 +102,7 @@ export class JavaBuilder extends PackBuilder {
       case 'normal':
         fileList.push('pack.mcmeta')
         for (const k in langContent) {
-          contentList[k] = JSON.stringify(langContent[k], null, 4)
+          contentList[k] = ensureAscii(JSON.stringify(langContent[k], null, 4))
         }
         break
       case 'compat':
@@ -112,8 +112,9 @@ export class JavaBuilder extends PackBuilder {
           4
         )
         for (const k in langContent) {
-          contentList[k.replace(/zh_meme\.json$/g, 'zh_cn.json')] =
+          contentList[k.replace(/zh_meme\.json$/g, 'zh_cn.json')] = ensureAscii(
             JSON.stringify(langContent[k], null, 4)
+          )
         }
         break
       case 'legacy':
