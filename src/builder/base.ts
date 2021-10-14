@@ -43,7 +43,6 @@ export class PackBuilder {
     }
     this.options = options || {
       type: 'normal',
-      outputDir: path.resolve('.'),
       modules: {
         resource: [],
         collection: [],
@@ -95,20 +94,19 @@ export class PackBuilder {
       }
     }
     for (const module of this.mergeCollectionIntoResource()) {
+      const moduleDir = path.resolve(modulePath, module.dirName)
       const fileList: string[] = []
-      klaw(path.resolve(modulePath, module.dirName)).on('data', (item) => {
+      for await (const item of klaw(moduleDir)) {
         if (
           item.stats.isFile() &&
-          excludedFiles.every((value) => {
-            !item.path.endsWith(value)
-          })
+          excludedFiles.every((value) => !item.path.endsWith(value))
         ) {
           fileList.push(item.path)
         }
-      })
+      }
       const destFileList: string[] = []
       for (const file of fileList) {
-        const destPath = path.relative(modulePath, file)
+        const destPath = path.relative(moduleDir, file)
         if (!destFileList.includes(destPath)) {
           zipFile.addFile(file, destPath)
           destFileList.push(destPath)

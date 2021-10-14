@@ -26,13 +26,7 @@ export class BedrockBuilder extends PackBuilder {
   }
 
   validateOptions(): boolean {
-    const beRequiredOptions = [
-      'type',
-      'compatible',
-      'modules',
-      'outputDir',
-      'hash',
-    ]
+    const beRequiredOptions = ['type', 'compatible', 'modules', 'hash']
     const options = this.options
     for (const option of beRequiredOptions) {
       if (!(option in options)) {

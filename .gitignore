@@ -108,3 +108,4 @@ package-lock.json
 builds/
 tests/java
 tests/bedrock
+*.zip

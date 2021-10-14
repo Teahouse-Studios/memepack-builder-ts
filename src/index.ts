@@ -6,6 +6,8 @@
  * @license Apache-2.0
  */
 
+import fse from 'fs-extra'
+import path from 'path'
 import { BedrockBuilder, JavaBuilder } from './builder'
 import { ModuleParser } from './ModuleParser'
 import { JEBuildOptions, BEBuildOptions } from './types'
@@ -40,7 +42,7 @@ export class MemepackBuilder {
     switch (platform) {
       case 'be':
         if (buildOptions && !['mcpack', 'zip'].includes(buildOptions.type)) {
-          throw 'Platform does not match type.'
+          throw new Error('Platform does not match type.')
         }
         this.#builder = new BedrockBuilder({
           resourcePath,
@@ -53,7 +55,7 @@ export class MemepackBuilder {
           buildOptions &&
           !['normal', 'compat', 'legacy'].includes(buildOptions.type)
         ) {
-          throw 'Platform does not match type.'
+          throw new Error('Platform does not match type.')
         }
         this.#builder = new JavaBuilder(
           resourcePath,
@@ -63,7 +65,7 @@ export class MemepackBuilder {
         )
         break
       default:
-        throw 'Unknown platform.'
+        throw new Error('Unknown platform.')
     }
   }
 
@@ -82,6 +84,16 @@ export class MemepackBuilder {
     this.#builder.moduleOverview = await this.#moduleParser.validateModules()
     const r = this.#builder.build()
     this.log.push(...this.#builder.log)
+    if (this.options.outputDir) {
+      const { name, buf } = await r
+      await this.#writeToPath(name, buf)
+    }
     return r
+  }
+
+  async #writeToPath(name: string, buf: Buffer): Promise<void> {
+    const p = path.resolve('.', this.options.outputDir || '')
+    await fse.ensureDir(p)
+    await fse.writeFile(path.resolve(p, name), buf)
   }
 }
