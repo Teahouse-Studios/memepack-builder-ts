@@ -15,7 +15,7 @@ yarn add memepack-builder
 
 ## Usage
 
-### `class MemepackBuilder(platform: 'je' | 'be', resourcePath: string, modulePath: string, buildOptions?: BuildOptions, modPath?: string)`
+### `class MemepackBuilder({ platform: 'je' | 'be', resourcePath?: string, modulePath?: string, buildOptions?: JEBuildOptions | BEBuildOptions, modPath?: string })`
 
 Main wrapper class for building packs.
 
@@ -35,27 +35,26 @@ Build logs.
 
 ### Example
 
-``` js
+```js
 const module = require('memepack-builder')
 const options = {
   type: 'normal',
   modules: {
     resource: [],
-    collection: []
+    collection: [],
   },
   mod: [],
   sfw: true,
-  outputDir: '/path/to/output/directory',
   format: 7,
-  hash: true
+  hash: true,
 }
-const builder = new module.MemepackBuilder(
-  'je',
-  '/path/to/main/resources/',
-  '/path/to/modules/',
-  options,
-  '/path/to/mods/'
-)
+const builder = new module.MemepackBuilder({
+  platform: 'je',
+  resourcePath: '/path/to/resources/',
+  modulePath: '/path/to/modules/',
+  buildOptions: options,
+  modPath: '/path/to/mods/',
+})
 const { name, buf } = await builder.build()
 ```
 
