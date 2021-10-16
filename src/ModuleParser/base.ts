@@ -72,16 +72,34 @@ export class ModuleParser {
   async readContent(
     item: LanguageModificationFile,
     key: 'add' | 'remove',
-    dir: string
+    directory: string
   ): Promise<any> {
     let content
     const e = item[key]
     switch (typeof e) {
+      // if it's a string, assuming file path
       case 'string':
-        content = await fse.readJSON(path.resolve(this.modulePath, dir, e))
+        if (e !== '') {
+          content = await fse.readJSON(
+            path.resolve(this.modulePath, directory, e)
+          )
+        }
         break
+      // if it's an object, use it directly
       case 'object':
         content = e
+        break
+      // not present, check default path `${item.file}.${key}.json`
+      case 'undefined':
+        if (
+          await fse.pathExists(
+            path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
+          )
+        ) {
+          content = await fse.readJSON(
+            path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
+          )
+        }
         break
       default:
         break
