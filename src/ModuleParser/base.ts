@@ -43,18 +43,15 @@ export class ModuleParser {
     dirName: string,
     data: ModuleManifest
   ): Promise<ModuleInfo> {
-    const info: ModuleInfo = {
-      name: data.name,
-      type: data.type,
-      author: data.author,
-      description: data.description,
+    const languageModification = data.languageModification
+    delete data.languageModification
+    const info = {
+      ...data,
       dirName,
-      contains: data.contains,
-      incompatibleWith: data.incompatibleWith,
-    }
-    if (data.languageModification) {
+    } as ModuleInfo
+    if (languageModification) {
       info.languageModification = []
-      for (const item of data.languageModification) {
+      for (const item of languageModification) {
         const add: Record<string, string> =
           (await this.readContent(item, 'add', dirName)) || {}
         const remove: string[] =
@@ -81,7 +78,8 @@ export class ModuleParser {
       case 'string':
         if (e !== '') {
           content = await fse.readJSON(
-            path.resolve(this.modulePath, directory, e)
+            path.resolve(this.modulePath, directory, e),
+            { encoding: 'utf8' }
           )
         }
         break
@@ -97,7 +95,12 @@ export class ModuleParser {
           )
         ) {
           content = await fse.readJSON(
-            path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
+            path.resolve(
+              this.modulePath,
+              directory,
+              `${item.file}.${key}.json`
+            ),
+            { encoding: 'utf8' }
           )
         }
         break
