@@ -53,11 +53,11 @@ export class ModuleParser {
       info.languageModification = []
       for (const item of languageModification) {
         const add: Record<string, string> =
-          (await this.readContent(item, 'add', dirName)) || {}
+          (await this.getLanguageModification(item, 'add', dirName)) || {}
         const remove: string[] =
-          (await this.readContent(item, 'remove', dirName)) || []
+          (await this.getLanguageModification(item, 'remove', dirName)) || []
         info.languageModification.push({
-          file: item.file,
+          file: typeof item === 'string' ? item : item.file,
           add,
           remove,
         })
@@ -66,47 +66,50 @@ export class ModuleParser {
     return info
   }
 
-  async readContent(
-    item: LanguageModificationFile,
+  async getLanguageModification(
+    item: LanguageModificationFile | string,
     key: 'add' | 'remove',
     directory: string
   ): Promise<any> {
     let content
-    const e = item[key]
-    switch (typeof e) {
-      // if it's a string, assuming file path
-      case 'string':
-        if (e !== '') {
-          content = await fse.readJSON(
-            path.resolve(this.modulePath, directory, e),
-            { encoding: 'utf8' }
-          )
-        }
-        break
-      // if it's an object, use it directly
-      case 'object':
-        content = e
-        break
-      // not present, check default path `${item.file}.${key}.json`
-      case 'undefined':
-        if (
-          await fse.pathExists(
+    if (typeof item === 'string') {
+      content = await this.#readDefaultContent(
+        path.resolve(this.modulePath, directory, `${item}.${key}.json`)
+      )
+    } else {
+      const e = item[key]
+      switch (typeof e) {
+        // if it's a string, assuming file path
+        case 'string':
+          if (e !== '') {
+            content = await fse.readJSON(
+              path.resolve(this.modulePath, directory, e),
+              { encoding: 'utf8' }
+            )
+          }
+          break
+        // if it's an object, use it directly
+        case 'object':
+          content = e
+          break
+        // not present, check default path `${item.file}.${key}.json`
+        case 'undefined':
+          content = await this.#readDefaultContent(
             path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
           )
-        ) {
-          content = await fse.readJSON(
-            path.resolve(
-              this.modulePath,
-              directory,
-              `${item.file}.${key}.json`
-            ),
-            { encoding: 'utf8' }
-          )
-        }
-        break
-      default:
-        break
+          break
+        default:
+          break
+      }
     }
     return content
+  }
+
+  async #readDefaultContent(filePath: string): Promise<any> {
+    if (await fse.pathExists(filePath)) {
+      return await fse.readJSON(filePath, { encoding: 'utf8' })
+    } else {
+      return undefined
+    }
   }
 }

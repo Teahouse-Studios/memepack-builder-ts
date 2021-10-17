@@ -16,7 +16,7 @@ export interface LanguageModificationFile {
 }
 
 export interface ModuleManifest extends ModuleBase {
-  languageModification?: LanguageModificationFile[]
+  languageModification?: LanguageModificationFile[] | string[]
 }
 
 export interface LanguageModification {
