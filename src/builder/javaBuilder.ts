@@ -56,10 +56,8 @@ export class JavaBuilder extends PackBuilder {
     }
     this.#normalizeOptions()
     this.mergeCollectionIntoResource()
-    const extraFiles = ['pack.png', 'LICENSE']
-    const extraContent: Record<string, string> = {}
-    this.#addLanguage(extraFiles, extraContent)
-    return super.build(extraFiles, extraContent)
+    const { fileList, contentList } = await this.#addLanguage(['pack.png', 'LICENSE'])
+    return super.build(fileList, contentList)
   }
 
   async #getLanguageContent(): Promise<NameContentList> {
@@ -86,10 +84,11 @@ export class JavaBuilder extends PackBuilder {
     }
   }
 
-  async #addLanguage(
+  async #addLanguage(fileList: string[]): Promise<{
     fileList: string[],
-    contentList: Record<string, string>
-  ): Promise<void> {
+    contentList: Record<string, string>,
+  }> {
+    const contentList: Record<string, string> = {}
     const langContent = await this.#getLanguageContent()
     switch (this.options.type) {
       case 'normal':
@@ -123,6 +122,10 @@ export class JavaBuilder extends PackBuilder {
         break
       default:
         break
+    }
+    return {
+      fileList,
+      contentList,
     }
   }
 
