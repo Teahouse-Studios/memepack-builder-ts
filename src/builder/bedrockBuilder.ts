@@ -45,7 +45,7 @@ export class BedrockBuilder extends PackBuilder {
     this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack_icon.png',
-      'manifest.json'
+      'manifest.json',
     ])
     contentList['textures/item_texture.json'] = await this.#getTexture(
       'item_texture.json'
