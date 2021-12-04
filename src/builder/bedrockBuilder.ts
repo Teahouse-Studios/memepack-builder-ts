@@ -43,14 +43,16 @@ export class BedrockBuilder extends PackBuilder {
     }
     this.#normalizeOptions()
     this.mergeCollectionIntoResource()
-    const files = ['pack_icon.png', 'manifest.json']
-    const content = {
-      'textures/item_texture.json': await this.#getTexture('item_texture.json'),
-      'textures/terrain_texture.json': await this.#getTexture(
-        'terrain_texture.json'
-      ),
-    }
-    this.#addLanguage(files, content)
+    const { fileList, contentList } = await this.#addLanguage([
+      'pack_icon.png',
+      'manifest.json'
+    ])
+    contentList['textures/item_texture.json'] = await this.#getTexture(
+      'item_texture.json'
+    )
+    contentList['textures/terrain_texture.json'] = await this.#getTexture(
+      'terrain_texture.json'
+    )
     return super.build(files, content, [
       'item_texture.json',
       'terrain_texture.json',
@@ -102,10 +104,11 @@ export class BedrockBuilder extends PackBuilder {
     }.${options.type}`
   }
 
-  async #addLanguage(
+  async #addLanguage(fileList: string[]): Promise<{
     fileList: string[],
-    contentList: Record<string, string>
-  ): Promise<void> {
+    contentList: Record<string, string>,
+  }> {
+    const contentList: Record<string, string> = {}
     const langContent = await this.#getLanguageContent()
     for (const k in langContent) {
       if (k === 'texts/zh_ME.lang' && this.options.compatible) {
@@ -118,6 +121,10 @@ export class BedrockBuilder extends PackBuilder {
       } else {
         contentList[k] = JSONToBELang(langContent[k])
       }
+    }
+    return {
+      fileList,
+      contentList,
     }
   }
 }
