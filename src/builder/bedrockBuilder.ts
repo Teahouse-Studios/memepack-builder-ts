@@ -53,7 +53,7 @@ export class BedrockBuilder extends PackBuilder {
     contentList['textures/terrain_texture.json'] = await this.#getTexture(
       'terrain_texture.json'
     )
-    return super.build(files, content, [
+    return super.build(fileList, contentList, [
       'item_texture.json',
       'terrain_texture.json',
     ])
@@ -105,8 +105,8 @@ export class BedrockBuilder extends PackBuilder {
   }
 
   async #addLanguage(fileList: string[]): Promise<{
-    fileList: string[],
-    contentList: Record<string, string>,
+    fileList: string[]
+    contentList: Record<string, string>
   }> {
     const contentList: Record<string, string> = {}
     const langContent = await this.#getLanguageContent()

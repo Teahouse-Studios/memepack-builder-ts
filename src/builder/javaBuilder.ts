@@ -56,7 +56,10 @@ export class JavaBuilder extends PackBuilder {
     }
     this.#normalizeOptions()
     this.mergeCollectionIntoResource()
-    const { fileList, contentList } = await this.#addLanguage(['pack.png', 'LICENSE'])
+    const { fileList, contentList } = await this.#addLanguage([
+      'pack.png',
+      'LICENSE',
+    ])
     return super.build(fileList, contentList)
   }
 
@@ -85,8 +88,8 @@ export class JavaBuilder extends PackBuilder {
   }
 
   async #addLanguage(fileList: string[]): Promise<{
-    fileList: string[],
-    contentList: Record<string, string>,
+    fileList: string[]
+    contentList: Record<string, string>
   }> {
     const contentList: Record<string, string> = {}
     const langContent = await this.#getLanguageContent()
