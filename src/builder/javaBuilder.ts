@@ -99,7 +99,7 @@ export class JavaBuilder extends PackBuilder {
         break
       case 'compat':
         contentList['pack.mcmeta'] = JSON.stringify(
-          this.#processMcMetaFile(),
+          await this.#processMcMetaFile(),
           null,
           4
         )
@@ -111,7 +111,7 @@ export class JavaBuilder extends PackBuilder {
         break
       case 'legacy':
         contentList['pack.mcmeta'] = JSON.stringify(
-          this.#processMcMetaFile(),
+          await this.#processMcMetaFile(),
           null,
           4
         )
