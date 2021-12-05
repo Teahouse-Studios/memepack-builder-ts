@@ -91,6 +91,7 @@ export class BedrockBuilder extends PackBuilder {
   async #getLanguageContent(): Promise<NameContentList> {
     const result = await generateJSON({
       resourcePath: this.resourcePath,
+      mainLanguageFile: 'texts/zh_ME.lang',
       modulePath: this.moduleOverview.modulePath,
       modules: this.moduleNameToInfo('resource'),
     })

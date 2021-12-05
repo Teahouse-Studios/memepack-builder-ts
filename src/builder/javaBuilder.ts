@@ -72,6 +72,7 @@ export class JavaBuilder extends PackBuilder {
     })
     const result = await generateJSON({
       resourcePath: this.resourcePath,
+      mainLanguageFile: 'assets/minecraft/lang/zh_meme.json',
       modulePath: this.moduleOverview.modulePath,
       modules: languageModules,
     })

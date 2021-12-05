@@ -76,7 +76,7 @@ export class PackBuilder {
         { encoding: 'utf8' }
       )
     } catch (e) {
-      ;
+      void 0
     }
     this.clearLog()
     excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')

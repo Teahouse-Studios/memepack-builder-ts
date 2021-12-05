@@ -1,5 +1,6 @@
 import fse from 'fs-extra'
 import path from 'path'
+import { BELangToJSON } from '.'
 import { ModuleInfo, NameContentList } from '../types'
 
 export class LanguageGenerator {
@@ -27,14 +28,24 @@ export class LanguageGenerator {
 
   async #getBaseFile(p: string): Promise<Record<string, string>> {
     if (await fse.pathExists(path.resolve(this.modulePath, p))) {
-      return await fse.readJSON(path.resolve(this.modulePath, p))
+      if (p.endsWith('.json')) {
+        return await fse.readJSON(path.resolve(this.modulePath, p))
+      } else {
+        return BELangToJSON(
+          await fse.readFile(path.resolve(this.modulePath, p), 'utf8')
+        )
+      }
     } else {
       return {}
     }
   }
 
-  async mergeModules(): Promise<NameContentList> {
-    const result: NameContentList = {}
+  async mergeModules(mainLanguageFile: string): Promise<NameContentList> {
+    const result: NameContentList = {
+      [mainLanguageFile]: await this.#getBaseFile(
+        path.resolve(this.resourcePath, mainLanguageFile)
+      ),
+    }
     for (const module of this.modules) {
       for (const modification of module.languageModification || []) {
         if (!result[modification.file]) {

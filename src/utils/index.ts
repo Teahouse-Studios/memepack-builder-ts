@@ -59,11 +59,13 @@ export function JSONToBELang(obj: Record<string, string>): string {
 
 export async function generateJSON({
   resourcePath,
+  mainLanguageFile,
   modulePath,
   modules = [],
   modFiles = {},
 }: {
   resourcePath: string
+  mainLanguageFile: string
   modulePath: string
   modules?: ModuleInfo[]
   modFiles?: NameContentList
@@ -74,5 +76,5 @@ export async function generateJSON({
     modules,
     modFiles,
   })
-  return await gen.mergeMods(await gen.mergeModules())
+  return await gen.mergeMods(await gen.mergeModules(mainLanguageFile))
 }
