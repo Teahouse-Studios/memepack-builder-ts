@@ -82,13 +82,12 @@ export class MemepackBuilder {
       this.log = []
     }
     this.#builder.moduleOverview = await this.#moduleParser.validateModules()
-    const r = this.#builder.build()
+    const { name, buf } = await this.#builder.build()
     this.log.push(...this.#builder.log)
     if (this.options.outputDir) {
-      const { name, buf } = await r
       await this.#writeToPath(name, buf)
     }
-    return r
+    return { name, buf }
   }
 
   async #writeToPath(name: string, buf: Buffer): Promise<void> {
