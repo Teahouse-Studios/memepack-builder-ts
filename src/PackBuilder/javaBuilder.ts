@@ -1,18 +1,23 @@
 import fse from 'fs-extra'
 import path from 'path'
 import { JEBuildOptions, ModuleOverview, NameContentList } from '../types'
-import { ensureAscii, generateJSON, JSONToJELang } from '../utils'
+import { ensureAscii, generateJSON, JSONToJELang } from '../LanguageGenerator'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
   modPath: string
 
-  constructor(
-    resourcePath?: string,
-    moduleOverview?: ModuleOverview,
-    modPath?: string,
+  constructor({
+    resourcePath,
+    moduleOverview,
+    modPath,
+    options,
+  }: {
+    resourcePath?: string
+    moduleOverview?: ModuleOverview
+    modPath?: string
     options?: JEBuildOptions
-  ) {
+  } = {}) {
     super({ resourcePath, moduleOverview, options })
     this.modPath = path.resolve(modPath || './mods')
   }

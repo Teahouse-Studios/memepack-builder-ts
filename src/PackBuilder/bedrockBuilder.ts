@@ -6,7 +6,7 @@ import {
   ModuleOverview,
   NameContentList,
 } from '../types'
-import { JSONToBELang, generateJSON } from '../utils'
+import { JSONToBELang, generateJSON } from '../LanguageGenerator'
 import { PackBuilder } from './base'
 
 export class BedrockBuilder extends PackBuilder {

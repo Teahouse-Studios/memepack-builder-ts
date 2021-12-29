@@ -1,5 +1,5 @@
-import { ModuleInfo, NameContentList } from '../types'
 import { LanguageGenerator } from './LanguageGenerator'
+import { ModuleInfo, NameContentList } from '../types'
 export { LanguageGenerator } from './LanguageGenerator'
 
 export function ensureAscii(value: string): string {
@@ -70,11 +70,14 @@ export async function generateJSON({
   modules?: ModuleInfo[]
   modFiles?: NameContentList
 }): Promise<NameContentList> {
-  const gen = new LanguageGenerator({
+  const generator = new LanguageGenerator({
     resourcePath,
+    mainLanguageFile,
     modulePath,
     modules,
     modFiles,
   })
-  return await gen.mergeMods(await gen.mergeModules(mainLanguageFile))
+  await generator.mergeModules()
+  await generator.mergeMods()
+  return generator.content
 }

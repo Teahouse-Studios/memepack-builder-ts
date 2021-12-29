@@ -8,15 +8,14 @@
 
 import fse from 'fs-extra'
 import path from 'path'
-import { BedrockBuilder, JavaBuilder } from './builder'
+import { BedrockBuilder, JavaBuilder } from './PackBuilder'
 import { ModuleParser } from './ModuleParser'
 import { JEBuildOptions, BEBuildOptions } from './types'
 
 // name
 export const name = 'memepack-builder'
-export { BedrockBuilder, JavaBuilder } from './builder'
+export { BedrockBuilder, JavaBuilder } from './PackBuilder'
 export { ModuleParser } from './ModuleParser'
-export * as utils from './utils'
 
 export class MemepackBuilder {
   #builder: BedrockBuilder | JavaBuilder
@@ -57,12 +56,12 @@ export class MemepackBuilder {
         ) {
           throw new Error('Platform does not match type.')
         }
-        this.#builder = new JavaBuilder(
+        this.#builder = new JavaBuilder({
           resourcePath,
-          undefined,
+          moduleOverview: undefined,
           modPath,
-          buildOptions as JEBuildOptions | undefined
-        )
+          options: buildOptions as JEBuildOptions | undefined,
+        })
         break
       default:
         throw new Error('Unknown platform.')

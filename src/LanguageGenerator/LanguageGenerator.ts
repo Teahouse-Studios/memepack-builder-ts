@@ -5,28 +5,33 @@ import { ModuleInfo, NameContentList } from '../types'
 
 export class LanguageGenerator {
   resourcePath: string
+  mainLanguageFile: string
   modulePath: string
   modules: ModuleInfo[]
   modFiles: NameContentList
+  #content: NameContentList = {}
 
   constructor({
     resourcePath,
+    mainLanguageFile,
     modulePath,
     modules = [],
     modFiles = {},
   }: {
     resourcePath: string
+    mainLanguageFile: string
     modulePath: string
     modules?: ModuleInfo[]
     modFiles?: NameContentList
   }) {
     this.resourcePath = path.resolve(resourcePath)
+    this.mainLanguageFile = mainLanguageFile
     this.modulePath = modulePath
     this.modules = modules
     this.modFiles = modFiles
   }
 
-  async #getBaseFile(p: string): Promise<Record<string, string>> {
+  async #getContent(p: string): Promise<Record<string, string>> {
     if (await fse.pathExists(path.resolve(this.modulePath, p))) {
       if (p.endsWith('.json')) {
         return await fse.readJSON(path.resolve(this.modulePath, p))
@@ -40,35 +45,35 @@ export class LanguageGenerator {
     }
   }
 
-  async mergeModules(mainLanguageFile: string): Promise<NameContentList> {
-    const result: NameContentList = {
-      [mainLanguageFile]: await this.#getBaseFile(
-        path.resolve(this.resourcePath, mainLanguageFile)
+  async mergeModules(): Promise<void> {
+    this.#content = {
+      [this.mainLanguageFile]: await this.#getContent(
+        path.resolve(this.resourcePath, this.mainLanguageFile)
       ),
     }
     for (const module of this.modules) {
       for (const modification of module.languageModification || []) {
-        if (!result[modification.file]) {
-          result[modification.file] = await this.#getBaseFile(modification.file)
+        if (!this.#content[modification.file]) {
+          this.#content[modification.file] = await this.#getContent(
+            modification.file
+          )
         }
-        const entry = result[modification.file]
-        for (const k in modification.add) {
-          entry[k] = modification.add[k]
-        }
+        const entry = this.#content[modification.file]
+        Object.assign(entry, modification.add)
         for (const k of modification.remove) {
           delete entry[k]
         }
       }
     }
-    return result
   }
 
-  async mergeMods(content: NameContentList): Promise<NameContentList> {
+  async mergeMods(): Promise<void> {
     for (const mod in this.modFiles) {
-      for (const k in this.modFiles[mod]) {
-        content[mod][k] = this.modFiles[mod][k]
-      }
+      Object.assign(this.#content[mod], this.modFiles[mod])
     }
-    return content
+  }
+
+  get content(): NameContentList {
+    return this.#content
   }
 }
