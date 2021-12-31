@@ -63,20 +63,20 @@ export class BedrockBuilder extends PackBuilder {
     const texture: BedrockTextureFile = { texture_data: {} }
     for (const module of this.options.modules.resource) {
       try {
-        const data = (
-          await fse.readJSON(
-            path.resolve(
-              this.moduleOverview.modulePath,
-              module,
-              'textures',
-              textureFileName
-            ),
-            { encoding: 'utf8' }
-          )
-        ).texture_data
-        for (const k in data) {
-          texture.texture_data[k] = data[k]
-        }
+        Object.assign(
+          texture.texture_data,
+          (
+            await fse.readJSON(
+              path.resolve(
+                this.moduleOverview.modulePath,
+                module,
+                'textures',
+                textureFileName
+              ),
+              { encoding: 'utf8' }
+            )
+          ).texture_data
+        )
       } catch (e) {
         console.error(e)
       }
