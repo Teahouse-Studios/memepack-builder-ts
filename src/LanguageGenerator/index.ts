@@ -29,13 +29,10 @@ export function JELangToJSON(content: string): Record<string, string> {
 export function BELangToJSON(content: string): Record<string, string> {
   const result: Record<string, string> = {}
   for (let value of content.replace(/\r\n/g, '\n').split('\n')) {
-    value = value.replace(/##.*$/g, '').trim()
-    if (value !== '') {
+    value = value.replace(/(?:##|\t).*$/g, '').trimStart()
+    if (value !== '' && value.includes('=')) {
       const keyValuePair = value.split('=', 2)
-      if (keyValuePair.length < 2) {
-        continue
-      }
-      result[keyValuePair[0]] = keyValuePair[1].replace(/\t#.*$/g, '')
+      result[keyValuePair[0]] = keyValuePair[1]
     }
   }
   return result
