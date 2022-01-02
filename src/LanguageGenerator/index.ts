@@ -4,9 +4,12 @@ export { LanguageGenerator } from './LanguageGenerator'
 
 export function ensureAscii(value: string): string {
   const arr: string[] = []
-  for (let i = 0; i < value.length; i++) {
-    const code = value.charCodeAt(i)
-    arr[i] = code < 128 ? value[i] : `\\u${code.toString(16).padStart(4, '0')}`
+  for (const char of value) {
+    arr.push(
+      char < '\u0080'
+        ? char
+        : `\\u${char.codePointAt(0)?.toString(16).padStart(4, '0')}`
+    )
   }
   return arr.join('')
 }
@@ -14,12 +17,9 @@ export function ensureAscii(value: string): string {
 export function JELangToJSON(content: string): Record<string, string> {
   const result: Record<string, string> = {}
   for (let value of content.replace(/\r\n/g, '\n').split('\n')) {
-    value = value.replace(/#.*$/g, '').trim()
-    if (value !== '') {
+    value = value.replace(/#.*$/g, '').trimStart()
+    if (value !== '' && value.includes('=')) {
       const keyValuePair = value.split('=', 2)
-      if (keyValuePair.length < 2) {
-        continue
-      }
       result[keyValuePair[0]] = keyValuePair[1]
     }
   }
@@ -39,19 +39,15 @@ export function BELangToJSON(content: string): Record<string, string> {
 }
 
 export function JSONToJELang(obj: Record<string, string>): string {
-  const arr = []
-  for (const k in obj) {
-    arr.push(`${k}=${obj[k]}`)
-  }
-  return arr.join('\n')
+  return Object.entries(obj)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n')
 }
 
 export function JSONToBELang(obj: Record<string, string>): string {
-  const arr = []
-  for (const k in obj) {
-    arr.push(`${k}=${obj[k]}\t#`)
-  }
-  return arr.join('\n')
+  return Object.entries(obj)
+    .map(([key, value]) => `${key}=${value}\t#`)
+    .join('\n')
 }
 
 export async function generateJSON({
