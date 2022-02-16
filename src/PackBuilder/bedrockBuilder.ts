@@ -25,23 +25,7 @@ export class BedrockBuilder extends PackBuilder {
     super({ resourcePath, moduleOverview, options })
   }
 
-  validateOptions(): boolean {
-    const beRequiredOptions = ['type', 'compatible', 'modules', 'hash']
-    const options = this.options
-    for (const option of beRequiredOptions) {
-      if (!(option in options)) {
-        this.appendLog(`Warning: Missing required argument "${option}".`)
-        return false
-      }
-    }
-    return true
-  }
-
   async build(): Promise<{ name: string; buf: Buffer }> {
-    if (!this.validateOptions()) {
-      throw new Error('Failed to validate')
-    }
-    this.#normalizeOptions()
     this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack_icon.png',
@@ -96,13 +80,6 @@ export class BedrockBuilder extends PackBuilder {
       modules: this.moduleNameToInfo('resource'),
     })
     return result
-  }
-
-  #normalizeOptions(): void {
-    const options = this.options
-    options.outputName = `${
-      options.outputName || this.config.defaultFileName
-    }.${options.type}`
   }
 
   async #addLanguage(fileList: string[]): Promise<{

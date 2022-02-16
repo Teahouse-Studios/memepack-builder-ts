@@ -3,4 +3,5 @@ export interface BuilderConfig {
   defaultPath?: string
   latestJEPackFormat: number
   legacyJEPackFormat: number
+  modPath?: string
 }

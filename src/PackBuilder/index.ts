@@ -1,2 +1,2 @@
-export { BedrockBuilder } from './bedrockBuilder'
-export { JavaBuilder } from './javaBuilder'
+export { BedrockBuilder } from './BedrockBuilder'
+export { JavaBuilder } from './JavaBuilder'

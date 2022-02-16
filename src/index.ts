@@ -11,6 +11,7 @@ import path from 'path'
 import { BedrockBuilder, JavaBuilder } from './PackBuilder'
 import { ModuleParser } from './ModuleParser'
 import { JEBuildOptions, BEBuildOptions } from './types'
+import { BedrockValidator, JavaValidator } from './OptionValidator'
 
 // name
 export const name = 'memepack-builder'
@@ -19,6 +20,7 @@ export { ModuleParser } from './ModuleParser'
 
 export class MemepackBuilder {
   #builder: BedrockBuilder | JavaBuilder
+  #validator: BedrockValidator | JavaValidator
   #moduleParser: ModuleParser
   log: string[]
 
@@ -27,7 +29,6 @@ export class MemepackBuilder {
     resourcePath,
     modulePath,
     buildOptions,
-    modPath,
   }: {
     platform: 'je' | 'be'
     resourcePath?: string
@@ -48,6 +49,10 @@ export class MemepackBuilder {
           moduleOverview: undefined,
           options: buildOptions as BEBuildOptions | undefined,
         })
+        this.#validator = new BedrockValidator(
+          buildOptions as BEBuildOptions,
+          this.#builder.config
+        )
         break
       case 'je':
         if (
@@ -59,13 +64,21 @@ export class MemepackBuilder {
         this.#builder = new JavaBuilder({
           resourcePath,
           moduleOverview: undefined,
-          modPath,
           options: buildOptions as JEBuildOptions | undefined,
         })
+        this.#validator = new JavaValidator(
+          buildOptions as JEBuildOptions,
+          this.#builder.config
+        )
         break
       default:
         throw new Error('Unknown platform.')
     }
+    if (!this.#validator.validateOptions()) {
+      this.log.concat(this.#validator.log)
+      throw new Error('Invalid options.')
+    }
+    this.#builder.options = this.#validator.normalizeOptions()
   }
 
   get options(): JEBuildOptions | BEBuildOptions {

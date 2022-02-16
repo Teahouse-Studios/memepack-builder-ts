@@ -1,65 +1,23 @@
-import fse from 'fs-extra'
+import fse, { readJSON } from 'fs-extra'
 import path from 'path'
 import { JEBuildOptions, ModuleOverview, NameContentList } from '../types'
 import { ensureAscii, generateJSON, JSONToJELang } from '../LanguageGenerator'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
-  modPath: string
-
   constructor({
     resourcePath,
     moduleOverview,
-    modPath,
     options,
   }: {
     resourcePath?: string
     moduleOverview?: ModuleOverview
-    modPath?: string
     options?: JEBuildOptions
   } = {}) {
     super({ resourcePath, moduleOverview, options })
-    this.modPath = path.resolve(modPath || './mods')
-  }
-
-  validateOptions(): boolean {
-    const latestJEPackFormat = this.config.latestJEPackFormat
-    const legacyJEPackFormat = this.config.legacyJEPackFormat
-    const jeRequiredOptions = ['type', 'modules', 'mod', 'sfw', 'format']
-    const options = this.options
-    for (const option of jeRequiredOptions) {
-      if (!(option in options)) {
-        this.appendLog(`Warning: Missing required argument "${option}".`)
-        return false
-      }
-    }
-    // validate 'format' option
-    if (!options.format) {
-      options.format =
-        options.type === 'legacy' ? legacyJEPackFormat : latestJEPackFormat
-      this.appendLog(
-        `Warning: Did not specify "pack_format". Assuming value is "${options.format}".`
-      )
-    } else {
-      if (
-        (options.type === 'legacy' && options.format !== legacyJEPackFormat) ||
-        (['normal', 'compat'].includes(options.type) &&
-          options.format <= legacyJEPackFormat)
-      ) {
-        this.appendLog(
-          `Error: Type "${options.type}" does not match pack_format ${options.format}.`
-        )
-        return false
-      }
-    }
-    return true
   }
 
   async build(): Promise<{ name: string; buf: Buffer }> {
-    if (!this.validateOptions()) {
-      throw new Error('Failed to validate')
-    }
-    this.#normalizeOptions()
     this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack.png',
@@ -80,17 +38,16 @@ export class JavaBuilder extends PackBuilder {
       mainLanguageFile: 'assets/minecraft/lang/zh_meme.json',
       modulePath: this.moduleOverview.modulePath,
       modules: languageModules,
+      modFiles: Object.fromEntries(
+        await Promise.all(
+          Array.from(new Set(options.mod)).map(async (value) => [
+            value,
+            await readJSON(value),
+          ]) ?? []
+        )
+      ),
     })
     return result
-  }
-
-  #normalizeOptions(): void {
-    const options = this.options
-    if (options.mod) {
-      options.mod = options.mod.map((value) => {
-        return path.resolve(this.modPath, value)
-      })
-    }
   }
 
   async #addLanguage(fileList: string[]): Promise<{

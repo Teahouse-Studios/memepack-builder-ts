@@ -5,6 +5,7 @@
 
 import fse from 'fs-extra'
 import klaw from 'klaw'
+import _ from 'lodash'
 import path from 'path'
 import { createHash } from 'crypto'
 import { ZipFile } from 'yazl'
@@ -144,23 +145,11 @@ export class PackBuilder {
   }
 
   moduleNameToInfo(type: ModuleType): ModuleInfo[] {
-    return this.#checkExists(
-      this.options.modules[type],
-      this.moduleOverview.modules
+    return _.intersectionWith(
+      this.moduleOverview.modules,
+      this.options?.modules[type] || [],
+      (a, b) => a.name === b
     )
-  }
-
-  #checkExists(source: string[], check: ModuleInfo[]): ModuleInfo[] {
-    const res: ModuleInfo[] = []
-    for (const item of source) {
-      const target = check.find((value) => value.name === item)
-      if (!target) {
-        this.appendLog(`Warning: Module "${item}" does not exist, skipping.`)
-        continue
-      }
-      res.push(target)
-    }
-    return res
   }
 
   mergeCollectionIntoResource(): ModuleInfo[] {
@@ -172,14 +161,19 @@ export class PackBuilder {
     )
     const optCollections = this.options?.modules.collection || []
     const optResources = this.options?.modules.resource || []
-    const resultResources = new Set<ModuleInfo>(
-      this.#checkExists(optResources, resourceModules)
+    const resultResources = new Set(
+      _.intersectionWith(resourceModules, optResources, (a, b) => a.name === b)
     )
-    for (const { contains } of this.#checkExists(
+    for (const { contains } of _.intersectionWith(
+      collectionModules,
       optCollections,
-      collectionModules
+      (a, b) => a.name === b
     )) {
-      for (const item of this.#checkExists(contains || [], resourceModules)) {
+      for (const item of _.intersectionWith(
+        resourceModules,
+        contains ?? [],
+        (a, b) => a.name === b
+      )) {
         resultResources.add(item)
       }
     }
