@@ -1,4 +1,5 @@
 import path from 'path'
+import { Logger } from '../Logger'
 import { BuilderConfig, JEBuildOptions } from '../types'
 import { BaseValidator } from './base'
 
@@ -13,23 +14,11 @@ export class JavaValidator extends BaseValidator {
     this.config = config
   }
 
-  get log(): string[] {
-    return this.#logs
-  }
-
-  #appendLog(entry: string | string[]): void {
-    if (Array.isArray(entry)) {
-      this.#logs = this.#logs.concat(entry)
-    } else {
-      this.#logs.push(entry)
-    }
-  }
-
   validateOptions(): boolean {
     const jeRequiredOptions = ['type', 'modules', 'mod', 'sfw', 'format']
     for (const option of jeRequiredOptions) {
       if (!(option in this.options)) {
-        this.#appendLog(`Warning: Missing required argument "${option}".`)
+        Logger.appendLog(`Warning: Missing required argument "${option}".`)
         return false
       }
     }
@@ -39,7 +28,7 @@ export class JavaValidator extends BaseValidator {
         this.options.type === 'legacy'
           ? this.config.legacyJEPackFormat
           : this.config.latestJEPackFormat
-      this.#appendLog(
+      Logger.appendLog(
         `Warning: Did not specify "pack_format". Assuming value is "${this.options.format}".`
       )
     } else {
@@ -49,7 +38,7 @@ export class JavaValidator extends BaseValidator {
         (['normal', 'compat'].includes(this.options.type) &&
           this.options.format <= this.config.legacyJEPackFormat)
       ) {
-        this.#appendLog(
+        Logger.appendLog(
           `Error: Type "${this.options.type}" does not match pack_format ${this.options.format}.`
         )
         return false

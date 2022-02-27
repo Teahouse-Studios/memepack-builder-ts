@@ -9,16 +9,11 @@ import {
 
 export class ModuleParser {
   modulePath: string
-  log: string[] = []
   moduleInfo: () => Promise<ModuleOverview>
 
   constructor(modulePath: string) {
     this.modulePath = path.resolve(modulePath)
     this.moduleInfo = this.validateModules
-  }
-
-  appendLog(entry: string | string[]): void {
-    this.log.push(...entry)
   }
 
   async validateModules(): Promise<ModuleOverview> {

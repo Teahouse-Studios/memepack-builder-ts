@@ -12,17 +12,18 @@ import { BedrockBuilder, JavaBuilder } from './PackBuilder'
 import { ModuleParser } from './ModuleParser'
 import { JEBuildOptions, BEBuildOptions } from './types'
 import { BedrockValidator, JavaValidator } from './OptionValidator'
+import { Logger } from './Logger'
 
 // name
 export const name = 'memepack-builder'
 export { BedrockBuilder, JavaBuilder } from './PackBuilder'
 export { ModuleParser } from './ModuleParser'
+export { Logger } from './Logger'
 
 export class MemepackBuilder {
   #builder: BedrockBuilder | JavaBuilder
   #validator: BedrockValidator | JavaValidator
   #moduleParser: ModuleParser
-  log: string[]
 
   constructor({
     platform,
@@ -36,9 +37,7 @@ export class MemepackBuilder {
     buildOptions?: JEBuildOptions | BEBuildOptions
     modPath?: string
   }) {
-    this.log = []
     this.#moduleParser = new ModuleParser(modulePath || './modules')
-    this.log.push(...this.#moduleParser.log)
     switch (platform) {
       case 'be':
         if (buildOptions && !['mcpack', 'zip'].includes(buildOptions.type)) {
@@ -75,7 +74,6 @@ export class MemepackBuilder {
         throw new Error('Unknown platform.')
     }
     if (!this.#validator.validateOptions()) {
-      this.log.concat(this.#validator.log)
       throw new Error('Invalid options.')
     }
     this.#builder.options = this.#validator.normalizeOptions()
@@ -91,11 +89,10 @@ export class MemepackBuilder {
 
   async build(clearLog = true): Promise<{ name: string; buf: Buffer }> {
     if (clearLog) {
-      this.log = []
+      Logger.clearLog()
     }
     this.#builder.moduleOverview = await this.#moduleParser.validateModules()
     const { name, buf } = await this.#builder.build()
-    this.log.push(...this.#builder.log)
     if (this.options.outputDir) {
       await this.#writeToPath(name, buf)
     }

@@ -19,6 +19,7 @@ import {
   ModuleType,
 } from '../types'
 import { defaultConfig } from '../constants'
+import { Logger } from '../Logger'
 
 export class PackBuilder {
   config: BuilderConfig
@@ -51,18 +52,6 @@ export class PackBuilder {
     }
   }
 
-  appendLog(entry: string | string[]): void {
-    if (Array.isArray(entry)) {
-      this.log = this.log.concat(entry)
-    } else {
-      this.log.push(entry)
-    }
-  }
-
-  clearLog(): void {
-    this.log = []
-  }
-
   async build(
     files: string[] = [],
     content: Record<string, string> = {},
@@ -79,10 +68,9 @@ export class PackBuilder {
     } catch (e) {
       void 0
     }
-    this.clearLog()
     excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
-    this.appendLog(`Building pack...`)
+    Logger.appendLog(`Building pack...`)
     const zipFile = new ZipFile()
     for (const k of files) {
       zipFile.addFile(path.resolve(this.resourcePath, k), k)
@@ -112,7 +100,7 @@ export class PackBuilder {
           zipFile.addFile(file, destPath)
           destFileList.push(destPath)
         } else {
-          this.appendLog(`Warning: Duplicated "${destPath}", skipping.`)
+          Logger.appendLog(`Warning: Duplicated "${destPath}", skipping.`)
         }
       }
     }
@@ -138,7 +126,7 @@ export class PackBuilder {
               `.${hash.digest('hex').slice(0, 7)}.$1`
             )
           }
-          this.appendLog(`Successfully built ${name}.`)
+          Logger.appendLog(`Successfully built ${name}.`)
           r({ name, buf })
         })
     })

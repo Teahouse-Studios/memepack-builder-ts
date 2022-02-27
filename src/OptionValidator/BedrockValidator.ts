@@ -1,3 +1,4 @@
+import { Logger } from '../Logger'
 import { BEBuildOptions, BuilderConfig } from '../types'
 import { BaseValidator } from './base'
 
@@ -12,23 +13,11 @@ export class BedrockValidator extends BaseValidator {
     this.config = config
   }
 
-  get log(): string[] {
-    return this.#logs
-  }
-
-  #appendLog(entry: string | string[]): void {
-    if (Array.isArray(entry)) {
-      this.#logs = this.#logs.concat(entry)
-    } else {
-      this.#logs.push(entry)
-    }
-  }
-
   validateOptions(): boolean {
     const beRequiredOptions = ['type', 'compatible', 'modules', 'hash']
     for (const option of beRequiredOptions) {
       if (!(option in this.options)) {
-        this.#appendLog(`Warning: Missing required argument "${option}".`)
+        Logger.appendLog(`Warning: Missing required argument "${option}".`)
       }
     }
     return true
