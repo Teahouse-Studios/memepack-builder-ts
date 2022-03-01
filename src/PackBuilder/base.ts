@@ -66,7 +66,7 @@ export class PackBuilder {
         { encoding: 'utf8' }
       )
     } catch (e) {
-      void 0
+      Logger.appendLog('No config file found. Using default config.')
     }
     excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
