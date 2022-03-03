@@ -29,6 +29,10 @@ Returns a `Promise` which will return pack name and content (as a `Buffer`) when
 
 Maps to internal builder's options.
 
+### `class Logger`
+
+Stores build logs. Cannot be initialized.
+
 #### `Logger.log: string[]`
 
 Build logs.
