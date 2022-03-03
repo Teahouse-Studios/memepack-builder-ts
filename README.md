@@ -29,7 +29,7 @@ Returns a `Promise` which will return pack name and content (as a `Buffer`) when
 
 Maps to internal builder's options.
 
-#### `MemepackBuilder.log: string[]`
+#### `Logger.log: string[]`
 
 Build logs.
 
@@ -47,13 +47,14 @@ const options = {
   sfw: true,
   format: 7,
   hash: true,
+  outputDir: '/path/to/output/directory', // if set, a file with computed name will be written to this directory
 }
 const builder = new module.MemepackBuilder({
   platform: 'je',
-  resourcePath: '/path/to/resources/',
-  modulePath: '/path/to/modules/',
+  resourcePath: '/path/to/resources',
+  modulePath: '/path/to/modules',
   buildOptions: options,
-  modPath: '/path/to/mods/',
+  modPath: '/path/to/mods',
 })
 const { name, buf } = await builder.build()
 ```
