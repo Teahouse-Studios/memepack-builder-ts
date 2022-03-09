@@ -25,7 +25,7 @@ export class BedrockValidator extends BaseValidator {
 
   normalizeOptions(): BEBuildOptions {
     this.options.outputName = `${
-      this.options.outputName || this.config.defaultFileName
+      this.options.outputName || this.config.outputFileName
     }.${this.options.type}`
     return this.options
   }

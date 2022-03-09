@@ -32,15 +32,15 @@ export class LanguageGenerator {
   }
 
   async #getContent(p: string): Promise<Record<string, string>> {
-    if (await fse.pathExists(path.resolve(this.modulePath, p))) {
+    const realPath = path.resolve(this.resourcePath, p)
+    try {
       if (p.endsWith('.json')) {
-        return await fse.readJSON(path.resolve(this.modulePath, p))
+        return await fse.readJSON(realPath)
       } else {
-        return BELangToJSON(
-          await fse.readFile(path.resolve(this.modulePath, p), 'utf8')
-        )
+        return BELangToJSON(await fse.readFile(realPath, 'utf8'))
       }
-    } else {
+    } catch (e) {
+      console.error(e)
       return {}
     }
   }

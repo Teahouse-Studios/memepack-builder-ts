@@ -77,10 +77,15 @@ export class ModuleParser {
         // if it's a string, assuming file path
         case 'string':
           if (e !== '') {
-            content = await fse.readJSON(
-              path.resolve(this.modulePath, directory, e),
-              { encoding: 'utf8' }
-            )
+            try {
+              content = await fse.readJSON(
+                path.resolve(this.modulePath, directory, e),
+                { encoding: 'utf8' }
+              )
+            } catch (e) {
+              console.error(e)
+              content = {}
+            }
           }
           break
         // if it's an object, use it directly
@@ -101,10 +106,11 @@ export class ModuleParser {
   }
 
   async #readDefaultContent(filePath: string): Promise<any> {
-    if (await fse.pathExists(filePath)) {
+    try {
       return await fse.readJSON(filePath, { encoding: 'utf8' })
-    } else {
-      return undefined
+    } catch (e) {
+      console.error(e)
+      return {}
     }
   }
 }

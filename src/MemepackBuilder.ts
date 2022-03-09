@@ -73,7 +73,10 @@ export class MemepackBuilder {
     this.#builder.options = value
   }
 
-  async build(clearLog = true): Promise<{ filename: string; buf: Buffer }> {
+  async build({ clearLog }: { clearLog?: boolean } = {}): Promise<{
+    filename: string
+    buf: Buffer
+  }> {
     if (clearLog) {
       Logger.clearLog()
     }
