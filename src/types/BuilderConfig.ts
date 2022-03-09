@@ -1,6 +1,5 @@
 export interface BuilderConfig {
-  defaultFileName: string
-  defaultPath?: string
+  outputFileName: string
   latestJEPackFormat: number
   legacyJEPackFormat: number
   modPath?: string

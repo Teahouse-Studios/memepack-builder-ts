@@ -1,28 +1,28 @@
 import fse from 'fs-extra'
 import path from 'path'
 import { BELangToJSON } from '.'
-import { ModuleInfo, NameContentList } from '../types'
+import { ModuleInfo, LanguageMap } from '../types'
 
 export class LanguageGenerator {
   resourcePath: string
   mainLanguageFile: string
   modulePath: string
   modules: ModuleInfo[]
-  modFiles: NameContentList
-  #content: NameContentList = {}
+  modFiles: LanguageMap
+  #content: LanguageMap = new Map()
 
   constructor({
     resourcePath,
     mainLanguageFile,
     modulePath,
     modules = [],
-    modFiles = {},
+    modFiles = new Map(),
   }: {
     resourcePath: string
     mainLanguageFile: string
     modulePath: string
     modules?: ModuleInfo[]
-    modFiles?: NameContentList
+    modFiles?: LanguageMap
   }) {
     this.resourcePath = path.resolve(resourcePath)
     this.mainLanguageFile = mainLanguageFile
@@ -46,19 +46,17 @@ export class LanguageGenerator {
   }
 
   async mergeModules(): Promise<void> {
-    this.#content = {
-      [this.mainLanguageFile]: await this.#getContent(
-        path.resolve(this.resourcePath, this.mainLanguageFile)
-      ),
-    }
+    this.#content.set(
+      this.mainLanguageFile,
+      await this.#getContent(this.mainLanguageFile)
+    )
     for (const module of this.modules) {
       for (const modification of module.languageModification || []) {
-        if (!this.#content[modification.file]) {
-          this.#content[modification.file] = await this.#getContent(
-            modification.file
-          )
-        }
-        const entry = this.#content[modification.file]
+        this.#content.set(
+          modification.file,
+          await this.#getContent(modification.file)
+        )
+        const entry = this.#content.get(modification.file) ?? {}
         Object.assign(entry, modification.add)
         for (const k of modification.remove) {
           delete entry[k]
@@ -69,11 +67,11 @@ export class LanguageGenerator {
 
   async mergeMods(): Promise<void> {
     for (const mod in this.modFiles) {
-      Object.assign(this.#content[mod], this.modFiles[mod])
+      Object.assign(this.#content.get(mod) ?? {}, this.modFiles.get(mod) ?? {})
     }
   }
 
-  get content(): NameContentList {
+  get content(): LanguageMap {
     return this.#content
   }
 }

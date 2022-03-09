@@ -73,21 +73,21 @@ export class MemepackBuilder {
     this.#builder.options = value
   }
 
-  async build(clearLog = true): Promise<{ name: string; buf: Buffer }> {
+  async build(clearLog = true): Promise<{ filename: string; buf: Buffer }> {
     if (clearLog) {
       Logger.clearLog()
     }
     this.#builder.moduleOverview = await this.#moduleParser.validateModules()
-    const { name, buf } = await this.#builder.build()
+    const { filename, buf } = await this.#builder.build()
     if (this.options.outputDir) {
-      await this.#writeToPath(name, buf)
+      await this.#writeToPath(filename, buf)
     }
-    return { name, buf }
+    return { filename, buf }
   }
 
-  async #writeToPath(name: string, buf: Buffer): Promise<void> {
+  async #writeToPath(filename: string, buf: Buffer): Promise<void> {
     const p = path.resolve('.', this.options.outputDir || '')
     await fse.ensureDir(p)
-    await fse.writeFile(path.resolve(p, name), buf)
+    await fse.writeFile(path.resolve(p, filename), buf)
   }
 }

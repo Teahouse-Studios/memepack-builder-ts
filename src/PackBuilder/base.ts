@@ -18,7 +18,7 @@ import {
   ModuleInfo,
   ModuleType,
 } from '../types'
-import { defaultConfig } from '../constants'
+import defaultConfig from './defaultConfig.json'
 import { Logger } from '../Logger'
 
 export class PackBuilder {
@@ -52,12 +52,16 @@ export class PackBuilder {
     }
   }
 
-  async build(
-    files: string[] = [],
-    content: Record<string, string> = {},
-    excludedFiles: string[] = []
-  ): Promise<{
-    name: string
+  async build({
+    files,
+    content,
+    excludedFiles,
+  }: {
+    files: string[]
+    content: Map<string, string>
+    excludedFiles: string[]
+  }): Promise<{
+    filename: string
     buf: Buffer
   }> {
     try {
@@ -70,16 +74,14 @@ export class PackBuilder {
     }
     excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
-    Logger.appendLog(`Building pack...`)
+    Logger.appendLog('Building pack...')
     const zipFile = new ZipFile()
     for (const k of files) {
       zipFile.addFile(path.resolve(this.resourcePath, k), k)
     }
-    for (const k in content) {
-      if (content[k] !== '') {
-        zipFile.addBuffer(Buffer.from(content[k], 'utf8'), k, {
-          mtime: new Date(0),
-        })
+    for (const [k, v] of content) {
+      if (v !== '') {
+        zipFile.addBuffer(Buffer.from(v, 'utf8'), k, { mtime: new Date(0) })
       }
     }
     for (const module of this.mergeCollectionIntoResource()) {
@@ -118,16 +120,16 @@ export class PackBuilder {
         })
         .on('end', () => {
           const buf = Buffer.concat(bufs)
-          let name =
-            this.options.outputName || `${this.config.defaultFileName}.zip`
+          let filename =
+            this.options.outputName || `${this.config.outputFileName}.zip`
           if (this.options?.hash) {
-            name = name.replace(
+            filename = filename.replace(
               /\.(\w+)$/gi,
               `.${hash.digest('hex').slice(0, 7)}.$1`
             )
           }
-          Logger.appendLog(`Successfully built ${name}.`)
-          r({ name, buf })
+          Logger.appendLog(`Successfully built ${filename}.`)
+          r({ filename, buf })
         })
     })
   }

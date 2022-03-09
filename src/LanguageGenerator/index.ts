@@ -1,5 +1,5 @@
 import { LanguageGenerator } from './LanguageGenerator'
-import { ModuleInfo, NameContentList } from '../types'
+import { ModuleInfo, LanguageMap } from '../types'
 export { LanguageGenerator } from './LanguageGenerator'
 export {
   ensureAscii,
@@ -14,14 +14,14 @@ export async function generateJSON({
   mainLanguageFile,
   modulePath,
   modules = [],
-  modFiles = {},
+  modFiles = new Map(),
 }: {
   resourcePath: string
   mainLanguageFile: string
   modulePath: string
   modules?: ModuleInfo[]
-  modFiles?: NameContentList
-}): Promise<NameContentList> {
+  modFiles?: LanguageMap
+}): Promise<LanguageMap> {
   const generator = new LanguageGenerator({
     resourcePath,
     mainLanguageFile,
