@@ -67,9 +67,10 @@ export class LanguageGenerator {
     }
   }
 
+  // FIXME: this may not working as expected, maybe mod dir structure needs to be changed?
   async mergeMods(): Promise<void> {
-    for (const mod in this.modFiles) {
-      Object.assign(this.#content.get(mod) ?? {}, this.modFiles.get(mod) ?? {})
+    for (const [modName, modContent] of this.modFiles) {
+      Object.assign(this.#content.get(this.mainLanguageFile) ?? {}, modContent)
     }
   }
 
