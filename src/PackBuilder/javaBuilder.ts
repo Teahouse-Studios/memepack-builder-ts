@@ -1,6 +1,6 @@
 import fse, { readJSON } from 'fs-extra'
 import path from 'path'
-import { JEBuildOptions, ModuleOverview, NameContentList } from '../types'
+import { JEBuildOptions, LanguageMap, ModuleOverview } from '../types'
 import { ensureAscii, generateJSON, JSONToJELang } from '../LanguageGenerator'
 import { PackBuilder } from './base'
 
@@ -17,16 +17,20 @@ export class JavaBuilder extends PackBuilder {
     super({ resourcePath, moduleOverview, options })
   }
 
-  async build(): Promise<{ name: string; buf: Buffer }> {
+  async build(): Promise<{ filename: string; buf: Buffer }> {
     this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack.png',
       'LICENSE',
     ])
-    return super.build(fileList, contentList)
+    return super.build({
+      files: fileList,
+      content: contentList,
+      excludedFiles: [],
+    })
   }
 
-  async #getLanguageContent(): Promise<NameContentList> {
+  async #getLanguageMap(): Promise<LanguageMap> {
     const options = this.options
     const languageModules = this.moduleOverview.modules.filter((module) => {
       options.modules.resource.find(
@@ -52,38 +56,39 @@ export class JavaBuilder extends PackBuilder {
 
   async #addLanguage(fileList: string[]): Promise<{
     fileList: string[]
-    contentList: Record<string, string>
+    contentList: Map<string, string>
   }> {
-    const contentList: Record<string, string> = {}
-    const langContent = await this.#getLanguageContent()
+    const contentList: Map<string, string> = new Map()
+    const langContent = await this.#getLanguageMap()
     switch (this.options.type) {
       case 'normal':
         fileList.push('pack.mcmeta')
-        for (const k in langContent) {
-          contentList[k] = ensureAscii(JSON.stringify(langContent[k], null, 4))
+        for (const [k, v] of langContent) {
+          contentList.set(k, ensureAscii(JSON.stringify(v, null, 4)))
         }
         break
       case 'compat':
-        contentList['pack.mcmeta'] = JSON.stringify(
-          await this.#processMcMetaFile(),
-          null,
-          4
+        contentList.set(
+          'pack.mcmeta',
+          JSON.stringify(await this.#processMcMetaFile(), null, 4)
         )
-        for (const k in langContent) {
-          contentList[k.replace(/zh_meme\.json$/g, 'zh_cn.json')] = ensureAscii(
-            JSON.stringify(langContent[k], null, 4)
+        for (const [k, v] of langContent) {
+          contentList.set(
+            k.replace(/zh_meme\.json$/g, 'zh_cn.json'),
+            ensureAscii(JSON.stringify(v, null, 4))
           )
         }
         break
       case 'legacy':
-        contentList['pack.mcmeta'] = JSON.stringify(
-          await this.#processMcMetaFile(),
-          null,
-          4
+        contentList.set(
+          'pack.mcmeta',
+          JSON.stringify(await this.#processMcMetaFile(), null, 4)
         )
-        for (const k in langContent) {
-          contentList[k.replace(/zh_meme\.json$/g, 'zh_cn.lang')] =
-            JSONToJELang(langContent[k])
+        for (const [k, v] of langContent) {
+          contentList.set(
+            k.replace(/zh_meme\.json$/g, 'zh_cn.lang'),
+            JSONToJELang(v)
+          )
         }
         break
       default:

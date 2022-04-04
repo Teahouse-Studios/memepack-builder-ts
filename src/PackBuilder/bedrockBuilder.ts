@@ -4,7 +4,7 @@ import {
   BedrockTextureFile,
   BEBuildOptions,
   ModuleOverview,
-  NameContentList,
+  LanguageMap,
 } from '../types'
 import { JSONToBELang, generateJSON } from '../LanguageGenerator'
 import { PackBuilder } from './base'
@@ -25,22 +25,25 @@ export class BedrockBuilder extends PackBuilder {
     super({ resourcePath, moduleOverview, options })
   }
 
-  async build(): Promise<{ name: string; buf: Buffer }> {
+  async build(): Promise<{ filename: string; buf: Buffer }> {
     this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack_icon.png',
       'manifest.json',
     ])
-    contentList['textures/item_texture.json'] = await this.#getTexture(
-      'item_texture.json'
+    contentList.set(
+      'textures/item_texture.json',
+      await this.#getTexture('item_texture.json')
     )
-    contentList['textures/terrain_texture.json'] = await this.#getTexture(
-      'terrain_texture.json'
+    contentList.set(
+      'textures/terrain_texture.json',
+      await this.#getTexture('terrain_texture.json')
     )
-    return super.build(fileList, contentList, [
-      'item_texture.json',
-      'terrain_texture.json',
-    ])
+    return super.build({
+      files: fileList,
+      content: contentList,
+      excludedFiles: ['item_texture.json', 'terrain_texture.json'],
+    })
   }
 
   async #getTexture(textureFileName: string): Promise<string> {
@@ -72,7 +75,7 @@ export class BedrockBuilder extends PackBuilder {
     }
   }
 
-  async #getLanguageContent(): Promise<NameContentList> {
+  async #getLanguageMap(): Promise<LanguageMap> {
     const result = await generateJSON({
       resourcePath: this.resourcePath,
       mainLanguageFile: 'texts/zh_ME.lang',
@@ -84,20 +87,20 @@ export class BedrockBuilder extends PackBuilder {
 
   async #addLanguage(fileList: string[]): Promise<{
     fileList: string[]
-    contentList: Record<string, string>
+    contentList: Map<string, string>
   }> {
-    const contentList: Record<string, string> = {}
-    const langContent = await this.#getLanguageContent()
-    for (const k in langContent) {
+    const contentList: Map<string, string> = new Map()
+    const langContent = await this.#getLanguageMap()
+    for (const [k, v] of langContent) {
       if (k === 'texts/zh_ME.lang' && this.options.compatible) {
-        contentList['texts/zh_CN.lang'] = JSONToBELang(langContent[k])
+        contentList.set('texts/zh_CN.lang', JSONToBELang(v))
         fileList.push(
           'texts/language_names.json',
           'texts/languages.json',
           'texts/zh_CN.lang'
         )
       } else {
-        contentList[k] = JSONToBELang(langContent[k])
+        contentList.set(k, JSONToBELang(v))
       }
     }
     return {
