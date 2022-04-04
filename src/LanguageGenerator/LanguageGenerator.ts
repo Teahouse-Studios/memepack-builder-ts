@@ -52,10 +52,12 @@ export class LanguageGenerator {
     )
     for (const module of this.modules) {
       for (const modification of module.languageModification || []) {
-        this.#content.set(
-          modification.file,
-          await this.#getContent(modification.file)
-        )
+        if (!this.#content.has(modification.file)) {
+          this.#content.set(
+            modification.file,
+            await this.#getContent(modification.file)
+          )
+        }
         const entry = this.#content.get(modification.file) ?? {}
         Object.assign(entry, modification.add)
         for (const k of modification.remove) {
