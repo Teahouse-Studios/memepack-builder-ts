@@ -19,13 +19,9 @@ export class JavaBuilder extends PackBuilder {
 
   async build(): Promise<{ filename: string; buf: Buffer }> {
     this.mergeCollectionIntoResource()
-    const { fileList, contentList } = await this.#addLanguage([
-      'pack.png',
-      'LICENSE',
-    ])
     return super.build({
-      files: fileList,
-      content: contentList,
+      files: ['pack.png', 'LICENSE'],
+      content: await this.#getContentList(),
       excludedFiles: [],
     })
   }
@@ -54,15 +50,15 @@ export class JavaBuilder extends PackBuilder {
     return result
   }
 
-  async #addLanguage(fileList: string[]): Promise<{
-    fileList: string[]
-    contentList: Map<string, string>
-  }> {
+  async #getContentList(): Promise<Map<string, string>> {
     const contentList: Map<string, string> = new Map()
     const langContent = await this.#getLanguageMap()
     switch (this.options.type) {
       case 'normal':
-        fileList.push('pack.mcmeta')
+        contentList.set(
+          'pack.mcmeta',
+          JSON.stringify(await this.#processMcMetaFile(), null, 4)
+        )
         for (const [k, v] of langContent) {
           contentList.set(k, ensureAscii(JSON.stringify(v, null, 4)))
         }
@@ -94,10 +90,7 @@ export class JavaBuilder extends PackBuilder {
       default:
         break
     }
-    return {
-      fileList,
-      contentList,
-    }
+    return contentList
   }
 
   async #processMcMetaFile(): Promise<any> {
