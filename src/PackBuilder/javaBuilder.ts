@@ -1,7 +1,12 @@
 import fse, { readJSON } from 'fs-extra'
 import path from 'path'
 import { JEBuildOptions, LanguageMap, ModuleOverview } from '../types'
-import { ensureAscii, generateJSON, JSONToJELang } from '../LanguageGenerator'
+import {
+  ensureAscii,
+  generateJSON,
+  JELangToJSON,
+  JSONToJELang,
+} from '../LanguageGenerator'
 import { PackBuilder } from './base'
 
 export class JavaBuilder extends PackBuilder {
@@ -33,19 +38,21 @@ export class JavaBuilder extends PackBuilder {
         (value) => module.name === value && module.languageModification
       )
     })
+    const languageMap: LanguageMap = new Map()
+    for (const value of new Set(options.mod)) {
+      languageMap.set(
+        value,
+        value.endsWith('.json')
+          ? await readJSON(value)
+          : JELangToJSON((await fse.readFile(value)).toString('utf8'))
+      )
+    }
     const result = await generateJSON({
       resourcePath: this.resourcePath,
       mainLanguageFile: 'assets/minecraft/lang/zh_meme.json',
       modulePath: this.moduleOverview.modulePath,
       modules: languageModules,
-      modFiles: Object.fromEntries(
-        await Promise.all(
-          Array.from(new Set(options.mod)).map(async (value) => [
-            value,
-            await readJSON(value),
-          ]) ?? []
-        )
-      ),
+      modFiles: languageMap,
     })
     return result
   }
