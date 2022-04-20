@@ -1,4 +1,4 @@
-import fse from 'fs-extra'
+import fse, { existsSync } from 'fs-extra'
 import path from 'path'
 import {
   LanguageModificationFile,
@@ -94,10 +94,13 @@ export class ModuleParser {
           break
         // not present, check default path `${item.file}.${key}.json`
         case 'undefined':
-          content = await this.#readDefaultContent(
-            path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
-          )
-          break
+          {
+            const filePath = path.resolve(this.modulePath, directory, `${item.file}.${key}.json`)
+            if (existsSync(filePath)) {
+              content = await this.#readDefaultContent(filePath)
+            }
+            break
+          }
         default:
           break
       }
