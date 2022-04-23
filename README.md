@@ -4,65 +4,6 @@
 
 This library provides a builder for packing Memified Chinese Resourcepack.
 
-## Installation
-
-```bash
-# npm
-npm install memepack-builder
-# yarn
-yarn add memepack-builder
-```
-
-## Usage
-
-### `class MemepackBuilder({ platform: 'je' | 'be', resourcePath?: string, modulePath?: string, buildOptions?: JEBuildOptions | BEBuildOptions, modPath?: string })`
-
-Main wrapper class for building packs.
-
-#### `MemepackBuilder.build(clearLog = true): Promise<{ name: string; buf: Buffer }>`
-
-Build method. If `clearLog` is true, will clear previous build logs. Default is true.
-
-Returns a `Promise` which will return pack name and content (as a `Buffer`) when fulfilled.
-
-#### `MemepackBuilder.options: JEBuildOptions | BEBuildOptions`
-
-Maps to internal builder's options.
-
-### `class Logger`
-
-Stores build logs. Cannot be initialized.
-
-#### `Logger.log: string[]`
-
-Build logs.
-
-### Example
-
-```js
-const module = require('memepack-builder')
-const options = {
-  type: 'normal',
-  modules: {
-    resource: [],
-    collection: [],
-  },
-  mod: [],
-  sfw: true,
-  format: 7,
-  hash: true,
-  outputDir: '/path/to/output/directory', // if set, a file with computed name will be written to this directory
-}
-const builder = new module.MemepackBuilder({
-  platform: 'je',
-  resourcePath: '/path/to/resources',
-  modulePath: '/path/to/modules',
-  buildOptions: options,
-  modPath: '/path/to/mods',
-})
-const { name, buf } = await builder.build()
-```
-
 ## License
 
 > Copyright 2021 MysticNebula70 & Teahouse Studios

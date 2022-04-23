@@ -34,7 +34,7 @@ export class JavaBuilder extends PackBuilder {
   async #getLanguageMap(): Promise<LanguageMap> {
     const options = this.options
     const languageModules = this.moduleOverview.modules.filter((module) => {
-      options.modules.resource.find(
+      return options.modules.resource.find(
         (value) => module.name === value && module.languageModification
       )
     })
