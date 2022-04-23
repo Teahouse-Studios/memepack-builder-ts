@@ -30,6 +30,7 @@ export class BedrockBuilder extends PackBuilder {
     const { fileList, contentList } = await this.#addLanguage([
       'pack_icon.png',
       'manifest.json',
+      'credits/credits.json'
     ])
     contentList.set(
       'textures/item_texture.json',
@@ -94,13 +95,13 @@ export class BedrockBuilder extends PackBuilder {
     for (const [k, v] of langContent) {
       if (k === 'texts/zh_ME.lang' && this.options.compatible) {
         contentList.set('texts/zh_CN.lang', JSONToBELang(v))
+      } else {
+        contentList.set('texts/zh_ME.lang', JSONToBELang(v))
         fileList.push(
           'texts/language_names.json',
           'texts/languages.json',
           'texts/zh_CN.lang'
         )
-      } else {
-        contentList.set(k, JSONToBELang(v))
       }
     }
     return {
