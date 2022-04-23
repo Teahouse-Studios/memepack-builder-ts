@@ -1,14 +1,14 @@
 import path from 'path'
-import { Logger } from '../Logger'
-import { BuilderConfig, JEBuildOptions } from '../types'
+import { Logger } from '../../log'
+import { BuilderConfig, JavaBuildOptions } from '../../types'
 import { BaseValidator } from './base'
 
 export class JavaValidator extends BaseValidator {
-  options: JEBuildOptions
+  options: JavaBuildOptions
   config: BuilderConfig
   #logs: string[] = []
 
-  constructor(options: JEBuildOptions, config: BuilderConfig) {
+  constructor(options: JavaBuildOptions, config: BuilderConfig) {
     super()
     this.options = options
     this.config = config
@@ -47,7 +47,7 @@ export class JavaValidator extends BaseValidator {
     return true
   }
 
-  normalizeOptions(): JEBuildOptions {
+  normalizeOptions(): JavaBuildOptions {
     const options = this.options
     if (options.mod) {
       options.mod = options.mod.map((value) => {

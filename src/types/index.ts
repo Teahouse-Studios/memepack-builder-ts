@@ -1,5 +1,4 @@
 export * from './BedrockTextureFile'
 export * from './BuildOptions'
-export * from './BuilderConfig'
-export * from './LanguageGenerator'
-export * from './ModuleTypes'
+export * from './LanguageModification'
+export * from './Module'

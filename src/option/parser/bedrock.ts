@@ -1,13 +1,12 @@
-import { Logger } from '../Logger'
-import { BEBuildOptions, BuilderConfig } from '../types'
+import { Logger } from '../../log'
+import { BedrockBuildOptions, BuilderConfig } from '../../types'
 import { BaseValidator } from './base'
 
 export class BedrockValidator extends BaseValidator {
-  options: BEBuildOptions
+  options: BedrockBuildOptions
   config: BuilderConfig
-  #logs: string[] = []
 
-  constructor(options: BEBuildOptions, config: BuilderConfig) {
+  constructor(options: BedrockBuildOptions, config: BuilderConfig) {
     super()
     this.options = options
     this.config = config
@@ -23,7 +22,7 @@ export class BedrockValidator extends BaseValidator {
     return true
   }
 
-  normalizeOptions(): BEBuildOptions {
+  normalizeOptions(): BedrockBuildOptions {
     this.options.outputName = `${
       this.options.outputName || this.config.outputFileName
     }.${this.options.type}`

@@ -1,16 +1,16 @@
 export function ensureAscii(value: string): string {
   const arr: string[] = []
-  for (const char of value) {
+  for (let i = 0; i < value.length; i++) {
     arr.push(
-      char < '\u0080'
-        ? char
-        : `\\u${char.codePointAt(0)?.toString(16).padStart(4, '0')}`
+      value[i] < '\u00FF'
+        ? value[i]
+        : `\\u${value[i].charCodeAt(0).toString(16).padStart(4, '0')}`
     )
   }
   return arr.join('')
 }
 
-export function JELangToJSON(content: string): Record<string, string> {
+export function javaLangToJSON(content: string): Record<string, string> {
   const result: Record<string, string> = {}
   for (let value of content.replace(/\r\n/g, '\n').split('\n')) {
     value = value.replace(/#.*$/g, '').trimStart()
@@ -22,7 +22,7 @@ export function JELangToJSON(content: string): Record<string, string> {
   return result
 }
 
-export function BELangToJSON(content: string): Record<string, string> {
+export function bedrockLangToJSON(content: string): Record<string, string> {
   const result: Record<string, string> = {}
   for (let value of content.replace(/\r\n/g, '\n').split('\n')) {
     value = value.replace(/(?:##|\t).*$/g, '').trimStart()
@@ -34,13 +34,13 @@ export function BELangToJSON(content: string): Record<string, string> {
   return result
 }
 
-export function JSONToJELang(obj: Record<string, string>): string {
+export function JSONToJavaLang(obj: Record<string, string>): string {
   return Object.entries(obj)
     .map(([key, value]) => `${key}=${value}`)
     .join('\n')
 }
 
-export function JSONToBELang(obj: Record<string, string>): string {
+export function JSONToBedrockLang(obj: Record<string, string>): string {
   return Object.entries(obj)
     .map(([key, value]) => `${key}=${value}\t#`)
     .join('\n')

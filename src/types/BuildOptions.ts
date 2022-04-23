@@ -12,7 +12,7 @@ export interface BaseBuildOptions {
   hash?: boolean
 }
 
-export type JEBuildOptions = BaseBuildOptions & {
+export type JavaBuildOptions = BaseBuildOptions & {
   type: 'normal' | 'compat' | 'legacy'
 }
-export type BEBuildOptions = BaseBuildOptions & { type: 'mcpack' | 'zip' }
+export type BedrockBuildOptions = BaseBuildOptions & { type: 'mcpack' | 'zip' }
