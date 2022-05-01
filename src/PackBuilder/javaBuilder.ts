@@ -23,9 +23,9 @@ export class JavaBuilder extends PackBuilder {
   }
 
   async build(): Promise<{ filename: string; buf: Buffer }> {
-    this.mergeCollectionIntoResource()
     return super.build({
-      files: ['pack.png', 'LICENSE'],
+      files: ['pack.png', 'LICENSE',
+        'assets/minecraft/texts/credits.json'],
       content: await this.#getContentList(),
       excludedFiles: [],
     })

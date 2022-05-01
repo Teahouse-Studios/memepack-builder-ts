@@ -64,14 +64,14 @@ export class PackBuilder {
     filename: string
     buf: Buffer
   }> {
-    try {
-      this.config = await fse.readJSON(
-        path.resolve(homedir(), '.memepack-builder.json'),
-        { encoding: 'utf8' }
-      )
-    } catch (e) {
-      Logger.appendLog('No config file found. Using default config.')
-    }
+    // try {
+    //   this.config = await fse.readJSON(
+    //     path.resolve(homedir(), '.memepack-builder.json'),
+    //     { encoding: 'utf8' }
+    //   )
+    // } catch (e) {
+    //   Logger.appendLog('No config file found. Using default config.')
+    // }
     excludedFiles.push('add.json', 'remove.json', 'module_manifest.json')
     const modulePath = this.moduleOverview.modulePath
     Logger.appendLog('Building pack...')
@@ -85,6 +85,7 @@ export class PackBuilder {
       }
     }
     for (const module of this.mergeCollectionIntoResource()) {
+      console.log('for', module)
       const moduleDir = path.resolve(modulePath, module.dirName)
       const fileList: string[] = []
       for await (const item of klaw(moduleDir)) {

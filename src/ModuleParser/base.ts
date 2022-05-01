@@ -73,6 +73,7 @@ export class ModuleParser {
       )
     } else {
       const e = item[key]
+      // console.trace(item, key)
       switch (typeof e) {
         // if it's a string, assuming file path
         case 'string':
@@ -83,7 +84,7 @@ export class ModuleParser {
                 { encoding: 'utf8' }
               )
             } catch (e) {
-              console.error(e)
+              // console.error(e)
               content = {}
             }
           }
@@ -105,6 +106,7 @@ export class ModuleParser {
           break
       }
     }
+    console.trace(Object.keys(content).length, item, key,directory)
     return content
   }
 
@@ -112,7 +114,7 @@ export class ModuleParser {
     try {
       return await fse.readJSON(filePath, { encoding: 'utf8' })
     } catch (e) {
-      console.error(e)
+      // console.error(e)
       return {}
     }
   }
