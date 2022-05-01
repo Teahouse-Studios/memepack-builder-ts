@@ -26,7 +26,6 @@ export class BedrockBuilder extends PackBuilder {
   }
 
   async build(): Promise<{ filename: string; buf: Buffer }> {
-    this.mergeCollectionIntoResource()
     const { fileList, contentList } = await this.#addLanguage([
       'pack_icon.png',
       'manifest.json',
@@ -66,7 +65,7 @@ export class BedrockBuilder extends PackBuilder {
           ).texture_data
         )
       } catch (e) {
-        console.error(e)
+        // console.error(e)
       }
     }
     if (!Object.keys(texture.texture_data).length) {

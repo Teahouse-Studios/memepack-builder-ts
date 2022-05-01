@@ -40,7 +40,7 @@ export class LanguageGenerator {
         return BELangToJSON(await fse.readFile(realPath, 'utf8'))
       }
     } catch (e) {
-      console.error(e)
+      // console.error(e)
       return {}
     }
   }
