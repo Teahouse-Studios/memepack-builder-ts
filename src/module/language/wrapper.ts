@@ -1,4 +1,4 @@
-import { ModuleManifestWithDirectory } from '../../types'
+import { LanguageMap, ModuleManifestWithDirectory } from '../../types'
 import { LanguageExtractor } from './extractor'
 import { LanguageMerger } from './merger'
 
@@ -6,7 +6,7 @@ export async function getLanguageMapFromOptions(
   baseResourcePath: string,
   modulePath: string,
   selectedModules: ModuleManifestWithDirectory[]
-): Promise<Map<string, Map<string, string>>> {
+): Promise<LanguageMap> {
   const extractor = new LanguageExtractor({
     modulePath,
     selectedModules,

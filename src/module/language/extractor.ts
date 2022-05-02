@@ -1,13 +1,16 @@
 import fse from 'fs-extra'
 import path from 'path'
 import {
+  LanguageMap,
   LanguageModificationDefinition,
+  LanguageSet,
   ModuleManifestWithDirectory,
+  RawLanguage,
 } from '../../types'
 
 export class LanguageExtractor {
-  addMap: Map<string, Map<string, string>> = new Map()
-  removeSet: Map<string, Set<string>> = new Map()
+  addMap: LanguageMap = new Map()
+  removeSet: LanguageSet = new Map()
   modulePath: string
   selectedModules: ModuleManifestWithDirectory[]
 
@@ -23,8 +26,8 @@ export class LanguageExtractor {
   }
 
   async extractModification(): Promise<{
-    add: Map<string, Map<string, string>>
-    remove: Map<string, Set<string>>
+    add: LanguageMap
+    remove: LanguageSet
   }> {
     for (const module of this.selectedModules) {
       await this.getModuleModification(module)
@@ -68,7 +71,7 @@ export class LanguageExtractor {
     path: string
   }): Promise<void> {
     const addContent = new Map(
-      Object.entries((await fse.readJSON(path)) as Record<string, string>)
+      Object.entries((await fse.readJSON(path)) as RawLanguage)
     )
     const addEntry = this.addMap.get(file)
     if (!addEntry) {

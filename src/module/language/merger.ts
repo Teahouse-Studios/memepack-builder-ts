@@ -1,10 +1,16 @@
 import fse from 'fs-extra'
 import path from 'path'
 import { BASE_LANGUAGE_FILE } from '../..'
+import {
+  LanguageMap,
+  LanguageSet,
+  RawLanguage,
+  SingleLanguage,
+} from '../../types'
 
 export class LanguageMerger {
-  addMap: Map<string, Map<string, string>>
-  removeSet: Map<string, Set<string>>
+  addMap: LanguageMap
+  removeSet: LanguageSet
   resourcePath: string
 
   constructor({
@@ -13,8 +19,8 @@ export class LanguageMerger {
   }: {
     resourcePath: string
     modification: {
-      add: Map<string, Map<string, string>>
-      remove: Map<string, Set<string>>
+      add: LanguageMap
+      remove: LanguageSet
     }
   }) {
     this.addMap = add
@@ -22,7 +28,7 @@ export class LanguageMerger {
     this.resourcePath = resourcePath
   }
 
-  async mergeModification(): Promise<Map<string, Map<string, string>>> {
+  async mergeModification(): Promise<LanguageMap> {
     const result = new Map()
     await this.handleDefaultLanguageFile(result)
     await this.handleAddMap(result)
@@ -30,16 +36,12 @@ export class LanguageMerger {
     return result
   }
 
-  async handleDefaultLanguageFile(
-    languageMap: Map<string, Map<string, string>>
-  ): Promise<void> {
+  async handleDefaultLanguageFile(languageMap: LanguageMap): Promise<void> {
     const baseLanguageMap = await this.loadBaseFile(BASE_LANGUAGE_FILE)
     languageMap.set(BASE_LANGUAGE_FILE, baseLanguageMap)
   }
 
-  async handleAddMap(
-    languageMap: Map<string, Map<string, string>>
-  ): Promise<void> {
+  async handleAddMap(languageMap: LanguageMap): Promise<void> {
     for (const [file, addMap] of this.addMap) {
       const baseLanguageMap =
         languageMap.get(file) ??
@@ -51,9 +53,7 @@ export class LanguageMerger {
     }
   }
 
-  async handleRemoveSet(
-    languageMap: Map<string, Map<string, string>>
-  ): Promise<void> {
+  async handleRemoveSet(languageMap: LanguageMap): Promise<void> {
     for (const [file, removeSet] of this.removeSet) {
       const baseLanguageMap =
         languageMap.get(file) ??
@@ -65,9 +65,9 @@ export class LanguageMerger {
     }
   }
 
-  async loadBaseFile(path: string): Promise<Map<string, string>> {
+  async loadBaseFile(path: string): Promise<SingleLanguage> {
     try {
-      const content: Record<string, string> = await fse.readJSON(path)
+      const content: RawLanguage = await fse.readJSON(path)
       return new Map(Object.entries(content))
     } catch (error) {
       return new Map()

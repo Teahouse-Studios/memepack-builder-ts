@@ -1,6 +1,4 @@
 export interface BaseBuildOptions {
-  outputDir?: string
-  outputName?: string
   modules: {
     resource: string[]
     collection: string[]

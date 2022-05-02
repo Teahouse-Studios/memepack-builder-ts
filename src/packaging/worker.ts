@@ -1,10 +1,11 @@
 import { ZipFile } from 'yazl'
+import { ArchiveMap, LanguageMap } from '../types'
 
 export class PackagingWorker {
   baseResourcePath: string
-  languageMap: Map<string, Map<string, string>>
+  languageMap: LanguageMap
   excludedFiles: string[]
-  otherResources: Map<string, string>
+  otherResources: ArchiveMap
 
   constructor({
     baseResourcePath,
@@ -13,8 +14,8 @@ export class PackagingWorker {
     excludedFiles,
   }: {
     baseResourcePath: string
-    languageMap: Map<string, Map<string, string>>
-    otherResources?: Map<string, string>
+    languageMap: LanguageMap
+    otherResources?: ArchiveMap
     excludedFiles?: string[]
   }) {
     this.baseResourcePath = baseResourcePath
@@ -25,7 +26,7 @@ export class PackagingWorker {
 
   async pack(): Promise<Buffer> {
     const excludedFiles = [...this.excludedFiles, ...this.languageMap.keys()]
-    const otherResources: Map<string, string> = new Map()
+    const otherResources: ArchiveMap = new Map()
     for (const [key, value] of this.otherResources) {
       if (!excludedFiles.includes(key)) {
         otherResources.set(key, value)

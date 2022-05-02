@@ -1,8 +1,9 @@
+import { LanguageMap } from '../types'
 import { ModExtractor } from './extractor'
 import { ModMerger } from './merger'
 
 export async function mergeModsIntoLanguageMap(
-  languageMap: Map<string, Map<string, string>>,
+  languageMap: LanguageMap,
   {
     modDirectory,
     modFiles,
@@ -10,7 +11,7 @@ export async function mergeModsIntoLanguageMap(
     modDirectory: string
     modFiles: string[]
   }
-): Promise<Map<string, Map<string, string>>> {
+): Promise<LanguageMap> {
   const extractor = new ModExtractor({ modDirectory, modFiles })
   const modification = await extractor.extractMods()
 

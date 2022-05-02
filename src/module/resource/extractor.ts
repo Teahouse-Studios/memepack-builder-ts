@@ -1,13 +1,13 @@
 import klaw from 'klaw'
 import path from 'path'
 import { MODULE_MANIFEST_FILE_NAME } from '../..'
-import { ModuleManifestWithDirectory } from '../../types'
+import { ArchiveMap, ModuleManifestWithDirectory } from '../../types'
 
 export async function extractResources(
   modulePath: string,
   selectedModules: ModuleManifestWithDirectory[]
-): Promise<Map<string, string>> {
-  const result: Map<string, string> = new Map()
+): Promise<ArchiveMap> {
+  const result: ArchiveMap = new Map()
   for (const module of selectedModules) {
     const p = path.resolve(modulePath, module.directory)
     const excludedFiles = [MODULE_MANIFEST_FILE_NAME]

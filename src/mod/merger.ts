@@ -1,25 +1,25 @@
 import { BASE_LANGUAGE_FILE } from '..'
+import { LanguageMap, SingleLanguage } from '../types'
 
 export class ModMerger {
-  languageMap: Map<string, Map<string, string>>
-  modModification: Map<string, Map<string, string>>
+  languageMap: LanguageMap
+  modModification: LanguageMap
 
   constructor({
     languageMap,
     modModification,
   }: {
-    languageMap: Map<string, Map<string, string>>
-    modModification: Map<string, Map<string, string>>
+    languageMap: LanguageMap
+    modModification: LanguageMap
   }) {
     this.languageMap = languageMap
     this.modModification = modModification
   }
 
-  mergeModification(): Map<string, Map<string, string>> {
+  mergeModification(): LanguageMap {
     const result = new Map(this.languageMap)
     for (const modification of this.modModification.values()) {
-      const map: Map<string, string> =
-        result.get(BASE_LANGUAGE_FILE) ?? new Map()
+      const map: SingleLanguage = result.get(BASE_LANGUAGE_FILE) ?? new Map()
       for (const [key, value] of modification) {
         map.set(key, value)
       }
