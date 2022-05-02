@@ -2,9 +2,8 @@ import _ from 'lodash'
 import { Logger } from '../../log'
 import { JavaBuildOptions } from '../../types'
 
-export class JavaValidator {
+export class JavaOptionValidator {
   options: JavaBuildOptions
-  #logs: string[] = []
 
   constructor(options: JavaBuildOptions) {
     this.options = options

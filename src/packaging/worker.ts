@@ -33,7 +33,7 @@ export class PackagingWorker {
     }
     const zipFile = new ZipFile()
     for (const [key, value] of otherResources) {
-      zipFile.addFile(key, value)
+      zipFile.addFile(value, key)
     }
     for (const [key, value] of this.languageMap) {
       zipFile.addBuffer(

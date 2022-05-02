@@ -1,2 +1,2 @@
-export { BedrockValidator } from './bedrock'
-export { JavaValidator } from './java'
+export { BedrockOptionValidator } from './bedrock'
+export { JavaOptionValidator } from './java'

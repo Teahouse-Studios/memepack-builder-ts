@@ -1,8 +1,7 @@
 import fse from 'fs-extra'
 import path from 'path'
 import { ModuleManifest, ModuleOverview } from '../../types'
-
-const MANIFEST_FILE_NAME = 'module_manifest.json'
+import { MODULE_MANIFEST_FILE_NAME } from '../..'
 
 export class ModuleParser {
   modulePath: string
@@ -18,11 +17,12 @@ export class ModuleParser {
       modulePath: this.modulePath,
       modules: [],
     }
-    for (const { name: dirName } of (
+    const moduleDirectories = (
       await fse.readdir(this.modulePath, { withFileTypes: true })
-    ).filter((value) => value.isDirectory())) {
+    ).filter((value) => value.isDirectory())
+    for (const { name: dirName } of moduleDirectories) {
       const data: ModuleManifest = await fse.readJSON(
-        path.resolve(this.modulePath, dirName, MANIFEST_FILE_NAME),
+        path.resolve(this.modulePath, dirName, MODULE_MANIFEST_FILE_NAME),
         { encoding: 'utf8' }
       )
       overview.modules.push({ ...data, directory: dirName })

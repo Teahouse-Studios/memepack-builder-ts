@@ -1,1 +1,1 @@
-export * from './packaging'
+export * from './worker'

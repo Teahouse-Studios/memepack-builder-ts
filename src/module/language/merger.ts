@@ -26,7 +26,7 @@ export class LanguageMerger {
     const result = new Map()
     await this.handleDefaultLanguageFile(result)
     await this.handleAddMap(result)
-    await this.handleRemoveMap(result)
+    await this.handleRemoveSet(result)
     return result
   }
 
@@ -51,7 +51,7 @@ export class LanguageMerger {
     }
   }
 
-  async handleRemoveMap(
+  async handleRemoveSet(
     languageMap: Map<string, Map<string, string>>
   ): Promise<void> {
     for (const [file, removeSet] of this.removeSet) {

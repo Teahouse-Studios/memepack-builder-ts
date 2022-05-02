@@ -2,7 +2,7 @@ import _ from 'lodash'
 import { Logger } from '../../log'
 import { BedrockBuildOptions } from '../../types'
 
-export class BedrockValidator {
+export class BedrockOptionValidator {
   options: BedrockBuildOptions
 
   constructor(options: BedrockBuildOptions) {
