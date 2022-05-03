@@ -10,6 +10,7 @@ export class BedrockOptionValidator {
   }
 
   validateOptions(): boolean {
+    if (this.options.platform !== 'bedrock') return false
     return this.checkRequiredOptions()
   }
 

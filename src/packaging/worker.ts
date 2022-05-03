@@ -6,21 +6,25 @@ export class PackagingWorker {
   languageMap: LanguageMap
   excludedFiles: string[]
   otherResources: ArchiveMap
+  otherObjects: Record<string, string | Buffer | null>
 
   constructor({
     baseResourcePath,
     languageMap,
     otherResources,
+    otherObjects,
     excludedFiles,
   }: {
     baseResourcePath: string
     languageMap: LanguageMap
     otherResources?: ArchiveMap
+    otherObjects?: Record<string, string | Buffer | null>
     excludedFiles?: string[]
   }) {
     this.baseResourcePath = baseResourcePath
     this.languageMap = languageMap
     this.otherResources = otherResources ?? new Map()
+    this.otherObjects = otherObjects ?? {}
     this.excludedFiles = excludedFiles ?? []
   }
 
@@ -38,10 +42,25 @@ export class PackagingWorker {
     }
     for (const [key, value] of this.languageMap) {
       zipFile.addBuffer(
-        Buffer.from(JSON.stringify(mapToObject(value)), 'utf-8'),
-        key
+        Buffer.from(
+          JSON.stringify(Object.fromEntries(value), null, 4),
+          'utf-8'
+        ),
+        key,
+        { mtime: new Date(0) }
       )
     }
+    Object.entries(this.otherObjects)
+      .filter(([key, value]) => key && value && value !== '')
+      .forEach(([key, value]) => {
+        if (value instanceof Buffer) {
+          zipFile.addBuffer(value, key, { mtime: new Date(0) })
+        } else if (typeof value === 'string') {
+          zipFile.addBuffer(Buffer.from(value, 'utf-8'), key, {
+            mtime: new Date(0),
+          })
+        }
+      })
     zipFile.end()
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
@@ -58,12 +77,4 @@ export class PackagingWorker {
         })
     })
   }
-}
-
-const mapToObject = (map: Map<string, string>): Record<string, string> => {
-  const result: Record<string, string> = {}
-  for (const [key, value] of map) {
-    result[key] = value
-  }
-  return result
 }

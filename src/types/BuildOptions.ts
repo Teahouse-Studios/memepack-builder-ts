@@ -3,14 +3,17 @@ export interface BaseBuildOptions {
     resource: string[]
     collection: string[]
   }
-  mod?: string[]
-  format?: number
-  sfw?: boolean
-  compatible?: boolean
-  hash?: boolean
+  compatible: boolean
+  hash: boolean
 }
 
-export type JavaBuildOptions = BaseBuildOptions & {
-  type: 'normal' | 'compat' | 'legacy'
+export interface JavaBuildOptions extends BaseBuildOptions {
+  platform: 'java'
+  type: 'normal' | 'legacy'
+  format: number
+  mod: string[]
 }
-export type BedrockBuildOptions = BaseBuildOptions & { type: 'mcpack' | 'zip' }
+export interface BedrockBuildOptions extends BaseBuildOptions {
+  platform: 'bedrock'
+  type: 'normal'
+}

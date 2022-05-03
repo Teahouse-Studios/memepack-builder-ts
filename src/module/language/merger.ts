@@ -7,16 +7,20 @@ import {
   RawLanguage,
   SingleLanguage,
 } from '../../types'
+import { bedrockLangToJSON, javaLangToJSON } from '../../utils'
 
 export class LanguageMerger {
   addMap: LanguageMap
   removeSet: LanguageSet
   resourcePath: string
+  platfrom: 'bedrock' | 'java'
 
   constructor({
+    platform,
     resourcePath,
     modification: { add, remove },
   }: {
+    platform: 'bedrock' | 'java'
     resourcePath: string
     modification: {
       add: LanguageMap
@@ -26,6 +30,7 @@ export class LanguageMerger {
     this.addMap = add
     this.removeSet = remove
     this.resourcePath = resourcePath
+    this.platfrom = platform
   }
 
   async mergeModification(): Promise<LanguageMap> {
@@ -67,7 +72,14 @@ export class LanguageMerger {
 
   async loadBaseFile(path: string): Promise<SingleLanguage> {
     try {
-      const content: RawLanguage = await fse.readJSON(path)
+      let content: RawLanguage
+      if (path.endsWith('.json')) {
+        content = await fse.readJSON(path)
+      } else if (this.platfrom === 'bedrock') {
+        content = bedrockLangToJSON(await fse.readFile(path, 'utf8'))
+      } else {
+        content = javaLangToJSON(await fse.readFile(path, 'utf8'))
+      }
       return new Map(Object.entries(content))
     } catch (error) {
       return new Map()

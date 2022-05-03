@@ -10,17 +10,14 @@ export class JavaOptionValidator {
   }
 
   validateOptions(): boolean {
-    if (!this.checkRequiredOptions()) {
-      return false
-    }
-    if (!this.options.format) {
-      this.setDefaultFormatVersion()
-    }
+    if (this.options.platform !== 'java') return false
+    if (!this.checkRequiredOptions()) return false
+    if (!this.options.format) this.setDefaultFormatVersion()
     return this.checkFormatVersion()
   }
 
   checkRequiredOptions(): boolean {
-    const requiredOptions = ['type', 'modules', 'mod', 'sfw', 'format']
+    const requiredOptions = ['type', 'modules', 'mod', 'format']
     const incomingOptions = Object.keys(this.options)
     const missingOptions = _.difference(requiredOptions, incomingOptions)
     if (missingOptions.length > 0) {
@@ -46,15 +43,15 @@ export class JavaOptionValidator {
       this.options.type === 'legacy' && this.options.format === 3
     const normalTest =
       this.options.type === 'normal' &&
-      this.options.format &&
+      this.options.compatible === false &&
       this.options.format > 3
     const compatTest =
-      this.options.type === 'compat' &&
-      this.options.format &&
+      this.options.type === 'normal' &&
+      this.options.compatible === true &&
       this.options.format > 3
     if (!legacyTest && !normalTest && !compatTest) {
       Logger.appendLog(
-        `Error: Type "${this.options.type}" does not match pack_format ${this.options.format}.`
+        `Error: Build type "${this.options.type}" does not match pack_format ${this.options.format}.`
       )
       return false
     }
