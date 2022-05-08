@@ -43,11 +43,11 @@ export class JavaOptionValidator {
       this.options.type === 'legacy' && this.options.format === 3
     const normalTest =
       this.options.type === 'normal' &&
-     // this.options.compatible === false &&
+      this.options.compatible === false &&
       this.options.format > 3
     const compatTest =
       this.options.type === 'normal' &&
-     // this.options.compatible === true &&
+      this.options.compatible === true &&
       this.options.format > 3
     if (!legacyTest && !normalTest && !compatTest) {
       Logger.appendLog(
