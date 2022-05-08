@@ -20,7 +20,7 @@ export class JavaPackBuilder extends PackBuilder {
       return Promise.reject('Invalid options')
     }
     const selectedModules = this.getSelectedModules(options)
-    let languageMap = await this.#setJavaLanguageMap(
+    let languageMap = await this.#getJavaLanguageMap(
       selectedModules,
       options.compatible
     )
@@ -48,7 +48,7 @@ export class JavaPackBuilder extends PackBuilder {
     return { name: this.getPackName(buf), content: buf }
   }
 
-  async #setJavaLanguageMap(
+  async #getJavaLanguageMap(
     selectedModules: ModuleManifestWithDirectory[],
     isCompatibleMode: boolean
   ): Promise<LanguageMap> {
