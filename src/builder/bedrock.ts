@@ -37,7 +37,6 @@ export class BedrockPackBuilder extends PackBuilder {
     return { name: this.getPackName(buf), content: buf }
   }
 
-  // not used?
   async #getBedrockLanguageMap(
     selectedModules: ModuleManifestWithDirectory[]
   ): Promise<LanguageMap> {
