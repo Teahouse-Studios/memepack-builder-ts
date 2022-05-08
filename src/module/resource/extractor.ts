@@ -10,16 +10,16 @@ export async function extractResources(
   const result: ArchiveMap = new Map()
   for (const module of selectedModules) {
     const p = path.resolve(modulePath, module.directory)
-    const excludedFiles = [MODULE_MANIFEST_FILE_NAME]
+    const excludedFiles = [path.resolve(p, MODULE_MANIFEST_FILE_NAME)]
     for (const entry of module.languageModification ?? []) {
-      if (entry.add) excludedFiles.push(entry.add)
-      if (entry.remove) excludedFiles.push(entry.remove)
+      if (entry.add) excludedFiles.push(path.resolve(p, entry.add))
+      if (entry.remove) excludedFiles.push(path.resolve(p, entry.remove))
     }
     for await (const entry of klaw(p)) {
       if (excludedFiles.includes(entry.path)) continue
       if (entry.stats.isFile()) {
-        const filePath = path.relative(p, entry.path)
-        result.set(filePath, entry.path)
+        const archivePath = path.relative(p, entry.path)
+        result.set(archivePath, entry.path)
       }
     }
   }
