@@ -32,7 +32,7 @@ export class PackBuilder {
     this.modFiles = modFiles
   }
 
-  setSelectedModules(
+  getSelectedModules(
     options: JavaBuildOptions | BedrockBuildOptions
   ): ModuleManifestWithDirectory[] {
     return mergeCollectionIntoResource(this.parsedModules, {
@@ -41,7 +41,7 @@ export class PackBuilder {
     })
   }
 
-  async setOtherResources(
+  async getOtherResources(
     selectedModules: ModuleManifestWithDirectory[]
   ): Promise<ArchiveMap> {
     const resources = await extractResources(
@@ -52,7 +52,7 @@ export class PackBuilder {
     return resources
   }
 
-  setPackName(content: Buffer): string {
+  getPackName(content: Buffer): string {
     return createHash('sha256').update(content).digest('hex').slice(0, 8)
   }
 }

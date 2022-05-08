@@ -19,8 +19,8 @@ export class JavaPackBuilder extends PackBuilder {
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
     }
-    const selectedModules = this.setSelectedModules(options)
-    let languageMap = await this.setJavaLanguageMap(
+    const selectedModules = this.getSelectedModules(options)
+    let languageMap = await this.#setJavaLanguageMap(
       selectedModules,
       options.compatible
     )
@@ -30,12 +30,12 @@ export class JavaPackBuilder extends PackBuilder {
         modFiles: this.modFiles,
       })
     }
-    const otherResources = this.setJavaOtherResources(
-      await this.setOtherResources(selectedModules)
+    const otherResources = this.#getJavaOtherResources(
+      await this.getOtherResources(selectedModules)
     )
-    const otherObjects = await this.setJavaOtherObjects(options)
+    const otherObjects = await this.#getJavaOtherObjects(options)
     if (options.type === 'legacy') {
-      this.setJavaLegacyMode(languageMap, otherObjects)
+      this.#setJavaLegacyMode(languageMap, otherObjects)
       languageMap = new Map()
     }
     const packagingWorker = new PackagingWorker({
@@ -45,10 +45,10 @@ export class JavaPackBuilder extends PackBuilder {
       otherObjects,
     })
     const buf = await packagingWorker.pack()
-    return { name: this.setPackName(buf), content: buf }
+    return { name: this.getPackName(buf), content: buf }
   }
 
-  async setJavaLanguageMap(
+  async #setJavaLanguageMap(
     selectedModules: ModuleManifestWithDirectory[],
     isCompatibleMode: boolean
   ): Promise<LanguageMap> {
@@ -67,7 +67,7 @@ export class JavaPackBuilder extends PackBuilder {
     return result
   }
 
-  setJavaLegacyMode(
+  #setJavaLegacyMode(
     languageMap: LanguageMap,
     otherObjects: Record<string, string>
   ): void {
@@ -77,7 +77,7 @@ export class JavaPackBuilder extends PackBuilder {
     }
   }
 
-  setJavaOtherResources(resources: ArchiveMap): ArchiveMap {
+  #getJavaOtherResources(resources: ArchiveMap): ArchiveMap {
     resources.set('pack.png', `${this.baseResourcePath}/pack.png`)
     resources.set(
       'assets/minecraft/texts/credits.json',
@@ -86,7 +86,7 @@ export class JavaPackBuilder extends PackBuilder {
     return resources
   }
 
-  async setJavaOtherObjects(
+  async #getJavaOtherObjects(
     options: JavaBuildOptions
   ): Promise<Record<string, string>> {
     return {

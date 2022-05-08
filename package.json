@@ -2,16 +2,11 @@
   "name": "memepack-builder",
   "version": "0.1.0-beta.5",
   "description": "Build memified Minecraft resource pack",
-  "type": "module",
-  "exports": {
-    ".": "./dist/index.js",
-    "./builder": "./dist/builder/index.js",
-    "./module": "./dist/module/index.js"
-  },
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
+  "main": "dist/index.js",
   "scripts": {
     "watch": "tsc --watch",
     "build": "yarn clear && tsc",

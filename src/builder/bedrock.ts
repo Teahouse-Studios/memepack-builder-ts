@@ -18,12 +18,12 @@ export class BedrockPackBuilder extends PackBuilder {
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
     }
-    const selectedModules = this.setSelectedModules(options)
-    const otherResources = this.setBedrockOtherResources(
-      await this.setOtherResources(selectedModules),
+    const selectedModules = this.getSelectedModules(options)
+    const otherResources = this.#getBedrockOtherResources(
+      await this.getOtherResources(selectedModules),
       options.compatible
     )
-    const otherObjects = await this.setBedrockOtherObjects(
+    const otherObjects = await this.#getBedrockOtherObjects(
       selectedModules,
       options.compatible
     )
@@ -34,10 +34,11 @@ export class BedrockPackBuilder extends PackBuilder {
       otherObjects,
     })
     const buf = await packagingWorker.pack()
-    return { name: this.setPackName(buf), content: buf }
+    return { name: this.getPackName(buf), content: buf }
   }
 
-  async setBedrockLanguageMap(
+  // not used?
+  async #getBedrockLanguageMap(
     selectedModules: ModuleManifestWithDirectory[]
   ): Promise<LanguageMap> {
     return getLanguageMapFromOptions(
@@ -48,7 +49,7 @@ export class BedrockPackBuilder extends PackBuilder {
     )
   }
 
-  setBedrockOtherResources(
+  #getBedrockOtherResources(
     resources: ArchiveMap,
     isCompatibleMode: boolean
   ): ArchiveMap {
@@ -75,7 +76,7 @@ export class BedrockPackBuilder extends PackBuilder {
     return resources
   }
 
-  async setBedrockOtherObjects(
+  async #getBedrockOtherObjects(
     selectedModules: ModuleManifestWithDirectory[],
     isCompatibleMode: boolean
   ): Promise<Record<string, string>> {
