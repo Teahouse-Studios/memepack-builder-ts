@@ -15,7 +15,7 @@ export class BedrockOptionValidator {
   }
 
   checkRequiredOptions(): boolean {
-    const requiredOptions = ['type', 'compatible', 'modules', 'hash']
+    const requiredOptions = ['type', 'compatible', 'modules']
     const incomingOptions = Object.keys(this.options)
     const missingOptions = _.difference(requiredOptions, incomingOptions)
     if (missingOptions.length > 0) {

@@ -55,21 +55,21 @@ export class BedrockPackBuilder extends PackBuilder {
     resources.set('pack_icon.png', `${this.baseResourcePath}/pack_icon.png`)
     resources.set('manifest.json', `${this.baseResourcePath}/manifest.json`)
     resources.set(
-      'credits/credit.json',
-      `${this.baseResourcePath}/credits/credit.json`
+      'credits/credits.json',
+      `${this.baseResourcePath}/credits/credits.json`
     )
     if (!isCompatibleMode) {
       resources.set(
+        'texts/language_names.json',
         `${this.baseResourcePath}/texts/language_names.json`,
-        'texts/language_names.json'
       )
       resources.set(
+        'texts/languages.json',
         `${this.baseResourcePath}/texts/languages.json`,
-        'texts/languages.json'
       )
       resources.set(
+        'texts/zh_CN.lang',
         `${this.baseResourcePath}/texts/zh_CN.lang`,
-        'texts/zh_CN.lang'
       )
     }
     return resources
