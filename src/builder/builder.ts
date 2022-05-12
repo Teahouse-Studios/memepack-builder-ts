@@ -1,5 +1,4 @@
 import { createHash } from 'crypto'
-import { packName } from '..'
 import { extractResources } from '../module/resource'
 import {
   JavaBuildOptions,
@@ -53,8 +52,8 @@ export class PackBuilder {
     return resources
   }
 
-  getPackName(content: Buffer): string {
-    const hash = createHash('sha256').update(content).digest('hex').slice(0, 8)
-    return `${packName}.${hash}`
+  static getPackHash(content: Buffer): string {
+    const hash = createHash('sha256').update(content).digest('hex')
+    return hash
   }
 }

@@ -1,4 +1,5 @@
 import fse from 'fs-extra'
+import { deprecate } from 'util'
 import { getLanguageMapFromOptions, getBedrockTextureFile } from '../module'
 import { BedrockOptionValidator } from '../option'
 import { PackagingWorker } from '../packaging'
@@ -34,7 +35,12 @@ export class BedrockPackBuilder extends PackBuilder {
       otherObjects,
     })
     const buf = await packagingWorker.pack()
-    return { name: this.getPackName(buf), content: buf }
+    const result = {
+      name: deprecate(() => '', 'name is deprecated')(),
+      content: buf,
+      hash: PackBuilder.getPackHash(buf),
+    }
+    return result
   }
 
   async #getBedrockLanguageMap(
