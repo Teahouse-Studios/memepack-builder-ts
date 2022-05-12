@@ -1,26 +1,18 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { BASE_LANGUAGE_FILE } from '../..'
-import {
-  LanguageMap,
-  LanguageSet,
-  RawLanguage,
-  SingleLanguage,
-} from '../../types'
-import { bedrockLangToJSON, javaLangToJSON } from '../../utils'
+import { BEDROCK_BASE_LANGUAGE_FILE } from '~/constants'
+import { LanguageMap, LanguageSet, RawLanguage, SingleLanguage } from '~/types'
+import { bedrockLangToJSON } from '~/utils'
 
-export class LanguageMerger {
+export class BedrockLanguageMerger {
   addMap: LanguageMap
   removeSet: LanguageSet
   resourcePath: string
-  platfrom: 'bedrock' | 'java'
 
   constructor({
-    platform,
     resourcePath,
     modification: { add, remove },
   }: {
-    platform: 'bedrock' | 'java'
     resourcePath: string
     modification: {
       add: LanguageMap
@@ -30,20 +22,21 @@ export class LanguageMerger {
     this.addMap = add
     this.removeSet = remove
     this.resourcePath = resourcePath
-    this.platfrom = platform
   }
 
   async mergeModification(): Promise<LanguageMap> {
     const result = new Map()
-    await this.handleDefaultLanguageFile(result)
+    await this.handleBedrockDefaultLanguageFile(result)
     await this.handleAddMap(result)
     await this.handleRemoveSet(result)
     return result
   }
 
-  async handleDefaultLanguageFile(languageMap: LanguageMap): Promise<void> {
-    const baseLanguageMap = await this.loadBaseFile(BASE_LANGUAGE_FILE)
-    languageMap.set(BASE_LANGUAGE_FILE, baseLanguageMap)
+  async handleBedrockDefaultLanguageFile(
+    languageMap: LanguageMap
+  ): Promise<void> {
+    const baseLanguageMap = await this.loadBaseFile(BEDROCK_BASE_LANGUAGE_FILE)
+    languageMap.set(BEDROCK_BASE_LANGUAGE_FILE, baseLanguageMap)
   }
 
   async handleAddMap(languageMap: LanguageMap): Promise<void> {
@@ -73,12 +66,10 @@ export class LanguageMerger {
   async loadBaseFile(path: string): Promise<SingleLanguage> {
     try {
       let content: RawLanguage
-      if (path.endsWith('.json')) {
-        content = await fse.readJSON(path)
-      } else if (this.platfrom === 'bedrock') {
+      if (path.endsWith('.lang')) {
         content = bedrockLangToJSON(await fse.readFile(path, 'utf8'))
       } else {
-        content = javaLangToJSON(await fse.readFile(path, 'utf8'))
+        content = await fse.readJSON(path)
       }
       return new Map(Object.entries(content))
     } catch (error) {

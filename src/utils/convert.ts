@@ -1,4 +1,4 @@
-import { RawLanguage } from '../types'
+import { RawLanguage } from '~/types'
 
 export function ensureAscii(value: string): string {
   const arr: string[] = []

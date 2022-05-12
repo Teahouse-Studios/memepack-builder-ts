@@ -6,7 +6,7 @@ import {
   LanguageSet,
   ModuleManifestWithDirectory,
   RawLanguage,
-} from '../../types'
+} from '~/types'
 
 export class LanguageExtractor {
   addMap: LanguageMap = new Map()

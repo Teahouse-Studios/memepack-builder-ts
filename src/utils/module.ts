@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { ModuleManifestWithDirectory, ModuleOverview } from '../types'
+import { ModuleManifestWithDirectory, ModuleOverview } from '~/types'
 
 export function mergeCollectionIntoResource(
   moduleOverview: ModuleOverview,

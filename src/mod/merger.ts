@@ -1,5 +1,5 @@
-import { BASE_LANGUAGE_FILE } from '..'
-import { LanguageMap, SingleLanguage } from '../types'
+import { JAVA_BASE_LANGUAGE_FILE } from '~'
+import { LanguageMap, SingleLanguage } from '~/types'
 
 export class ModMerger {
   languageMap: LanguageMap
@@ -19,11 +19,12 @@ export class ModMerger {
   mergeModification(): LanguageMap {
     const result = new Map(this.languageMap)
     for (const modification of this.modModification.values()) {
-      const map: SingleLanguage = result.get(BASE_LANGUAGE_FILE) ?? new Map()
+      const map: SingleLanguage =
+        result.get(JAVA_BASE_LANGUAGE_FILE) ?? new Map()
       for (const [key, value] of modification) {
         map.set(key, value)
       }
-      result.set(BASE_LANGUAGE_FILE, map)
+      result.set(JAVA_BASE_LANGUAGE_FILE, map)
     }
     return result
   }

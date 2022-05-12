@@ -1,3 +1,3 @@
 export * from './extractor'
-export * from './merger'
+export * from './merger/java'
 export * from './wrapper'

@@ -1,8 +1,8 @@
 import { deprecate } from 'util'
-import { mergeModsIntoLanguageMap } from '../mod'
-import { getLanguageMapFromOptions, getMcMetaFile } from '../module'
-import { JavaOptionValidator } from '../option'
-import { PackagingWorker } from '../packaging'
+import { mergeModsIntoLanguageMap } from '~/mod'
+import { getLanguageMapFromOptions, getMcMetaFile } from '~/module'
+import { JavaOptionValidator } from '~/option'
+import { PackagingWorker } from '~/packaging'
 import {
   ArchiveMap,
   JavaBuildOptions,

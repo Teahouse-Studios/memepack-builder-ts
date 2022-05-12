@@ -1,14 +1,14 @@
-import fse from 'fs-extra'
 import { deprecate } from 'util'
-import { getLanguageMapFromOptions, getBedrockTextureFile } from '../module'
-import { BedrockOptionValidator } from '../option'
-import { PackagingWorker } from '../packaging'
+import { getLanguageMapFromOptions, getBedrockTextureFile } from '~/module'
+import { BedrockOptionValidator } from '~/option'
+import { PackagingWorker } from '~/packaging'
 import {
   BedrockBuildOptions,
   ModuleManifestWithDirectory,
   LanguageMap,
   ArchiveMap,
-} from '../types'
+} from '~/types'
+import { JSONToBedrockLang } from '~/utils'
 import { PackBuilder } from './builder'
 
 export class BedrockPackBuilder extends PackBuilder {
@@ -20,12 +20,14 @@ export class BedrockPackBuilder extends PackBuilder {
       return Promise.reject('Invalid options')
     }
     const selectedModules = this.getSelectedModules(options)
+    const languageMap = await this.#getBedrockLanguageMap(selectedModules)
     const otherResources = this.#getBedrockOtherResources(
       await this.getOtherResources(selectedModules),
       options.compatible
     )
     const otherObjects = await this.#getBedrockOtherObjects(
       selectedModules,
+      languageMap,
       options.compatible
     )
     const packagingWorker = new PackagingWorker({
@@ -83,6 +85,7 @@ export class BedrockPackBuilder extends PackBuilder {
 
   async #getBedrockOtherObjects(
     selectedModules: ModuleManifestWithDirectory[],
+    languageMap: LanguageMap,
     isCompatibleMode: boolean
   ): Promise<Record<string, string>> {
     const result: Record<string, string> = {
@@ -98,15 +101,12 @@ export class BedrockPackBuilder extends PackBuilder {
       ),
     }
     if (isCompatibleMode) {
-      result['texts/zh_CN.lang'] = await fse.readFile(
-        `${this.baseResourcePath}/texts/zh_ME.lang`,
-        'utf8'
-      )
-    } else {
-      result['texts/zh_ME.lang'] = await fse.readFile(
-        `${this.baseResourcePath}/texts/zh_ME.lang`,
-        'utf8'
-      )
+      const mainLanguage = languageMap.get('texts/zh_ME.lang') ?? new Map()
+      languageMap.set('texts/zh_CN.lang', mainLanguage)
+      languageMap.delete('texts/zh_ME.lang')
+    }
+    for (const [lang, langMap] of languageMap) {
+      result[lang] = JSONToBedrockLang(Object.fromEntries(langMap))
     }
     return result
   }

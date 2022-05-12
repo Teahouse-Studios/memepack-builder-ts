@@ -1,5 +1,5 @@
 import { ZipFile } from 'yazl'
-import { ArchiveMap, LanguageMap } from '../types'
+import { ArchiveMap, LanguageMap } from '~/types'
 
 export class PackagingWorker {
   baseResourcePath: string

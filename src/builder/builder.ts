@@ -1,13 +1,13 @@
 import { createHash } from 'crypto'
-import { extractResources } from '../module/resource'
+import { extractResources } from '~/module/resource'
 import {
   JavaBuildOptions,
   BedrockBuildOptions,
   ModuleOverview,
   ModuleManifestWithDirectory,
   ArchiveMap,
-} from '../types'
-import { mergeCollectionIntoResource } from '../utils'
+} from '~/types'
+import { mergeCollectionIntoResource } from '~/utils'
 
 export class PackBuilder {
   parsedModules: ModuleOverview
