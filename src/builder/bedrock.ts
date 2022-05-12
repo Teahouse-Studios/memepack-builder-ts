@@ -1,6 +1,9 @@
 import { deprecate } from 'util'
 import { BEDROCK_BASE_LANGUAGE_FILE } from '~/constants'
-import { getLanguageMapFromOptions, getBedrockTextureFile } from '~/module'
+import {
+  getBedrockLanguageMapFromOptions,
+  getBedrockTextureFile,
+} from '~/module'
 import { BedrockOptionValidator } from '~/option'
 import { PackagingWorker } from '~/packaging'
 import {
@@ -49,8 +52,7 @@ export class BedrockPackBuilder extends PackBuilder {
   async #getBedrockLanguageMap(
     selectedModules: ModuleManifestWithDirectory[]
   ): Promise<LanguageMap> {
-    return getLanguageMapFromOptions(
-      'bedrock',
+    return getBedrockLanguageMapFromOptions(
       this.baseResourcePath,
       this.parsedModules.modulePath,
       selectedModules

@@ -1,10 +1,8 @@
 import { LanguageMap, ModuleManifestWithDirectory } from '~/types'
 import { LanguageExtractor } from './extractor'
-import { BedrockLanguageMerger } from './merger'
-import { JavaLanguageMerger } from './merger/java'
+import { BedrockLanguageMerger, JavaLanguageMerger } from './merger'
 
-export async function getLanguageMapFromOptions(
-  platform: 'bedrock' | 'java',
+export async function getJavaLanguageMapFromOptions(
   baseResourcePath: string,
   modulePath: string,
   selectedModules: ModuleManifestWithDirectory[]
@@ -14,15 +12,26 @@ export async function getLanguageMapFromOptions(
     selectedModules,
   })
   const { add, remove } = await extractor.extractModification()
-  const merger =
-    platform === 'java'
-      ? new JavaLanguageMerger({
-          resourcePath: baseResourcePath,
-          modification: { add, remove },
-        })
-      : new BedrockLanguageMerger({
-          resourcePath: baseResourcePath,
-          modification: { add, remove },
-        })
+  const merger = new JavaLanguageMerger({
+    resourcePath: baseResourcePath,
+    modification: { add, remove },
+  })
+  return await merger.mergeModification()
+}
+
+export async function getBedrockLanguageMapFromOptions(
+  baseResourcePath: string,
+  modulePath: string,
+  selectedModules: ModuleManifestWithDirectory[]
+): Promise<LanguageMap> {
+  const extractor = new LanguageExtractor({
+    modulePath,
+    selectedModules,
+  })
+  const { add, remove } = await extractor.extractModification()
+  const merger = new BedrockLanguageMerger({
+    resourcePath: baseResourcePath,
+    modification: { add, remove },
+  })
   return await merger.mergeModification()
 }
