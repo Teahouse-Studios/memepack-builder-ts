@@ -1,4 +1,5 @@
 import { deprecate } from 'util'
+import { BEDROCK_BASE_LANGUAGE_FILE } from '~/constants'
 import { getLanguageMapFromOptions, getBedrockTextureFile } from '~/module'
 import { BedrockOptionValidator } from '~/option'
 import { PackagingWorker } from '~/packaging'
@@ -101,9 +102,10 @@ export class BedrockPackBuilder extends PackBuilder {
       ),
     }
     if (isCompatibleMode) {
-      const mainLanguage = languageMap.get('texts/zh_ME.lang') ?? new Map()
+      const mainLanguage =
+        languageMap.get(BEDROCK_BASE_LANGUAGE_FILE) ?? new Map()
       languageMap.set('texts/zh_CN.lang', mainLanguage)
-      languageMap.delete('texts/zh_ME.lang')
+      languageMap.delete(BEDROCK_BASE_LANGUAGE_FILE)
     }
     for (const [lang, langMap] of languageMap) {
       result[lang] = JSONToBedrockLang(Object.fromEntries(langMap))
