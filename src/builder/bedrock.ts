@@ -61,15 +61,15 @@ export class BedrockPackBuilder extends PackBuilder {
     if (!isCompatibleMode) {
       resources.set(
         'texts/language_names.json',
-        `${this.baseResourcePath}/texts/language_names.json`,
+        `${this.baseResourcePath}/texts/language_names.json`
       )
       resources.set(
         'texts/languages.json',
-        `${this.baseResourcePath}/texts/languages.json`,
+        `${this.baseResourcePath}/texts/languages.json`
       )
       resources.set(
         'texts/zh_CN.lang',
-        `${this.baseResourcePath}/texts/zh_CN.lang`,
+        `${this.baseResourcePath}/texts/zh_CN.lang`
       )
     }
     return resources
