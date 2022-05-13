@@ -6,11 +6,12 @@ import { ArchiveMap, ModuleManifestWithDirectory } from '../../types'
 export async function extractResources(
   modulePath: string,
   selectedModules: ModuleManifestWithDirectory[],
-  excludedFiles: string[] = []
+  excluded: string[] = []
 ): Promise<ArchiveMap> {
   const result: ArchiveMap = new Map()
   for (const module of selectedModules) {
     const p = path.resolve(modulePath, module.directory)
+    const excludedFiles = excluded.map((file) => path.resolve(p, file))
     excludedFiles.push(path.resolve(p, MODULE_MANIFEST_FILE_NAME))
     for (const entry of module.languageModification ?? []) {
       if (entry.add) excludedFiles.push(path.resolve(p, entry.add))
