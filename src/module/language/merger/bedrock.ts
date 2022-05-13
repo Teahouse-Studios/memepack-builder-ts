@@ -40,7 +40,9 @@ export class BedrockLanguageMerger {
   async handleBedrockDefaultLanguageFile(
     languageMap: LanguageMap
   ): Promise<void> {
-    const baseLanguageMap = await this.loadBaseFile(BEDROCK_BASE_LANGUAGE_FILE)
+    const baseLanguageMap = await this.loadBaseFile(
+      path.join(this.resourcePath, BEDROCK_BASE_LANGUAGE_FILE)
+    )
     languageMap.set(BEDROCK_BASE_LANGUAGE_FILE, baseLanguageMap)
   }
 

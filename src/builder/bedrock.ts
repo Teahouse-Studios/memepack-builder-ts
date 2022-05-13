@@ -18,7 +18,7 @@ import { PackBuilder } from './builder'
 export class BedrockPackBuilder extends PackBuilder {
   async build(
     options: BedrockBuildOptions
-  ): Promise<{ name: string; content: Buffer }> {
+  ): Promise<{ name: string; content: Buffer; hash: string }> {
     const optionValidator = new BedrockOptionValidator(options)
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')

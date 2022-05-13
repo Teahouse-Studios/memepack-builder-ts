@@ -38,7 +38,9 @@ export class JavaLanguageMerger {
   }
 
   async handleJavaDefaultLanguageFile(languageMap: LanguageMap): Promise<void> {
-    const baseLanguageMap = await this.loadBaseFile(JAVA_BASE_LANGUAGE_FILE)
+    const baseLanguageMap = await this.loadBaseFile(
+      path.join(this.resourcePath, JAVA_BASE_LANGUAGE_FILE)
+    )
     languageMap.set(JAVA_BASE_LANGUAGE_FILE, baseLanguageMap)
   }
 

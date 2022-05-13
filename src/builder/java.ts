@@ -15,7 +15,7 @@ import { PackBuilder } from './builder'
 export class JavaPackBuilder extends PackBuilder {
   async build(
     options: JavaBuildOptions
-  ): Promise<{ name: string; content: Buffer }> {
+  ): Promise<{ name: string; content: Buffer; hash: string }> {
     const optionValidator = new JavaOptionValidator(options)
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
