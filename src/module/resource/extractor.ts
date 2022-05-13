@@ -1,7 +1,7 @@
 import klaw from 'klaw'
 import path from 'path'
-import { MODULE_MANIFEST_FILE_NAME } from '~'
-import { ArchiveMap, ModuleManifestWithDirectory } from '~/types'
+import { MODULE_MANIFEST_FILE_NAME } from '../../constants'
+import { ArchiveMap, ModuleManifestWithDirectory } from '../../types'
 
 export async function extractResources(
   modulePath: string,

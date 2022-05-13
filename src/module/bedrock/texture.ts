@@ -4,7 +4,7 @@ import {
   BedrockTextureFile,
   BedrockTextureFileType,
   ModuleManifestWithDirectory,
-} from '~/types'
+} from '../../types'
 
 export async function getBedrockTextureFile(
   textureFileName: BedrockTextureFileType,

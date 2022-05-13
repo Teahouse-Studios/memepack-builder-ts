@@ -1,7 +1,7 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { LanguageMap, RawLanguage, SingleLanguage } from '~/types'
-import { javaLangToJSON } from '~/utils'
+import { LanguageMap, RawLanguage, SingleLanguage } from '../types'
+import { javaLangToJSON } from '../utils'
 
 export class ModExtractor {
   modDirectory: string

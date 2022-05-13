@@ -1,8 +1,13 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { BEDROCK_BASE_LANGUAGE_FILE } from '~/constants'
-import { LanguageMap, LanguageSet, RawLanguage, SingleLanguage } from '~/types'
-import { bedrockLangToJSON } from '~/utils'
+import { BEDROCK_BASE_LANGUAGE_FILE } from '../../../constants'
+import {
+  LanguageMap,
+  LanguageSet,
+  RawLanguage,
+  SingleLanguage,
+} from '../../../types'
+import { bedrockLangToJSON } from '../../../utils'
 
 export class BedrockLanguageMerger {
   addMap: LanguageMap

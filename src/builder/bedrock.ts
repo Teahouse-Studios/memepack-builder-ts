@@ -1,18 +1,18 @@
 import { deprecate } from 'util'
-import { BEDROCK_BASE_LANGUAGE_FILE } from '~/constants'
+import { BEDROCK_BASE_LANGUAGE_FILE } from '../constants'
 import {
   getBedrockLanguageMapFromOptions,
   getBedrockTextureFile,
-} from '~/module'
-import { BedrockOptionValidator } from '~/option'
-import { PackagingWorker } from '~/packaging'
+} from '../module'
+import { BedrockOptionValidator } from '../option'
+import { PackagingWorker } from '../packaging'
 import {
   BedrockBuildOptions,
   ModuleManifestWithDirectory,
   LanguageMap,
   ArchiveMap,
-} from '~/types'
-import { JSONToBedrockLang } from '~/utils'
+} from '../types'
+import { JSONToBedrockLang } from '../utils'
 import { PackBuilder } from './builder'
 
 export class BedrockPackBuilder extends PackBuilder {

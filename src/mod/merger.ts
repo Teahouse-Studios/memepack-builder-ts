@@ -1,5 +1,5 @@
-import { JAVA_BASE_LANGUAGE_FILE } from '~'
-import { LanguageMap, SingleLanguage } from '~/types'
+import { JAVA_BASE_LANGUAGE_FILE } from '..'
+import { LanguageMap, SingleLanguage } from '../types'
 
 export class ModMerger {
   languageMap: LanguageMap

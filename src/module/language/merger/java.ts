@@ -1,8 +1,13 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { JAVA_BASE_LANGUAGE_FILE } from '~/constants'
-import { LanguageMap, LanguageSet, RawLanguage, SingleLanguage } from '~/types'
-import { javaLangToJSON } from '~/utils'
+import { JAVA_BASE_LANGUAGE_FILE } from '../../../constants'
+import {
+  LanguageMap,
+  LanguageSet,
+  RawLanguage,
+  SingleLanguage,
+} from '../../../types'
+import { javaLangToJSON } from '../../../utils'
 
 export class JavaLanguageMerger {
   addMap: LanguageMap

@@ -1,8 +1,8 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { ModuleManifest, ModuleOverview } from '~/types'
-import { MODULE_MANIFEST_FILE_NAME } from '~'
-import { Logger } from '~/log'
+import { ModuleManifest, ModuleOverview } from '../../types'
+import { MODULE_MANIFEST_FILE_NAME } from '../../constants'
+import { Logger } from '../../log'
 
 export class ModuleParser {
   modulePath: string

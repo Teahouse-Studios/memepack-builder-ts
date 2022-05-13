@@ -1,4 +1,4 @@
-import { LanguageMap } from '~/types'
+import { LanguageMap } from '../types'
 import { ModExtractor } from './extractor'
 import { ModMerger } from './merger'
 

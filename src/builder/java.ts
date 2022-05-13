@@ -1,15 +1,15 @@
 import { deprecate } from 'util'
-import { mergeModsIntoLanguageMap } from '~/mod'
-import { getJavaLanguageMapFromOptions, getMcMetaFile } from '~/module'
-import { JavaOptionValidator } from '~/option'
-import { PackagingWorker } from '~/packaging'
+import { mergeModsIntoLanguageMap } from '../mod'
+import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../module'
+import { JavaOptionValidator } from '../option'
+import { PackagingWorker } from '../packaging'
 import {
   ArchiveMap,
   JavaBuildOptions,
   LanguageMap,
   ModuleManifestWithDirectory,
-} from '~/types'
-import { JSONToJavaLang } from '~/utils'
+} from '../types'
+import { JSONToJavaLang } from '../utils'
 import { PackBuilder } from './builder'
 
 export class JavaPackBuilder extends PackBuilder {

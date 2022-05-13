@@ -1,4 +1,4 @@
-import { LanguageMap, ModuleManifestWithDirectory } from '~/types'
+import { LanguageMap, ModuleManifestWithDirectory } from '../../types'
 import { LanguageExtractor } from './extractor'
 import { BedrockLanguageMerger, JavaLanguageMerger } from './merger'
 

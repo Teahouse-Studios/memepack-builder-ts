@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import { Logger } from '~/log'
-import { BedrockBuildOptions } from '~/types'
+import { Logger } from '../../log'
+import { BedrockBuildOptions } from '../../types'
 
 export class BedrockOptionValidator {
   options: BedrockBuildOptions

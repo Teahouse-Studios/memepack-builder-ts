@@ -1,6 +1,6 @@
 import _ from 'lodash'
-import { Logger } from '~/log'
-import { JavaBuildOptions } from '~/types'
+import { Logger } from '../../log'
+import { JavaBuildOptions } from '../../types'
 
 export class JavaOptionValidator {
   options: JavaBuildOptions

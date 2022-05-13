@@ -1,6 +1,6 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { JavaBuildOptions } from '~/types'
+import { JavaBuildOptions } from '../../types'
 
 export async function getMcMetaFile(
   baseResourcePath: string,
