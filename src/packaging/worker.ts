@@ -11,9 +11,9 @@ export class PackagingWorker {
   constructor({
     baseResourcePath,
     languageMap,
-    otherResources,
-    otherObjects,
-    excludedFiles,
+    otherResources = new Map(),
+    otherObjects = {},
+    excludedFiles = [],
   }: {
     baseResourcePath: string
     languageMap: LanguageMap
@@ -23,9 +23,9 @@ export class PackagingWorker {
   }) {
     this.baseResourcePath = baseResourcePath
     this.languageMap = languageMap
-    this.otherResources = otherResources ?? new Map()
-    this.otherObjects = otherObjects ?? {}
-    this.excludedFiles = excludedFiles ?? []
+    this.otherResources = otherResources
+    this.otherObjects = otherObjects
+    this.excludedFiles = excludedFiles
   }
 
   async pack(): Promise<Buffer> {
