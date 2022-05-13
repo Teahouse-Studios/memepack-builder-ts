@@ -42,11 +42,13 @@ export class PackBuilder {
   }
 
   async getOtherResources(
-    selectedModules: ModuleManifestWithDirectory[]
+    selectedModules: ModuleManifestWithDirectory[],
+    excludedFiles: string[] = []
   ): Promise<ArchiveMap> {
     const resources = await extractResources(
       this.parsedModules.modulePath,
-      selectedModules
+      selectedModules,
+      excludedFiles
     )
     resources.set('LICENSE', `${this.baseResourcePath}/LICENSE`)
     return resources

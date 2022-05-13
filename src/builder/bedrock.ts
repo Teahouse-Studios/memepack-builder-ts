@@ -26,7 +26,10 @@ export class BedrockPackBuilder extends PackBuilder {
     const selectedModules = this.getSelectedModules(options)
     const languageMap = await this.#getBedrockLanguageMap(selectedModules)
     const otherResources = this.#getBedrockOtherResources(
-      await this.getOtherResources(selectedModules),
+      await this.getOtherResources(selectedModules, [
+        'textures/item_texture.json',
+        'textures/terrain_texture.json',
+      ]),
       options.compatible
     )
     const otherObjects = await this.#getBedrockOtherObjects(
