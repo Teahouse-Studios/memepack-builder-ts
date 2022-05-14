@@ -1,4 +1,3 @@
-import { deprecate } from 'util'
 import { mergeModsIntoLanguageMap } from '../mod'
 import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../module'
 import { JavaOptionValidator } from '../option'
@@ -15,7 +14,7 @@ import { PackBuilder } from './builder'
 export class JavaPackBuilder extends PackBuilder {
   async build(
     options: JavaBuildOptions
-  ): Promise<{ name: string; content: Buffer; hash: string }> {
+  ): Promise<{ content: Buffer; hash: string }> {
     const optionValidator = new JavaOptionValidator(options)
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
@@ -47,7 +46,6 @@ export class JavaPackBuilder extends PackBuilder {
     })
     const buf = await packagingWorker.pack()
     const result = {
-      name: deprecate(() => '', 'name is deprecated')(),
       content: buf,
       hash: PackBuilder.getPackHash(buf),
     }

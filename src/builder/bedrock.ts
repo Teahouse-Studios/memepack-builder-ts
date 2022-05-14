@@ -1,4 +1,3 @@
-import { deprecate } from 'util'
 import { BEDROCK_BASE_LANGUAGE_FILE } from '../constants'
 import {
   getBedrockLanguageMapFromOptions,
@@ -18,7 +17,7 @@ import { PackBuilder } from './builder'
 export class BedrockPackBuilder extends PackBuilder {
   async build(
     options: BedrockBuildOptions
-  ): Promise<{ name: string; content: Buffer; hash: string }> {
+  ): Promise<{ content: Buffer; hash: string }> {
     const optionValidator = new BedrockOptionValidator(options)
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
@@ -45,7 +44,6 @@ export class BedrockPackBuilder extends PackBuilder {
     })
     const buf = await packagingWorker.pack()
     const result = {
-      name: deprecate(() => '', 'name is deprecated')(),
       content: buf,
       hash: PackBuilder.getPackHash(buf),
     }
