@@ -1,3 +1,5 @@
+import klaw from 'klaw'
+import path from 'path'
 import { mergeModsIntoLanguageMap } from '../mod'
 import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../module'
 import { JavaOptionValidator } from '../option'
@@ -30,8 +32,9 @@ export class JavaPackBuilder extends PackBuilder {
         modFiles: this.modFiles,
       })
     }
-    const otherResources = this.#getJavaOtherResources(
-      await this.getOtherResources(selectedModules)
+    const otherResources = await this.#getJavaOtherResources(
+      await this.getOtherResources(selectedModules),
+      options.compatible
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
     if (options.type === 'legacy') {
@@ -80,12 +83,27 @@ export class JavaPackBuilder extends PackBuilder {
     }
   }
 
-  #getJavaOtherResources(resources: ArchiveMap): ArchiveMap {
-    resources.set('pack.png', `${this.baseResourcePath}/pack.png`)
-    resources.set(
-      'assets/minecraft/texts/credits.json',
-      `${this.baseResourcePath}/assets/minecraft/texts/credits.json`
-    )
+  async #getJavaOtherResources(
+    resources: ArchiveMap,
+    isCompatibleMode: boolean
+  ): Promise<ArchiveMap> {
+    const excluded = ['pack.mcmeta', 'assets/minecraft/lang/zh_meme.json']
+    for await (const item of klaw(this.baseResourcePath)) {
+      if (
+        item.stats.isFile() &&
+        excluded.every((e) => !item.path.endsWith(e))
+      ) {
+        const archivePath = path.relative(this.baseResourcePath, item.path)
+        resources.set(archivePath, item.path)
+      }
+    }
+    if (isCompatibleMode) {
+      const res = new Map(resources)
+      for (const [key, value] of res) {
+        resources.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
+        resources.delete(key)
+      }
+    }
     return resources
   }
 

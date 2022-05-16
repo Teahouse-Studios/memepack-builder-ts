@@ -1,3 +1,5 @@
+import klaw from 'klaw'
+import path from 'path'
 import { BEDROCK_BASE_LANGUAGE_FILE } from '../constants'
 import {
   getBedrockLanguageMapFromOptions,
@@ -24,7 +26,7 @@ export class BedrockPackBuilder extends PackBuilder {
     }
     const selectedModules = this.getSelectedModules(options)
     const languageMap = await this.#getBedrockLanguageMap(selectedModules)
-    const otherResources = this.#getBedrockOtherResources(
+    const otherResources = await this.#getBedrockOtherResources(
       await this.getOtherResources(selectedModules, [
         'textures/item_texture.json',
         'textures/terrain_texture.json',
@@ -60,16 +62,24 @@ export class BedrockPackBuilder extends PackBuilder {
     )
   }
 
-  #getBedrockOtherResources(
+  async #getBedrockOtherResources(
     resources: ArchiveMap,
     isCompatibleMode: boolean
-  ): ArchiveMap {
-    resources.set('pack_icon.png', `${this.baseResourcePath}/pack_icon.png`)
-    resources.set('manifest.json', `${this.baseResourcePath}/manifest.json`)
-    resources.set(
-      'credits/credits.json',
-      `${this.baseResourcePath}/credits/credits.json`
-    )
+  ): Promise<ArchiveMap> {
+    const excluded = [
+      'texts/language_names.json',
+      'texts/languages.json',
+      'texts/zh_CN.lang',
+    ]
+    for await (const item of klaw(this.baseResourcePath)) {
+      if (
+        item.stats.isFile() &&
+        excluded.every((e) => !item.path.endsWith(e))
+      ) {
+        const archivePath = path.relative(this.baseResourcePath, item.path)
+        resources.set(archivePath, item.path)
+      }
+    }
     if (!isCompatibleMode) {
       resources.set(
         'texts/language_names.json',

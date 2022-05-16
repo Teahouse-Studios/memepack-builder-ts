@@ -50,7 +50,6 @@ export class PackBuilder {
       selectedModules,
       excludedFiles
     )
-    resources.set('LICENSE', `${this.baseResourcePath}/LICENSE`)
     return resources
   }
 
