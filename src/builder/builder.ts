@@ -1,4 +1,6 @@
 import { createHash } from 'crypto'
+import klaw from 'klaw'
+import path from 'path'
 import { extractResources } from '../module/resource'
 import {
   JavaBuildOptions,
@@ -41,7 +43,23 @@ export class PackBuilder {
     })
   }
 
-  async getOtherResources(
+  async getBaseOtherResources(
+    excludedFiles: string[] = []
+  ): Promise<ArchiveMap> {
+    const resources: ArchiveMap = new Map()
+    for await (const item of klaw(this.baseResourcePath)) {
+      if (
+        item.stats.isFile() &&
+        excludedFiles.every((f) => !item.path.endsWith(f))
+      ) {
+        const archivePath = path.relative(this.baseResourcePath, item.path)
+        resources.set(archivePath, item.path)
+      }
+    }
+    return resources
+  }
+
+  async getModuleOtherResources(
     selectedModules: ModuleManifestWithDirectory[],
     excludedFiles: string[] = []
   ): Promise<ArchiveMap> {

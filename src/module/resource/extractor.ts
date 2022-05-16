@@ -6,19 +6,19 @@ import { ArchiveMap, ModuleManifestWithDirectory } from '../../types'
 export async function extractResources(
   modulePath: string,
   selectedModules: ModuleManifestWithDirectory[],
-  excluded: string[] = []
+  excludedFiles: string[] = []
 ): Promise<ArchiveMap> {
   const result: ArchiveMap = new Map()
+  excludedFiles.push(MODULE_MANIFEST_FILE_NAME)
   for (const module of selectedModules) {
     const p = path.resolve(modulePath, module.directory)
-    const excludedFiles = excluded.map((file) => path.resolve(p, file))
-    excludedFiles.push(path.resolve(p, MODULE_MANIFEST_FILE_NAME))
+    const excluded = excludedFiles.map((file) => path.resolve(p, file))
     for (const entry of module.languageModification ?? []) {
-      if (entry.add) excludedFiles.push(path.resolve(p, entry.add))
-      if (entry.remove) excludedFiles.push(path.resolve(p, entry.remove))
+      if (entry.add) excluded.push(path.resolve(p, entry.add))
+      if (entry.remove) excluded.push(path.resolve(p, entry.remove))
     }
     for await (const entry of klaw(p)) {
-      if (excludedFiles.includes(entry.path)) continue
+      if (excluded.includes(entry.path)) continue
       if (entry.stats.isFile()) {
         const archivePath = path.relative(p, entry.path)
         result.set(archivePath, entry.path)

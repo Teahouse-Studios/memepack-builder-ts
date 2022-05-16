@@ -1,5 +1,3 @@
-import klaw from 'klaw'
-import path from 'path'
 import { BEDROCK_BASE_LANGUAGE_FILE } from '../constants'
 import {
   getBedrockLanguageMapFromOptions,
@@ -26,16 +24,23 @@ export class BedrockPackBuilder extends PackBuilder {
     }
     const selectedModules = this.getSelectedModules(options)
     const languageMap = await this.#getBedrockLanguageMap(selectedModules)
-    const otherResources = await this.#getBedrockOtherResources(
-      await this.getOtherResources(selectedModules, [
-        'textures/item_texture.json',
-        'textures/terrain_texture.json',
-      ]),
-      options.compatible
+    const baseOtherResources = await this.getBaseOtherResources([
+      'texts/language_names.json',
+      'texts/languages.json',
+      'texts/zh_CN.lang',
+    ])
+    const moduleOtherResources = await this.getModuleOtherResources(
+      selectedModules,
+      ['textures/item_texture.json', 'textures/terrain_texture.json']
     )
     const otherObjects = await this.#getBedrockOtherObjects(
       selectedModules,
       languageMap,
+      options.compatible
+    )
+    const otherResources = this.#getBedrockOtherResources(
+      baseOtherResources,
+      moduleOtherResources,
       options.compatible
     )
     const packagingWorker = new PackagingWorker({
@@ -62,39 +67,30 @@ export class BedrockPackBuilder extends PackBuilder {
     )
   }
 
-  async #getBedrockOtherResources(
-    resources: ArchiveMap,
+  #getBedrockOtherResources(
+    baseOtherResources: ArchiveMap,
+    moduleOtherResources: ArchiveMap,
     isCompatibleMode: boolean
-  ): Promise<ArchiveMap> {
-    const excluded = [
-      'texts/language_names.json',
-      'texts/languages.json',
-      'texts/zh_CN.lang',
-    ]
-    for await (const item of klaw(this.baseResourcePath)) {
-      if (
-        item.stats.isFile() &&
-        excluded.every((e) => !item.path.endsWith(e))
-      ) {
-        const archivePath = path.relative(this.baseResourcePath, item.path)
-        resources.set(archivePath, item.path)
-      }
+  ): ArchiveMap {
+    const result = new Map(baseOtherResources)
+    for (const [key, value] of moduleOtherResources) {
+      result.set(key, value)
     }
     if (!isCompatibleMode) {
-      resources.set(
+      result.set(
         'texts/language_names.json',
         `${this.baseResourcePath}/texts/language_names.json`
       )
-      resources.set(
+      result.set(
         'texts/languages.json',
         `${this.baseResourcePath}/texts/languages.json`
       )
-      resources.set(
+      result.set(
         'texts/zh_CN.lang',
         `${this.baseResourcePath}/texts/zh_CN.lang`
       )
     }
-    return resources
+    return result
   }
 
   async #getBedrockOtherObjects(

@@ -1,5 +1,3 @@
-import klaw from 'klaw'
-import path from 'path'
 import { mergeModsIntoLanguageMap } from '../mod'
 import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../module'
 import { JavaOptionValidator } from '../option'
@@ -32,8 +30,16 @@ export class JavaPackBuilder extends PackBuilder {
         modFiles: this.modFiles,
       })
     }
-    const otherResources = await this.#getJavaOtherResources(
-      await this.getOtherResources(selectedModules),
+    const baseOtherResources = await this.getBaseOtherResources([
+      'pack.mcmeta',
+      'assets/minecraft/lang/zh_meme.json',
+    ])
+    const moduleOtherResources = await this.getModuleOtherResources(
+      selectedModules
+    )
+    const otherResources = this.#getJavaOtherResources(
+      baseOtherResources,
+      moduleOtherResources,
       options.compatible
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
@@ -83,28 +89,26 @@ export class JavaPackBuilder extends PackBuilder {
     }
   }
 
-  async #getJavaOtherResources(
-    resources: ArchiveMap,
+  #getJavaOtherResources(
+    baseOtherResources: ArchiveMap,
+    moduleOtherResources: ArchiveMap,
     isCompatibleMode: boolean
-  ): Promise<ArchiveMap> {
-    const excluded = ['pack.mcmeta', 'assets/minecraft/lang/zh_meme.json']
-    for await (const item of klaw(this.baseResourcePath)) {
-      if (
-        item.stats.isFile() &&
-        excluded.every((e) => !item.path.endsWith(e))
-      ) {
-        const archivePath = path.relative(this.baseResourcePath, item.path)
-        resources.set(archivePath, item.path)
-      }
+  ): ArchiveMap {
+    const result = new Map(baseOtherResources)
+    for (const [key, value] of moduleOtherResources) {
+      result.set(key, value)
     }
     if (isCompatibleMode) {
-      const res = new Map(resources)
-      for (const [key, value] of res) {
-        resources.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
-        resources.delete(key)
-      }
+      const keys = Array.from(result.keys())
+      keys
+        .filter((key) => key.endsWith('zh_meme.json'))
+        .forEach((key) => {
+          const value = result.get(key) ?? ''
+          result.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
+          result.delete(key)
+        })
     }
-    return resources
+    return result
   }
 
   async #getJavaOtherObjects(
