@@ -32,7 +32,7 @@ export class ModExtractor {
       return new Map(Object.entries((await fse.readJSON(path)) as RawLanguage))
     } else if (path.endsWith('.lang')) {
       return new Map(
-        Object.entries(javaLangToJSON((await fse.readFile(path)).toString()))
+        Object.entries(javaLangToJSON(await fse.readFile(path, 'utf-8')))
       )
     } else {
       throw new Error(`Unknown file type: ${path}`)

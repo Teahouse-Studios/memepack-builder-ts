@@ -10,6 +10,7 @@ import {
   ModuleManifestWithDirectory,
   LanguageMap,
   ArchiveMap,
+  SingleLanguage,
 } from '../types'
 import { JSONToBedrockLang } from '../utils'
 import { PackBuilder } from './builder'
@@ -111,7 +112,7 @@ export class BedrockPackBuilder extends PackBuilder {
       ),
     }
     if (isCompatibleMode) {
-      const mainLanguage =
+      const mainLanguage: SingleLanguage =
         languageMap.get(BEDROCK_BASE_LANGUAGE_FILE) ?? new Map()
       languageMap.set('texts/zh_CN.lang', mainLanguage)
       languageMap.delete(BEDROCK_BASE_LANGUAGE_FILE)

@@ -31,15 +31,13 @@ export class JavaOptionValidator {
   }
 
   setDefaultFormatVersion(): void {
-    if (!this.options.format) {
-      this.options.format =
-        this.options.type === 'legacy'
-          ? LEGACY_FORMAT_VERSION
-          : CURRENT_FORMAT_VERSION
-      Logger.appendLog(
-        `Warning: Did not specify "pack_format". Assuming value is "${this.options.format}".`
-      )
-    }
+    this.options.format =
+      this.options.type === 'legacy'
+        ? LEGACY_FORMAT_VERSION
+        : CURRENT_FORMAT_VERSION
+    Logger.appendLog(
+      `Warning: Did not specify "pack_format". Assuming value is "${this.options.format}".`
+    )
   }
 
   checkFormatVersion(): boolean {

@@ -13,8 +13,7 @@ export async function mergeModsIntoLanguageMap(
   }
 ): Promise<LanguageMap> {
   const extractor = new ModExtractor({ modDirectory, modFiles })
-  const modification = await extractor.extractMods()
-
-  const merger = new ModMerger({ languageMap, modModification: modification })
+  const modModification = await extractor.extractMods()
+  const merger = new ModMerger({ languageMap, modModification })
   return merger.mergeModification()
 }
