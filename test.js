@@ -3,7 +3,7 @@ const options1 = {
   type: 'normal',
   modules: {
     resource: [],
-    collection: ['version_1.16', 'choice_modules_1'],
+    collection: ['version_1.16', 'choice_modules_default'],
   },
   mod: [],
   sfw: true,
@@ -26,7 +26,7 @@ const options2 = {
   type: 'mcpack',
   modules: {
     resource: [],
-    collection: ['choice_modules_1'],
+    collection: ['choice_modules_default'],
   },
   compatible: false,
   outputDir: 'builds',
