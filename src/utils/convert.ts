@@ -43,3 +43,12 @@ export function JSONToBedrockLang(obj: RawLanguage): string {
     .map(([key, value]) => `${key}=${value}\t#`)
     .join('\n')
 }
+
+export function priorityToArray(content: string): string[] {
+  const entries = content
+    .replace(/\r\n/g, '\n')
+    .split('\n')
+    .map((line) => line.replace(/#.*$/g, '').trim())
+    .filter((line) => line !== '')
+  return entries
+}
