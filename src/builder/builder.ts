@@ -1,3 +1,4 @@
+import fse from 'fs-extra'
 import { createHash } from 'crypto'
 import klaw from 'klaw'
 import path from 'path'
@@ -9,7 +10,10 @@ import {
   ModuleManifestWithDirectory,
   ArchiveMap,
 } from '../types'
-import { mergeCollectionIntoResource } from '../utils'
+import { mergeCollectionIntoResource, priorityToArray } from '../utils'
+import _ from 'lodash'
+import { MODULE_PRIORITY_FILE_NAME } from '../constants'
+import { Logger } from '../log'
 
 export class PackBuilder {
   parsedModules: ModuleOverview
@@ -37,10 +41,40 @@ export class PackBuilder {
   getSelectedModules(
     options: JavaBuildOptions | BedrockBuildOptions
   ): ModuleManifestWithDirectory[] {
-    return mergeCollectionIntoResource(this.parsedModules, {
+    const modules = mergeCollectionIntoResource(this.parsedModules, {
       resource: options.modules.resource,
       collection: options.modules.collection,
     })
+
+    const priorityRaw = fse
+      .readFileSync(this.parsedModules.modulePath + MODULE_PRIORITY_FILE_NAME)
+      .toString('utf8')
+    const priority = priorityToArray(priorityRaw)
+    const sorted: ModuleManifestWithDirectory[] = []
+
+    priority.forEach((rank) => {
+      const manifest = modules.find((m) => m.name === rank)
+      if (manifest) {
+        sorted.push(manifest)
+      } else {
+        Logger.appendLog(
+          `Warning: Module ${rank} is in the priority rank but it cannot be found.`
+        )
+      }
+    })
+    const left = _.intersectionWith(modules, sorted, _.isEqual)
+
+    if (left.length > 0) {
+      Logger.appendLog(
+        `Warning: Module ${left
+          .map((m) => m.name)
+          .join(
+            ', '
+          )} is/are not in the priority rank and will be applied last.`
+      )
+    }
+
+    return [...sorted, ...left]
   }
 
   async getBaseOtherResources(
