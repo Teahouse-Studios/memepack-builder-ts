@@ -47,7 +47,9 @@ export class PackBuilder {
     })
 
     const priorityRaw = fse
-      .readFileSync(this.parsedModules.modulePath + MODULE_PRIORITY_FILE_NAME)
+      .readFileSync(
+        this.parsedModules.modulePath + '/' + MODULE_PRIORITY_FILE_NAME
+      )
       .toString('utf8')
     const priority = priorityToArray(priorityRaw)
     const sorted: ModuleManifestWithDirectory[] = []
@@ -56,13 +58,9 @@ export class PackBuilder {
       const manifest = modules.find((m) => m.name === rank)
       if (manifest) {
         sorted.push(manifest)
-      } else {
-        Logger.appendLog(
-          `Warning: Module ${rank} is in the priority rank but it cannot be found.`
-        )
       }
     })
-    const left = _.intersectionWith(modules, sorted, _.isEqual)
+    const left = modules.filter((m) => !priority.includes(m.name))
 
     if (left.length > 0) {
       Logger.appendLog(
