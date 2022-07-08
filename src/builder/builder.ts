@@ -11,7 +11,6 @@ import {
   ArchiveMap,
 } from '../types'
 import { mergeCollectionIntoResource, priorityToArray } from '../utils'
-import _ from 'lodash'
 import { MODULE_PRIORITY_FILE_NAME } from '../constants'
 import { Logger } from '../log'
 

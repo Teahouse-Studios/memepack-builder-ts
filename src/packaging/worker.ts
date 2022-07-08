@@ -51,7 +51,7 @@ export class PackagingWorker {
       )
     }
     Object.entries(this.otherObjects)
-      .filter(([key, value]) => key && value && value !== '')
+      .filter(([key, value]) => key && value)
       .forEach(([key, value]) => {
         if (value instanceof Buffer) {
           zipFile.addBuffer(value, key, { mtime: new Date(0) })
@@ -65,16 +65,8 @@ export class PackagingWorker {
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
       zipFile.outputStream
-        .on('readable', () => {
-          let buf: Buffer
-          while ((buf = zipFile.outputStream.read() as Buffer)) {
-            bufs.push(buf)
-          }
-        })
-        .on('end', () => {
-          const buf = Buffer.concat(bufs)
-          resolve(buf)
-        })
+        .on('data', (data: Buffer | string) => bufs.push(Buffer.from(data)))
+        .on('end', () => resolve(Buffer.concat(bufs)))
     })
   }
 }

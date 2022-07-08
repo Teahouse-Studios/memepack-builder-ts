@@ -29,6 +29,7 @@ export class BedrockPackBuilder extends PackBuilder {
       'texts/language_names.json',
       'texts/languages.json',
       'texts/zh_CN.lang',
+      'texts/zh_ME.lang',
     ])
     const moduleOtherResources = await this.getModuleOtherResources(
       selectedModules,
