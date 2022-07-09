@@ -37,19 +37,18 @@ export class PackBuilder {
     this.modFiles = modFiles
   }
 
-  getSelectedModules(
+  async getSelectedModules(
     options: JavaBuildOptions | BedrockBuildOptions
-  ): ModuleManifestWithDirectory[] {
+  ): Promise<ModuleManifestWithDirectory[]> {
     const modules = mergeCollectionIntoResource(this.parsedModules, {
       resource: options.modules.resource,
       collection: options.modules.collection,
     })
 
-    const priorityRaw = fse
-      .readFileSync(
-        this.parsedModules.modulePath + '/' + MODULE_PRIORITY_FILE_NAME
-      )
-      .toString('utf8')
+    const priorityRaw = await fse.readFile(
+      this.parsedModules.modulePath + '/' + MODULE_PRIORITY_FILE_NAME,
+      'utf-8'
+    )
     const priority = priorityToArray(priorityRaw)
     const sorted: ModuleManifestWithDirectory[] = []
 

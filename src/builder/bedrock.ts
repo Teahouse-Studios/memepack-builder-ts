@@ -23,7 +23,7 @@ export class BedrockPackBuilder extends PackBuilder {
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
     }
-    const selectedModules = this.getSelectedModules(options)
+    const selectedModules = await this.getSelectedModules(options)
     const languageMap = await this.#getBedrockLanguageMap(selectedModules)
     const baseOtherResources = await this.getBaseOtherResources([
       'texts/language_names.json',

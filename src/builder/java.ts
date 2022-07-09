@@ -7,9 +7,15 @@ import {
   JavaBuildOptions,
   LanguageMap,
   ModuleManifestWithDirectory,
+  SingleLanguage,
 } from '../types'
 import { JSONToJavaLang } from '../utils'
 import { PackBuilder } from './builder'
+import fse from 'fs-extra'
+import {
+  JAVA_BASE_LANGUAGE_FILE,
+  LEGACY_LANGUAGE_MAPPING_FILE,
+} from '../constants'
 
 export class JavaPackBuilder extends PackBuilder {
   async build(
@@ -19,7 +25,7 @@ export class JavaPackBuilder extends PackBuilder {
     if (!optionValidator.validateOptions()) {
       return Promise.reject('Invalid options')
     }
-    const selectedModules = this.getSelectedModules(options)
+    const selectedModules = await this.getSelectedModules(options)
     let languageMap = await this.#getJavaLanguageMap(
       selectedModules,
       options.compatible
@@ -44,7 +50,7 @@ export class JavaPackBuilder extends PackBuilder {
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
     if (options.type === 'legacy') {
-      this.#setJavaLegacyMode(languageMap, otherObjects)
+      await this.#setJavaLegacyMode(languageMap, otherObjects)
       languageMap = new Map()
     }
     const packagingWorker = new PackagingWorker({
@@ -79,10 +85,22 @@ export class JavaPackBuilder extends PackBuilder {
     return result
   }
 
-  #setJavaLegacyMode(
+  async #setJavaLegacyMode(
     languageMap: LanguageMap,
     otherObjects: Record<string, string>
-  ): void {
+  ): Promise<void> {
+    const languageKeyMapping: Record<string, string> = await fse.readJSON(
+      LEGACY_LANGUAGE_MAPPING_FILE
+    )
+    const mainLanguage: SingleLanguage =
+      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? new Map()
+    for (const [originalKey, mappedKey] of Object.entries(languageKeyMapping)) {
+      if (mainLanguage.has(originalKey)) {
+        const languageValue = mainLanguage.get(originalKey) ?? ''
+        mainLanguage.delete(languageValue)
+        mainLanguage.set(mappedKey, languageValue)
+      }
+    }
     for (const [key, value] of languageMap) {
       otherObjects[key.replace(/zh_meme\.json$/g, 'zh_cn.lang')] =
         JSONToJavaLang(Object.fromEntries(value))
