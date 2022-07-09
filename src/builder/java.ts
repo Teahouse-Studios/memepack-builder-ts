@@ -16,6 +16,7 @@ import {
   JAVA_BASE_LANGUAGE_FILE,
   LEGACY_LANGUAGE_MAPPING_FILE,
 } from '../constants'
+import { resolve } from 'path'
 
 export class JavaPackBuilder extends PackBuilder {
   async build(
@@ -46,7 +47,8 @@ export class JavaPackBuilder extends PackBuilder {
     const otherResources = this.#getJavaOtherResources(
       baseOtherResources,
       moduleOtherResources,
-      options.compatible
+      options.compatible,
+      options.type === "legacy"
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
     if (options.type === 'legacy') {
@@ -85,13 +87,22 @@ export class JavaPackBuilder extends PackBuilder {
     return result
   }
 
+  async #getLanguageKeyMapping(): Promise<Record<string, string>>{
+    const mappingIndex: string[] = await fse.readJSON(
+      resolve(this.baseResourcePath, '..', LEGACY_LANGUAGE_MAPPING_FILE)
+    )
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    return (await Promise.all(mappingIndex.map(v => fse.readJSON(
+      resolve(this.baseResourcePath, '../mappings/', v + '.json')
+    )))).flat()
+  }
+
   async #setJavaLegacyMode(
     languageMap: LanguageMap,
     otherObjects: Record<string, string>
   ): Promise<void> {
-    const languageKeyMapping: Record<string, string> = await fse.readJSON(
-      LEGACY_LANGUAGE_MAPPING_FILE
-    )
+    const languageKeyMapping = await this.#getLanguageKeyMapping()
     const mainLanguage: SingleLanguage =
       languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? new Map()
     for (const [originalKey, mappedKey] of Object.entries(languageKeyMapping)) {
@@ -102,7 +113,7 @@ export class JavaPackBuilder extends PackBuilder {
       }
     }
     for (const [key, value] of languageMap) {
-      otherObjects[key.replace(/zh_meme\.json$/g, 'zh_cn.lang')] =
+      otherObjects[key.replace(/zh_cn\.json$/g, 'zh_cn.lang')] =
         JSONToJavaLang(Object.fromEntries(value))
     }
   }
@@ -110,19 +121,28 @@ export class JavaPackBuilder extends PackBuilder {
   #getJavaOtherResources(
     baseOtherResources: ArchiveMap,
     moduleOtherResources: ArchiveMap,
-    isCompatibleMode: boolean
+    isCompatibleMode: boolean,
+    isLegacyMode: boolean
   ): ArchiveMap {
     const result = new Map(baseOtherResources)
     for (const [key, value] of moduleOtherResources) {
       result.set(key, value)
     }
-    if (isCompatibleMode) {
+    if (isCompatibleMode && !isLegacyMode) {
       const keys = Array.from(result.keys())
       keys
         .filter((key) => key.endsWith('zh_meme.json'))
         .forEach((key) => {
           const value = result.get(key) ?? ''
           result.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
+          result.delete(key)
+        })
+    }
+    if(isLegacyMode){
+      const keys = Array.from(result.keys())
+      keys
+        .filter((key) => key.endsWith('zh_meme.json'))
+        .forEach((key) => {
           result.delete(key)
         })
     }
