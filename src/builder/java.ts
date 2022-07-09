@@ -95,7 +95,7 @@ export class JavaPackBuilder extends PackBuilder {
     // @ts-ignore
     return (await Promise.all(mappingIndex.map(v => fse.readJSON(
       resolve(this.baseResourcePath, '../mappings/', v + '.json')
-    )))).flat()
+    )))).reduce((prev, item) => prev = {...prev, ...item}, {})
   }
 
   async #setJavaLegacyMode(
@@ -104,11 +104,11 @@ export class JavaPackBuilder extends PackBuilder {
   ): Promise<void> {
     const languageKeyMapping = await this.#getLanguageKeyMapping()
     const mainLanguage: SingleLanguage =
-      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? new Map()
-    for (const [originalKey, mappedKey] of Object.entries(languageKeyMapping)) {
-      if (mainLanguage.has(originalKey)) {
+      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? languageMap.get(JAVA_BASE_LANGUAGE_FILE.replace('zh_meme.json', 'zh_cn.json')) ?? new Map()
+    for (const [mappedKey, originalKey] of Object.entries(languageKeyMapping)) {
+      if (mappedKey !== originalKey && mainLanguage.has(originalKey)) {
         const languageValue = mainLanguage.get(originalKey) ?? ''
-        mainLanguage.delete(languageValue)
+        mainLanguage.delete(originalKey)
         mainLanguage.set(mappedKey, languageValue)
       }
     }
