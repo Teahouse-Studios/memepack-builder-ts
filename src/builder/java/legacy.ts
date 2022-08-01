@@ -1,24 +1,24 @@
-import { mergeModsIntoLanguageMap } from '../mod'
-import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../module'
-import { JavaOptionValidator } from '../option'
-import { PackagingWorker } from '../packaging'
+import { mergeModsIntoLanguageMap } from '../../mod'
+import { getJavaLanguageMapFromOptions, getMcMetaFile } from '../../module'
+import { JavaOptionValidator } from '../../option'
+import { PackagingWorker } from '../../packaging'
 import {
   ArchiveMap,
   JavaBuildOptions,
   LanguageMap,
   ModuleManifestWithDirectory,
   SingleLanguage,
-} from '../types'
-import { JSONToJavaLang } from '../utils'
-import { PackBuilder } from './builder'
+} from '../../types'
+import { JSONToJavaLang } from '../../utils'
+import { PackBuilder } from '../builder'
 import fse from 'fs-extra'
 import {
   JAVA_BASE_LANGUAGE_FILE,
   LEGACY_LANGUAGE_MAPPING_FILE,
-} from '../constants'
+} from '../../constants'
 import { resolve } from 'path'
 
-export class JavaPackBuilder extends PackBuilder {
+export class JavaLegacyPackBuilder extends PackBuilder {
   async build(
     options: JavaBuildOptions
   ): Promise<{ content: Buffer; hash: string }> {
@@ -48,13 +48,11 @@ export class JavaPackBuilder extends PackBuilder {
       baseOtherResources,
       moduleOtherResources,
       options.compatible,
-      options.type === "legacy"
+      options.type === 'legacy'
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
-    if (options.type === 'legacy') {
-      await this.#setJavaLegacyMode(languageMap, otherObjects)
-      languageMap = new Map()
-    }
+    await this.#setJavaLegacyMode(languageMap, otherObjects)
+    languageMap = new Map()
     const packagingWorker = new PackagingWorker({
       baseResourcePath: this.baseResourcePath,
       languageMap,
@@ -87,15 +85,21 @@ export class JavaPackBuilder extends PackBuilder {
     return result
   }
 
-  async #getLanguageKeyMapping(): Promise<Record<string, string>>{
+  async #getLanguageKeyMapping(): Promise<Record<string, string>> {
     const mappingIndex: string[] = await fse.readJSON(
       resolve(this.baseResourcePath, '..', LEGACY_LANGUAGE_MAPPING_FILE)
     )
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    return (await Promise.all(mappingIndex.map(v => fse.readJSON(
-      resolve(this.baseResourcePath, '../mappings/', v + '.json')
-    )))).reduce((prev, item) => prev = {...prev, ...item}, {})
+    return (
+      await Promise.all(
+        mappingIndex.map((v) =>
+          fse.readJSON(
+            resolve(this.baseResourcePath, '../mappings/', v + '.json')
+          )
+        )
+      )
+    ).reduce((prev, item) => (prev = { ...prev, ...item }), {})
   }
 
   async #setJavaLegacyMode(
@@ -104,7 +108,11 @@ export class JavaPackBuilder extends PackBuilder {
   ): Promise<void> {
     const languageKeyMapping = await this.#getLanguageKeyMapping()
     const mainLanguage: SingleLanguage =
-      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? languageMap.get(JAVA_BASE_LANGUAGE_FILE.replace('zh_meme.json', 'zh_cn.json')) ?? new Map()
+      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ??
+      languageMap.get(
+        JAVA_BASE_LANGUAGE_FILE.replace('zh_meme.json', 'zh_cn.json')
+      ) ??
+      new Map()
     for (const [mappedKey, originalKey] of Object.entries(languageKeyMapping)) {
       if (mappedKey !== originalKey && mainLanguage.has(originalKey)) {
         const languageValue = mainLanguage.get(originalKey) ?? ''
@@ -113,8 +121,9 @@ export class JavaPackBuilder extends PackBuilder {
       }
     }
     for (const [key, value] of languageMap) {
-      otherObjects[key.replace(/zh_cn\.json$/g, 'zh_cn.lang')] =
-        JSONToJavaLang(Object.fromEntries(value))
+      otherObjects[key.replace(/zh_cn\.json$/g, 'zh_cn.lang')] = JSONToJavaLang(
+        Object.fromEntries(value)
+      )
     }
   }
 
@@ -138,7 +147,7 @@ export class JavaPackBuilder extends PackBuilder {
           result.delete(key)
         })
     }
-    if(isLegacyMode){
+    if (isLegacyMode) {
       const keys = Array.from(result.keys())
       keys
         .filter((key) => key.endsWith('zh_meme.json'))
