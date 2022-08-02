@@ -15,7 +15,7 @@ import { PackBuilder } from '../builder'
 import fse from 'fs-extra'
 import {
   JAVA_BASE_LANGUAGE_FILE,
-  LEGACY_LANGUAGE_MAPPING_FILE,
+  LEGACY_MAPPING_INDEX_FILE,
 } from '../../constants'
 import { resolve } from 'path'
 
@@ -93,7 +93,7 @@ export class JavaLegacyPackBuilder extends PackBuilder {
 
   async #getLanguageKeyMapping(): Promise<Map<string, string>> {
     const mappingIndex: string[] = await fse.readJSON(
-      resolve(this.languageMappingPath, LEGACY_LANGUAGE_MAPPING_FILE)
+      resolve(this.languageMappingPath, LEGACY_MAPPING_INDEX_FILE)
     )
     const result: Map<string, string> = new Map()
     for (const i of mappingIndex) {
@@ -109,7 +109,7 @@ export class JavaLegacyPackBuilder extends PackBuilder {
 
   async #processLagacyMode(
     languageMap: LanguageMap,
-    otherObjects: Record<string, string>
+    otherObjects: Map<string, string>
   ) {
     const languageKeyMapping = await this.#getLanguageKeyMapping()
     const mainLanguage: SingleLanguage =
@@ -124,8 +124,10 @@ export class JavaLegacyPackBuilder extends PackBuilder {
     }
     languageMap.set('assets/minecraft/lang/zh_cn.lang', mainLanguage)
     for (const [key, value] of languageMap) {
-      otherObjects[key.replace(/zh_(?:cn|meme)\.json$/g, 'zh_cn.lang')] =
+      otherObjects.set(
+        key.replace(/zh_(?:cn|meme)\.json$/g, 'zh_cn.lang'),
         JSONToJavaLang(Object.fromEntries(value))
+      )
     }
   }
 
@@ -148,9 +150,12 @@ export class JavaLegacyPackBuilder extends PackBuilder {
 
   async #getJavaOtherObjects(
     options: JavaBuildOptions
-  ): Promise<Record<string, string>> {
-    return {
-      'pack.mcmeta': await getMcMetaFile(this.baseResourcePath, options),
-    }
+  ): Promise<Map<string, string>> {
+    const result: Map<string, string> = new Map()
+    result.set(
+      'pack.mcmeta',
+      await getMcMetaFile(this.baseResourcePath, options)
+    )
+    return result
   }
 }

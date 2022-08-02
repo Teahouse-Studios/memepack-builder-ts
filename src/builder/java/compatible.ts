@@ -93,9 +93,12 @@ export class JavaCompatiblePackBuilder extends PackBuilder {
 
   async #getJavaOtherObjects(
     options: JavaBuildOptions
-  ): Promise<Record<string, string>> {
-    return {
-      'pack.mcmeta': await getMcMetaFile(this.baseResourcePath, options),
-    }
+  ): Promise<Map<string, string>> {
+    const result: Map<string, string> = new Map()
+    result.set(
+      'pack.mcmeta',
+      await getMcMetaFile(this.baseResourcePath, options)
+    )
+    return result
   }
 }
