@@ -7,6 +7,7 @@ import {
   JavaBuildOptions,
   LanguageMap,
   ModuleManifestWithDirectory,
+  ModuleOverview,
   SingleLanguage,
 } from '../../types'
 import { JSONToJavaLang } from '../../utils'
@@ -19,6 +20,24 @@ import {
 import { resolve } from 'path'
 
 export class JavaLegacyPackBuilder extends PackBuilder {
+  languageMappingPath: string
+
+  constructor(
+    parsedModules: ModuleOverview,
+    baseResourcePath: string,
+    {
+      modDirectory,
+      modFiles,
+    }: {
+      modDirectory?: string
+      modFiles?: string[]
+    },
+    languageMappingPath: string
+  ) {
+    super(parsedModules, baseResourcePath, { modDirectory, modFiles })
+    this.languageMappingPath = languageMappingPath
+  }
+
   async build(
     options: JavaBuildOptions
   ): Promise<{ content: Buffer; hash: string }> {
@@ -27,10 +46,7 @@ export class JavaLegacyPackBuilder extends PackBuilder {
       return Promise.reject('Invalid options')
     }
     const selectedModules = await this.getSelectedModules(options)
-    let languageMap = await this.#getJavaLanguageMap(
-      selectedModules,
-      options.compatible
-    )
+    let languageMap = await this.#getJavaLanguageMap(selectedModules)
     if (this.modDirectory && this.modFiles) {
       languageMap = await mergeModsIntoLanguageMap(languageMap, {
         modDirectory: this.modDirectory,
@@ -39,23 +55,20 @@ export class JavaLegacyPackBuilder extends PackBuilder {
     }
     const baseOtherResources = await this.getBaseOtherResources([
       'pack.mcmeta',
-      'assets/minecraft/lang/zh_meme.json',
+      JAVA_BASE_LANGUAGE_FILE,
     ])
     const moduleOtherResources = await this.getModuleOtherResources(
       selectedModules
     )
     const otherResources = this.#getJavaOtherResources(
       baseOtherResources,
-      moduleOtherResources,
-      options.compatible,
-      options.type === 'legacy'
+      moduleOtherResources
     )
     const otherObjects = await this.#getJavaOtherObjects(options)
-    await this.#setJavaLegacyMode(languageMap, otherObjects)
-    languageMap = new Map()
+    await this.#processLagacyMode(languageMap, otherObjects)
     const packagingWorker = new PackagingWorker({
       baseResourcePath: this.baseResourcePath,
-      languageMap,
+      languageMap: new Map(),
       otherResources,
       otherObjects,
     })
@@ -68,93 +81,68 @@ export class JavaLegacyPackBuilder extends PackBuilder {
   }
 
   async #getJavaLanguageMap(
-    selectedModules: ModuleManifestWithDirectory[],
-    isCompatibleMode: boolean
+    selectedModules: ModuleManifestWithDirectory[]
   ): Promise<LanguageMap> {
-    const map = await getJavaLanguageMapFromOptions(
+    const result = await getJavaLanguageMapFromOptions(
       this.baseResourcePath,
       this.parsedModules.modulePath,
       selectedModules
     )
-    const result = isCompatibleMode ? new Map() : map
-    if (isCompatibleMode) {
-      for (const [key, value] of map) {
-        result.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
+    return result
+  }
+
+  async #getLanguageKeyMapping(): Promise<Map<string, string>> {
+    const mappingIndex: string[] = await fse.readJSON(
+      resolve(this.languageMappingPath, LEGACY_LANGUAGE_MAPPING_FILE)
+    )
+    const result: Map<string, string> = new Map()
+    for (const i of mappingIndex) {
+      const content: Record<string, string> = await fse.readJSON(
+        resolve(this.languageMappingPath, `${i}.json`)
+      )
+      for (const entries of Object.entries(content)) {
+        result.set(entries[0], entries[1])
       }
     }
     return result
   }
 
-  async #getLanguageKeyMapping(): Promise<Record<string, string>> {
-    const mappingIndex: string[] = await fse.readJSON(
-      resolve(this.baseResourcePath, '..', LEGACY_LANGUAGE_MAPPING_FILE)
-    )
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return (
-      await Promise.all(
-        mappingIndex.map((v) =>
-          fse.readJSON(
-            resolve(this.baseResourcePath, '../mappings/', v + '.json')
-          )
-        )
-      )
-    ).reduce((prev, item) => (prev = { ...prev, ...item }), {})
-  }
-
-  async #setJavaLegacyMode(
+  async #processLagacyMode(
     languageMap: LanguageMap,
     otherObjects: Record<string, string>
-  ): Promise<void> {
+  ) {
     const languageKeyMapping = await this.#getLanguageKeyMapping()
     const mainLanguage: SingleLanguage =
-      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ??
-      languageMap.get(
-        JAVA_BASE_LANGUAGE_FILE.replace('zh_meme.json', 'zh_cn.json')
-      ) ??
-      new Map()
-    for (const [mappedKey, originalKey] of Object.entries(languageKeyMapping)) {
+      languageMap.get(JAVA_BASE_LANGUAGE_FILE) ?? new Map()
+    languageMap.delete(JAVA_BASE_LANGUAGE_FILE)
+    for (const [mappedKey, originalKey] of languageKeyMapping) {
       if (mappedKey !== originalKey && mainLanguage.has(originalKey)) {
         const languageValue = mainLanguage.get(originalKey) ?? ''
         mainLanguage.delete(originalKey)
         mainLanguage.set(mappedKey, languageValue)
       }
     }
+    languageMap.set('assets/minecraft/lang/zh_cn.lang', mainLanguage)
     for (const [key, value] of languageMap) {
-      otherObjects[key.replace(/zh_cn\.json$/g, 'zh_cn.lang')] = JSONToJavaLang(
-        Object.fromEntries(value)
-      )
+      otherObjects[key.replace(/zh_(?:cn|meme)\.json$/g, 'zh_cn.lang')] =
+        JSONToJavaLang(Object.fromEntries(value))
     }
   }
 
   #getJavaOtherResources(
     baseOtherResources: ArchiveMap,
-    moduleOtherResources: ArchiveMap,
-    isCompatibleMode: boolean,
-    isLegacyMode: boolean
+    moduleOtherResources: ArchiveMap
   ): ArchiveMap {
     const result = new Map(baseOtherResources)
     for (const [key, value] of moduleOtherResources) {
       result.set(key, value)
     }
-    if (isCompatibleMode && !isLegacyMode) {
-      const keys = Array.from(result.keys())
-      keys
-        .filter((key) => key.endsWith('zh_meme.json'))
-        .forEach((key) => {
-          const value = result.get(key) ?? ''
-          result.set(key.replace(/zh_meme\.json$/g, 'zh_cn.json'), value)
-          result.delete(key)
-        })
-    }
-    if (isLegacyMode) {
-      const keys = Array.from(result.keys())
-      keys
-        .filter((key) => key.endsWith('zh_meme.json'))
-        .forEach((key) => {
-          result.delete(key)
-        })
-    }
+    const keys = Array.from(result.keys())
+    keys
+      .filter((key) => key.endsWith('zh_meme.json'))
+      .forEach((key) => {
+        result.delete(key)
+      })
     return result
   }
 
