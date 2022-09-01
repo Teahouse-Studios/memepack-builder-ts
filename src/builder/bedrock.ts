@@ -99,19 +99,25 @@ export class BedrockPackBuilder extends PackBuilder {
     selectedModules: ModuleManifestWithDirectory[],
     languageMap: LanguageMap,
     isCompatibleMode: boolean
-  ): Promise<Record<string, string>> {
-    const result: Record<string, string> = {
-      'textures/item_texture.json': await getBedrockTextureFile(
+  ): Promise<Map<string, string>> {
+    const result: Map<string, string> = new Map()
+    result.set(
+      'textures/item_texture.json',
+      await getBedrockTextureFile(
         'item_texture.json',
         this.parsedModules.modulePath,
         selectedModules
-      ),
-      'textures/terrain_texture.json': await getBedrockTextureFile(
+      )
+    )
+    result.set(
+      'textures/terrain_texture.json',
+      await getBedrockTextureFile(
         'terrain_texture.json',
         this.parsedModules.modulePath,
         selectedModules
-      ),
-    }
+      )
+    )
+
     if (isCompatibleMode) {
       const mainLanguage: SingleLanguage =
         languageMap.get(BEDROCK_BASE_LANGUAGE_FILE) ?? new Map()
@@ -119,7 +125,7 @@ export class BedrockPackBuilder extends PackBuilder {
       languageMap.delete(BEDROCK_BASE_LANGUAGE_FILE)
     }
     for (const [lang, langMap] of languageMap) {
-      result[lang] = JSONToBedrockLang(Object.fromEntries(langMap))
+      result.set(lang, JSONToBedrockLang(Object.fromEntries(langMap)))
     }
     return result
   }
