@@ -6,19 +6,19 @@ export class PackagingWorker {
   languageMap: LanguageMap
   excludedFiles: string[]
   otherResources: ArchiveMap
-  otherObjects: Record<string, string | Buffer | null>
+  otherObjects: Map<string, string | Buffer | null>
 
   constructor({
     baseResourcePath,
     languageMap,
     otherResources = new Map(),
-    otherObjects = {},
+    otherObjects = new Map(),
     excludedFiles = [],
   }: {
     baseResourcePath: string
     languageMap: LanguageMap
     otherResources?: ArchiveMap
-    otherObjects?: Record<string, string | Buffer | null>
+    otherObjects?: Map<string, string | Buffer | null>
     excludedFiles?: string[]
   }) {
     this.baseResourcePath = baseResourcePath
@@ -50,9 +50,8 @@ export class PackagingWorker {
         { mtime: new Date(0) }
       )
     }
-    Object.entries(this.otherObjects)
-      .filter(([key, value]) => key && value)
-      .forEach(([key, value]) => {
+    for (const [key, value] of this.otherObjects) {
+      if (key && value) {
         if (value instanceof Buffer) {
           zipFile.addBuffer(value, key, { mtime: new Date(0) })
         } else if (typeof value === 'string') {
@@ -60,7 +59,8 @@ export class PackagingWorker {
             mtime: new Date(0),
           })
         }
-      })
+      }
+    }
     zipFile.end()
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
