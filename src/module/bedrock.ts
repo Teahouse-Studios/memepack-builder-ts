@@ -8,14 +8,17 @@ export async function getBedrockTextureFile(
 ): Promise<BedrockTextureFile> {
   const texture: BedrockTextureFile = { texture_data: {} }
   selectedModules.forEach(async (module) => {
-    Object.assign(
-      texture.texture_data,
-      (
-        await fse.readJSON(path.resolve(module.path, 'textures', textureFileName), {
-          encoding: 'utf8',
-        })
-      ).texture_data
-    )
+    const targetPath = path.resolve(module.path, 'textures', textureFileName)
+    if (fse.existsSync(targetPath)) {
+      Object.assign(
+        texture.texture_data,
+        (
+          await fse.readJSON(targetPath, {
+            encoding: 'utf8',
+          })
+        ).texture_data
+      )
+    }
   })
   return texture
 }

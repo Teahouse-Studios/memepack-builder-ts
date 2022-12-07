@@ -110,3 +110,5 @@ tests/java
 tests/bedrock
 *.zip
 lib/
+java/
+bedrock/

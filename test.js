@@ -1,44 +1,46 @@
-const m = require('.')
-const options1 = {
-  type: 'normal',
-  modules: {
-    resource: [],
-    collection: ['version_1.16', 'choice_modules_default'],
-  },
-  mod: [],
-  sfw: true,
-  outputDir: 'builds',
-  format: 7,
-  hash: true,
-}
-const builder1 = new m.MemepackBuilder({
-  platform: 'je',
-  resourcePath: 'tests/java/meme_resourcepack',
-  modulePath: 'tests/java/modules',
-  buildOptions: options1,
-  modPath: 'tests/java/mods',
+const a = require('./lib')
+const fs = require('fs')
+const p1 = new a.ModuleParser()
+p1.addSearchPaths('./java/modules')
+p1.searchModules().then((m) => {
+  const b = new a.JavaPackBuilder(m, './java/modules/priority.txt', './java/mappings/al.json')
+  const o = {
+    platform: 'java',
+    type: 'normal',
+    format: 9,
+    compatible: false,
+    hash: false,
+    mod: [],
+    modules: {
+      resource: ['meme_resourcepack', 'a_letter', 'bagify'],
+      collection: ['version_1.18.2'],
+    },
+  }
+  b.build(o).then((b) => {
+    console.log(b)
+    const f = fs.openSync('./out1.zip', 'w')
+    fs.writeSync(f, b)
+    fs.closeSync(f)
+  })
 })
-builder1.build().then(({ name, buf }) => {
-  console.log(name)
-  console.log(buf)
-})
-const options2 = {
-  type: 'mcpack',
-  modules: {
-    resource: [],
-    collection: ['choice_modules_default'],
-  },
-  compatible: false,
-  outputDir: 'builds',
-  hash: true,
-}
-const builder2 = new m.MemepackBuilder({
-  platform: 'be',
-  resourcePath: 'tests/bedrock/meme_resourcepack',
-  modulePath: 'tests/bedrock/modules',
-  buildOptions: options2,
-})
-builder2.build().then(({ name, buf }) => {
-  console.log(name)
-  console.log(buf)
+const p2 = new a.ModuleParser()
+p2.addSearchPaths('./bedrock/modules')
+p2.searchModules().then((m) => {
+  const b = new a.BedrockPackBuilder(m, './bedrock/modules/priority.txt')
+  const o = {
+    platform: 'bedrock',
+    type: 'normal',
+    compatible: false,
+    hash: false,
+    modules: {
+      resource: ['meme_resourcepack', 'bagify'],
+      collection: ['sound_modules'],
+    },
+  }
+  b.build(o).then((b) => {
+    console.log(b)
+    const f = fs.openSync('./out2.zip', 'w')
+    fs.writeSync(f, b)
+    fs.closeSync(f)
+  })
 })

@@ -56,6 +56,8 @@ export class JavaPackBuilder extends PackBuilder {
   }
 
   async build(options: JavaBuildOptions): Promise<Buffer> {
+    this.decideSelectedModules(options)
+    await this.getPackEntries()
     const zipFile = new ZipFile()
     this.#applyMcMetaModification({
       compatible: options.compatible,
@@ -66,11 +68,21 @@ export class JavaPackBuilder extends PackBuilder {
     }
     const toLegacy = options.type === 'legacy'
     this.entries.forEach(async (detail, key) => {
-      const finalContent = await this.#makeFinalContent(detail, toLegacy)
-      const storeContent = toLegacy
-        ? LangFileConvertor.dumpJavaLang(finalContent)
-        : jsonDumpEnsureAscii(finalContent)
-      zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+      if (/\.(?:json|mcmeta|lang)$/.test(key)) {
+        const finalContent = await this.#makeJsonFinalContent(detail, toLegacy)
+        if (toLegacy) {
+          const storeContent = LangFileConvertor.dumpJavaLang(finalContent)
+          const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
+          zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
+        } else {
+          const storeContent = jsonDumpEnsureAscii(finalContent)
+          zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+        }
+      } else {
+        if (detail.filePath) {
+          zipFile.addFile(detail.filePath, key)
+        }
+      }
     })
     zipFile.end()
     return new Promise((resolve) => {
@@ -81,7 +93,10 @@ export class JavaPackBuilder extends PackBuilder {
     })
   }
 
-  async #makeFinalContent(detail: ArchiveDetail, toLegacy: boolean): Promise<Record<string, any>> {
+  async #makeJsonFinalContent(
+    detail: ArchiveDetail,
+    toLegacy: boolean
+  ): Promise<Record<string, any>> {
     let content: Record<string, any>
     if (detail.content) {
       content = JsonTransformation.applyJsonContentModification(

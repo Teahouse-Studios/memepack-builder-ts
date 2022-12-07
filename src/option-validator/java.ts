@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { LEGACY_FORMAT_VERSION } from '../constants'
+import { JAVA_LEGACY_FORMAT_VERSION } from '../constants'
 import { JavaBuildOptions } from '../types'
 import { BaseOptionValidator } from './base'
 
@@ -25,15 +25,15 @@ export class JavaOptionValidator extends BaseOptionValidator {
 
   #checkFormatVersion(): boolean {
     const legacyWellFormed =
-      this.#options.type === 'legacy' && this.#options.format === LEGACY_FORMAT_VERSION
+      this.#options.type === 'legacy' && this.#options.format === JAVA_LEGACY_FORMAT_VERSION
     const normalWellFormed =
       this.#options.type === 'normal' &&
       this.#options.compatible === false &&
-      this.#options.format > LEGACY_FORMAT_VERSION
+      this.#options.format > JAVA_LEGACY_FORMAT_VERSION
     const compatibleWellFormed =
       this.#options.type === 'normal' &&
       this.#options.compatible === true &&
-      this.#options.format > LEGACY_FORMAT_VERSION
+      this.#options.format > JAVA_LEGACY_FORMAT_VERSION
     return normalWellFormed || compatibleWellFormed || legacyWellFormed
   }
 }

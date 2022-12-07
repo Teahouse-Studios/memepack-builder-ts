@@ -1,3 +1,4 @@
+import fs from 'fs-extra'
 import _ from 'lodash'
 import { ZipFile } from 'yazl'
 import { JsonTransformation, LangFileConvertor } from '../json'
@@ -7,15 +8,27 @@ import { PackBuilder } from './base'
 
 export class BedrockPackBuilder extends PackBuilder {
   async build(options: BedrockBuildOptions): Promise<Buffer> {
+    this.decideSelectedModules(options)
+    await this.getPackEntries()
     const zipFile = new ZipFile()
     this.#addBedrockTextureFile()
     if (options.compatible) {
       this.#applyCompatMoification()
     }
     this.entries.forEach(async (detail, key) => {
-      const finalContent = await this.#makeFinalContent(detail)
-      const storeContent = LangFileConvertor.dumpBedrockLang(finalContent)
-      zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+      if (/\.lang$/.test(key)) {
+        const finalContent = await this.#makeLangFinalContent(detail)
+        const storeContent = LangFileConvertor.dumpBedrockLang(finalContent)
+        zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+      } else if (/\.json$/.test(key)) {
+        const finalContent = await this.#makeJsonFinalContent(detail)
+        const storeContent = JSON.stringify(finalContent, null, 2)
+        zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+      } else {
+        if (detail.filePath) {
+          zipFile.addFile(detail.filePath, key)
+        }
+      }
     })
     zipFile.end()
     return new Promise((resolve) => {
@@ -26,19 +39,43 @@ export class BedrockPackBuilder extends PackBuilder {
     })
   }
 
-  async #makeFinalContent(detail: ArchiveDetail) {
-    let content: Record<string, any>
+  async #makeLangFinalContent(detail: ArchiveDetail) {
     if (detail.content) {
-      content = JsonTransformation.applyJsonContentModification(
+      const content = JsonTransformation.applyJsonContentModification(
         _.cloneDeep(detail.content),
         detail.modification
       )
+      return content
     } else if (detail.filePath) {
-      content = await JsonTransformation.applyJsonModification(detail.filePath, detail.modification)
+      const rawContent = LangFileConvertor.parseBedrockLang(
+        await fs.readFile(detail.filePath, { encoding: 'utf-8' })
+      )
+      const modifiedContent = JsonTransformation.applyJsonContentModification(
+        rawContent,
+        detail.modification
+      )
+      return modifiedContent
     } else {
-      content = {}
+      return {}
     }
-    return content
+  }
+
+  async #makeJsonFinalContent(detail: ArchiveDetail) {
+    if (detail.content) {
+      const content = JsonTransformation.applyJsonContentModification(
+        _.cloneDeep(detail.content),
+        detail.modification
+      )
+      return content
+    } else if (detail.filePath) {
+      const content = await JsonTransformation.applyJsonModification(
+        detail.filePath,
+        detail.modification
+      )
+      return content
+    } else {
+      return {}
+    }
   }
 
   async #addBedrockTextureFile() {

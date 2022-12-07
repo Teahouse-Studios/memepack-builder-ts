@@ -13,13 +13,13 @@ export class ModuleParser {
 
   async searchModules(): Promise<Module[]> {
     const modules: Module[] = []
-    this.#searchPaths.forEach(async (searchPath) => {
+    for await (const searchPath of this.#searchPaths) {
       const candidates = await fs
         .readdir(searchPath, {
           withFileTypes: true,
         })
         .then((items) => items.filter((item) => item.isDirectory()))
-      candidates.forEach(async (dir) => {
+      for await (const dir of candidates) {
         const manifest: ResourceModuleManifest = await fs.readJSON(
           path.resolve(searchPath, dir.name, MODULE_MANIFEST_FILENAME)
         )
@@ -37,8 +37,8 @@ export class ModuleParser {
           }
           modules.push(m)
         }
-      })
-    })
+      }
+    }
     return modules
   }
 }
@@ -51,8 +51,8 @@ async function extractFiles(rootPath: string, manifest: ResourceModuleManifest):
   const excludedFilePath = [path.resolve(rootPath, MODULE_MANIFEST_FILENAME)]
   const result: string[] = []
   for (const entry of manifest.languageModification ?? []) {
-    if (entry.add) excludedFilePath.push(path.resolve(module.path, entry.add))
-    if (entry.remove) excludedFilePath.push(path.resolve(module.path, entry.remove))
+    if (entry.add) excludedFilePath.push(path.resolve(rootPath, entry.add))
+    if (entry.remove) excludedFilePath.push(path.resolve(rootPath, entry.remove))
   }
   for await (const entry of klaw(rootPath)) {
     if (entry.stats.isFile() && !excludedFilePath.includes(entry.path)) {

@@ -8,6 +8,8 @@
 
 export * from './builder'
 export * from './constants'
+export * from './json'
 export * from './module'
 export * from './option-validator'
+export * from './parser'
 export * from './utils'
