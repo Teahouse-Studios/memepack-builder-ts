@@ -10,7 +10,7 @@ specifiers:
   '@typescript-eslint/parser': ^5.45.1
   eslint: ^8.29.0
   eslint-config-prettier: ^8.5.0
-  fs-extra: ^10.1.0
+  fs-extra: ^11.1.0
   klaw: ^4.0.1
   lodash: ^4.17.21
   prettier: ^2.8.0
@@ -20,7 +20,7 @@ specifiers:
   yazl: ^2.5.1
 
 dependencies:
-  fs-extra: 10.1.0
+  fs-extra: 11.1.0
   klaw: 4.0.1
   lodash: 4.17.21
   tslib: 2.4.1
@@ -595,9 +595,9 @@ packages:
     resolution: {integrity: sha512-5nqDSxl8nn5BSNxyR3n4I6eDmbolI6WT+QqR547RwxQapgjQBmtktdP+HTBb/a/zLsbzERTONyUB5pefh5TtjQ==}
     dev: true
 
-  /fs-extra/10.1.0:
-    resolution: {integrity: sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ==}
-    engines: {node: '>=12'}
+  /fs-extra/11.1.0:
+    resolution: {integrity: sha512-0rcTq621PD5jM/e0a3EJoGC/1TC5ZBCERW82LQuwfGnCa1V8w7dpYH1yNu+SLb6E5dkeCBzKEyLGlFrnr+dUyw==}
+    engines: {node: '>=14.14'}
     dependencies:
       graceful-fs: 4.2.10
       jsonfile: 6.1.0
