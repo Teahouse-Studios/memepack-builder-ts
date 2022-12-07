@@ -1,5 +1,4 @@
 env:
-  browser: true
   es2022: true
 extends:
   - eslint:recommended
@@ -11,3 +10,5 @@ parserOptions:
   sourceType: module
 plugins:
   - '@typescript-eslint'
+rules:
+  '@typescript-eslint/no-explicit-any': 0

@@ -2,6 +2,7 @@
 .vscode
 .eslintrc.yml
 dist
+lib
 tests
 tsconfig.json
 package.json

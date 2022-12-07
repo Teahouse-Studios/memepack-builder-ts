@@ -1,5 +1,2 @@
+export * from './archive'
 export * from './bedrock'
-export * from './java'
-export * from './language'
-export * from './parser'
-export * from './resource'

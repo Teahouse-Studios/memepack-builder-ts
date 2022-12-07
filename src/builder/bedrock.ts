@@ -1,132 +1,60 @@
-import { BEDROCK_BASE_LANGUAGE_FILE } from '../constants'
-import {
-  getBedrockLanguageMapFromOptions,
-  getBedrockTextureFile,
-} from '../module'
-import { BedrockOptionValidator } from '../option'
-import { PackagingWorker } from '../packaging'
-import {
-  BedrockBuildOptions,
-  ModuleManifestWithDirectory,
-  LanguageMap,
-  ArchiveMap,
-  SingleLanguage,
-} from '../types'
-import { JSONToBedrockLang } from '../utils'
-import { PackBuilder } from './builder'
+import _ from 'lodash'
+import { ZipFile } from 'yazl'
+import { LangFileConvertor } from '../json'
+import { getBedrockTextureFile } from '../module'
+import { ArchiveDetail, ArchiveMap, BedrockBuildOptions, BedrockTextureFile } from '../types'
+import { PackBuilder } from './base'
 
 export class BedrockPackBuilder extends PackBuilder {
-  async build(
-    options: BedrockBuildOptions
-  ): Promise<{ content: Buffer; hash: string }> {
-    const optionValidator = new BedrockOptionValidator(options)
-    if (!optionValidator.validateOptions()) {
-      return Promise.reject('Invalid options')
+  async build(options: BedrockBuildOptions): Promise<Buffer> {
+    const zipFile = new ZipFile()
+    this.#addBedrockTextureFile()
+    if (options.compatible) {
+      this.#applyCompatMoification()
     }
-    const selectedModules = await this.getSelectedModules(options)
-    const languageMap = await this.#getBedrockLanguageMap(selectedModules)
-    const baseOtherResources = await this.getBaseOtherResources([
-      'texts/language_names.json',
-      'texts/languages.json',
-      'texts/zh_CN.lang',
-      'texts/zh_ME.lang',
-    ])
-    const moduleOtherResources = await this.getModuleOtherResources(
-      selectedModules,
-      ['textures/item_texture.json', 'textures/terrain_texture.json']
-    )
-    const otherObjects = await this.#getBedrockOtherObjects(
-      selectedModules,
-      languageMap,
-      options.compatible
-    )
-    const otherResources = this.#getBedrockOtherResources(
-      baseOtherResources,
-      moduleOtherResources,
-      options.compatible
-    )
-    const packagingWorker = new PackagingWorker({
-      baseResourcePath: this.baseResourcePath,
-      languageMap: new Map(),
-      otherResources,
-      otherObjects,
+    this.entries.forEach(async (detail, key) => {
+      const finalContent = await this.#makeFinalContent(detail)
+      const storeContent = LangFileConvertor.dumpBedrockLang(finalContent)
+      zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
     })
-    const buf = await packagingWorker.pack()
-    const result = {
-      content: buf,
-      hash: PackBuilder.getPackHash(buf),
-    }
-    return result
+    zipFile.end()
+    return new Promise((resolve) => {
+      const bufs: Buffer[] = []
+      zipFile.outputStream
+        .on('data', (data: Buffer | string) => bufs.push(Buffer.from(data)))
+        .on('end', () => resolve(Buffer.concat(bufs)))
+    })
   }
 
-  async #getBedrockLanguageMap(
-    selectedModules: ModuleManifestWithDirectory[]
-  ): Promise<LanguageMap> {
-    return getBedrockLanguageMapFromOptions(
-      this.baseResourcePath,
-      this.parsedModules.modulePath,
-      selectedModules
-    )
+  async #makeFinalContent(detail: ArchiveDetail) {
+    let content: Record<string, any>
+    if (detail.content) {
+      content = PackBuilder.applyJsonContentModification(
+        _.cloneDeep(detail.content),
+        detail.modification
+      )
+    } else if (detail.filePath) {
+      content = await PackBuilder.applyJsonModification(detail.filePath, detail.modification)
+    } else {
+      content = {}
+    }
+    return content
   }
 
-  #getBedrockOtherResources(
-    baseOtherResources: ArchiveMap,
-    moduleOtherResources: ArchiveMap,
-    isCompatibleMode: boolean
-  ): ArchiveMap {
-    const result = new Map(baseOtherResources)
-    for (const [key, value] of moduleOtherResources) {
-      result.set(key, value)
-    }
-    if (!isCompatibleMode) {
-      result.set(
-        'texts/language_names.json',
-        `${this.baseResourcePath}/texts/language_names.json`
-      )
-      result.set(
-        'texts/languages.json',
-        `${this.baseResourcePath}/texts/languages.json`
-      )
-      result.set(
-        'texts/zh_CN.lang',
-        `${this.baseResourcePath}/texts/zh_CN.lang`
-      )
-    }
-    return result
+  async #addBedrockTextureFile() {
+    ;['item_texture.json', 'terrain_texture.json'].forEach(async (value) => {
+      const content: BedrockTextureFile = await getBedrockTextureFile(value, this.selectedModules)
+      this.entries.set(`textures/${value}`, { content, modification: {} })
+    })
   }
 
-  async #getBedrockOtherObjects(
-    selectedModules: ModuleManifestWithDirectory[],
-    languageMap: LanguageMap,
-    isCompatibleMode: boolean
-  ): Promise<Map<string, string>> {
-    const result: Map<string, string> = new Map()
-    result.set(
-      'textures/item_texture.json',
-      await getBedrockTextureFile(
-        'item_texture.json',
-        this.parsedModules.modulePath,
-        selectedModules
-      )
-    )
-    result.set(
-      'textures/terrain_texture.json',
-      await getBedrockTextureFile(
-        'terrain_texture.json',
-        this.parsedModules.modulePath,
-        selectedModules
-      )
-    )
-
-    if (isCompatibleMode) {
-      const mainLanguage: SingleLanguage =
-        languageMap.get(BEDROCK_BASE_LANGUAGE_FILE) ?? new Map()
-      languageMap.set('texts/zh_CN.lang', mainLanguage)
-      languageMap.delete(BEDROCK_BASE_LANGUAGE_FILE)
+  #applyCompatMoification() {
+    this.entries.delete('texts/languages.json')
+    this.entries.delete('texts/language_names.json')
+    const newEntries: ArchiveMap = new Map()
+    for (const [k, v] of this.entries) {
+      newEntries.set(k.replace('zh_ME', 'zh_CN'), v)
     }
-    for (const [lang, langMap] of languageMap) {
-      result.set(lang, JSONToBedrockLang(Object.fromEntries(langMap)))
-    }
-    return result
+    this.entries = newEntries
   }
 }

@@ -109,3 +109,4 @@ builds/
 tests/java
 tests/bedrock
 *.zip
+lib/
