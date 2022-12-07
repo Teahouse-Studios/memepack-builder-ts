@@ -1,6 +1,6 @@
 import _ from 'lodash'
 import { ZipFile } from 'yazl'
-import { LangFileConvertor } from '../json'
+import { JsonTransformation, LangFileConvertor } from '../json'
 import { getBedrockTextureFile } from '../module'
 import { ArchiveDetail, ArchiveMap, BedrockBuildOptions, BedrockTextureFile } from '../types'
 import { PackBuilder } from './base'
@@ -29,12 +29,12 @@ export class BedrockPackBuilder extends PackBuilder {
   async #makeFinalContent(detail: ArchiveDetail) {
     let content: Record<string, any>
     if (detail.content) {
-      content = PackBuilder.applyJsonContentModification(
+      content = JsonTransformation.applyJsonContentModification(
         _.cloneDeep(detail.content),
         detail.modification
       )
     } else if (detail.filePath) {
-      content = await PackBuilder.applyJsonModification(detail.filePath, detail.modification)
+      content = await JsonTransformation.applyJsonModification(detail.filePath, detail.modification)
     } else {
       content = {}
     }

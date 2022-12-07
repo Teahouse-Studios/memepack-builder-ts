@@ -1,15 +1,14 @@
 import path from 'path'
-import _ from 'lodash'
 import { ArchiveMap, ResourceModule } from '../types'
 import { JsonModification } from '../json'
 
 export async function getArchive(selectedModules: ResourceModule[]): Promise<ArchiveMap> {
   const result: ArchiveMap = new Map()
-  const modification = await new JsonModification(selectedModules).extract()
+  const modification = await new JsonModification(selectedModules).getModification()
   selectedModules.forEach((module) => {
     module.files.forEach((file) => {
-      result.set(file.path, {
-        filePath: path.resolve(module.path, file.path),
+      result.set(file, {
+        filePath: path.resolve(module.path, file),
         modification: {},
       })
     })

@@ -3,7 +3,7 @@ import { PackBuilder } from './base'
 import fs from 'fs-extra'
 import { ZipFile } from 'yazl'
 import _ from 'lodash'
-import { jsonDumpEnsureAscii, LangFileConvertor } from '../json'
+import { jsonDumpEnsureAscii, JsonTransformation, LangFileConvertor } from '../json'
 
 export class JavaPackBuilder extends PackBuilder {
   #legacyMappingFilePath: string
@@ -84,12 +84,12 @@ export class JavaPackBuilder extends PackBuilder {
   async #makeFinalContent(detail: ArchiveDetail, toLegacy: boolean): Promise<Record<string, any>> {
     let content: Record<string, any>
     if (detail.content) {
-      content = PackBuilder.applyJsonContentModification(
+      content = JsonTransformation.applyJsonContentModification(
         _.cloneDeep(detail.content),
         detail.modification
       )
     } else if (detail.filePath) {
-      content = await PackBuilder.applyJsonModification(detail.filePath, detail.modification)
+      content = await JsonTransformation.applyJsonModification(detail.filePath, detail.modification)
     } else {
       content = {}
     }

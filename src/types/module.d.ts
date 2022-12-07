@@ -1,10 +1,8 @@
 export interface ResourceModule {
   path: string
   manifest: ResourceModuleManifest
-  files: ResourceFileInfo[]
+  files: string[]
 }
-
-export type ResourceFileInfo = { path: string; isLanguage: boolean }
 
 export interface CollectionModule {
   path: string

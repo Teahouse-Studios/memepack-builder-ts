@@ -1,54 +1,86 @@
+import {
+  JsonContentModification,
+  JsonFlatKeyModification,
+  JsonNestedKeyModification,
+} from '../types'
 import fs from 'fs-extra'
-import { JsonFlatAdditionEntry, JsonFlatDeletionEntry, ResourceModule } from '../types'
-import { resolve } from 'path'
 
-export class JsonModification {
-  #addition: JsonFlatAdditionEntry
-  #deletion: JsonFlatDeletionEntry
-  #selectedModules: ResourceModule[]
-
-  constructor(selectedModules: ResourceModule[]) {
-    this.#addition = new Map()
-    this.#deletion = new Map()
-    this.#selectedModules = selectedModules
+export class JsonTransformation {
+  static applyJsonContentModification(
+    content: Record<string, any>,
+    modification: JsonContentModification
+  ): Record<string, any> {
+    if (modification.flatKey) {
+      content = JsonTransformation.applyJsonFlatKeyModification(content, modification.flatKey)
+    }
+    if (modification.nestedKey) {
+      content = JsonTransformation.applyJsonNestedKeyModification(content, modification.nestedKey)
+    }
+    return content
   }
 
-  async extract(): Promise<{
-    addition: JsonFlatAdditionEntry
-    deletion: JsonFlatDeletionEntry
-  }> {
-    for (const module of this.#selectedModules) {
-      await this.#updateModification(module)
-    }
-    return { addition: this.#addition, deletion: this.#deletion }
+  static async applyJsonModification(
+    filePath: string,
+    modification: JsonContentModification
+  ): Promise<Record<string, any>> {
+    return JsonTransformation.applyJsonContentModification(
+      await fs.readJSON(filePath),
+      modification
+    )
   }
 
-  async #updateModification(module: ResourceModule): Promise<void> {
-    for (const definition of module.manifest.languageModification ?? []) {
-      if (definition.add) {
-        const addContent: Record<string, string> = await fs.readJSON(
-          resolve(module.path, definition.add)
-        )
-        const updateFile = this.#addition.get(definition.file)
-        if (!updateFile) {
-          this.#addition.set(definition.file, new Map(Object.entries(addContent)))
-        } else {
-          for (const [k, v] of Object.entries(addContent)) {
-            updateFile.set(k, v)
+  static applyJsonFlatKeyModification(
+    content: Record<string, any>,
+    modification: JsonFlatKeyModification
+  ): Record<string, any> {
+    if (modification.addition) {
+      for (const [k, v] of modification.addition) {
+        content[k] = v
+      }
+    }
+    if (modification.deletion) {
+      for (const k of modification.deletion) {
+        delete content[k]
+      }
+    }
+    return content
+  }
+
+  static applyJsonNestedKeyModification(
+    content: Record<string, any>,
+    modification: JsonNestedKeyModification
+  ): Record<string, any> {
+    if (modification.addition) {
+      for (const [k, v] of modification.addition) {
+        const segments = k.split('.')
+        const lastKey = segments.pop() ?? ''
+        let ref = content
+        for (const key of segments) {
+          ref[key] ??= {}
+          ref = ref[key]
+        }
+        ref[lastKey] = v
+      }
+    }
+    if (modification.deletion) {
+      for (const k of modification.deletion) {
+        const segments = k.split('.')
+        const lastKey = segments.pop() ?? ''
+        let ref = content
+        let hasKey = true
+        for (const key of segments) {
+          if (ref[key]) {
+            ref = ref[key]
+          } else {
+            hasKey = false
+            break
           }
         }
-      }
-      if (definition.remove) {
-        const removeContent: string[] = await fs.readJSON(resolve(module.path, definition.remove))
-        const updateFile = this.#deletion.get(definition.file)
-        if (!updateFile) {
-          this.#deletion.set(definition.file, new Set(removeContent))
-        } else {
-          for (const k of removeContent) {
-            updateFile.add(k)
-          }
+        if (hasKey) {
+          delete ref[lastKey]
         }
       }
     }
+    return content
   }
 }

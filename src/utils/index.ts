@@ -1,7 +1,9 @@
 import _ from 'lodash'
+import fs from 'fs-extra'
 import { CollectionModule, Module, ResourceModule } from '../types'
 
-export function priorityToArray(content: string): string[] {
+export async function priorityToArray(filePath: string): Promise<string[]> {
+  const content = await fs.readFile(filePath, 'utf-8')
   const entries = content
     .replace(/\r\n/g, '\n')
     .split('\n')

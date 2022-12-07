@@ -1,4 +1,5 @@
 export * from './lang'
+export * from './modification'
 export * from './transform'
 
 export function jsonDumpEnsureAscii(obj: Record<string, string>) {
