@@ -2,4 +2,5 @@ version: 2
 updates:
 - package-ecosystem: npm
   directory: /
-  schedule: monthly
+  schedule:
+    interval: weekly
