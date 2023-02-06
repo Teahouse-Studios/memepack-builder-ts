@@ -112,3 +112,5 @@ tests/bedrock
 lib/
 java/
 bedrock/
+yarn.lock
+pnpm-lock.yaml
