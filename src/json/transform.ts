@@ -52,7 +52,7 @@ export class JsonTransformation {
   ): Record<string, any> {
     if (modification.addition) {
       for (const [k, v] of modification.addition) {
-        const segments = k.split('.')
+        const segments = k.split('.').filter((v) => v !== '__proto__')
         const lastKey = segments.pop() ?? ''
         let ref = content
         for (const key of segments) {
@@ -64,7 +64,7 @@ export class JsonTransformation {
     }
     if (modification.deletion) {
       for (const k of modification.deletion) {
-        const segments = k.split('.')
+        const segments = k.split('.').filter((v) => v !== '__proto__')
         const lastKey = segments.pop() ?? ''
         let ref = content
         let hasKey = true
