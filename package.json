@@ -1,6 +1,6 @@
 {
   "name": "memepack-builder",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "Build memified Minecraft resource pack",
   "types": "lib/index.d.ts",
   "files": [
@@ -12,7 +12,8 @@
     "build": "pnpm clear && tsc",
     "clear": "rimraf ./lib",
     "lint": "eslint src/*.ts src/**/*.ts",
-    "pretty": "prettier --write src/"
+    "pretty": "prettier --write src/",
+    "prepublish": "pnpm build"
   },
   "author": "MysticNebula70 <alpha513001@gmail.com>",
   "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
@@ -27,16 +28,16 @@
   "devDependencies": {
     "@types/fs-extra": "^11.0.1",
     "@types/klaw": "^3.0.3",
-    "@types/lodash": "^4.14.192",
+    "@types/lodash": "^4.14.194",
     "@types/node": "^18.15.11",
     "@types/yazl": "^2.4.2",
-    "@typescript-eslint/eslint-plugin": "^5.57.0",
-    "@typescript-eslint/parser": "^5.57.0",
-    "eslint": "^8.37.0",
+    "@typescript-eslint/eslint-plugin": "^5.58.0",
+    "@typescript-eslint/parser": "^5.58.0",
+    "eslint": "^8.38.0",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^2.8.7",
     "rimraf": "^4.4.1",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   },
   "keywords": [
     "minecraft",
