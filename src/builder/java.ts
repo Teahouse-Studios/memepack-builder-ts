@@ -73,13 +73,18 @@ export class JavaPackBuilder extends PackBuilder {
     this.entries.forEach(async (detail, key) => {
       if (/\.(?:json|mcmeta|lang)$/.test(key)) {
         const finalContent = await this.#makeJsonFinalContent(detail, toLegacy)
-        if (toLegacy) {
-          const storeContent = LangFileConvertor.dumpJavaLang(finalContent)
-          const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
-          zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
-        } else {
-          const storeContent = jsonDumpEnsureAscii(finalContent)
+        if (key.endsWith('.mcmeta')) {
+          const storeContent = JSON.stringify(finalContent, undefined, 4)
           zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+        } else {
+          if (toLegacy) {
+            const storeContent = LangFileConvertor.dumpJavaLang(finalContent)
+            const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
+            zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
+          } else {
+            const storeContent = jsonDumpEnsureAscii(finalContent)
+            zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+          }
         }
       } else {
         if (detail.filePath) {
