@@ -4,7 +4,6 @@ export interface BaseBuildOptions {
     collection: string[]
   }
   compatible: boolean
-  hash: boolean
 }
 
 export interface JavaBuildOptions extends BaseBuildOptions {

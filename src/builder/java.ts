@@ -1,4 +1,10 @@
-import { ArchiveDetail, ArchiveMap, JavaBuildOptions, ResourceModule } from '../types'
+import {
+  ArchiveDetail,
+  ArchiveMap,
+  JavaBuildOptions,
+  ResourceModule,
+  TransformOptions,
+} from '../types'
 import { PackBuilder } from './base'
 import fs from 'fs-extra'
 import { ZipFile } from 'yazl'
@@ -17,10 +23,7 @@ export class JavaPackBuilder extends PackBuilder {
     this.#legacyMappingFilePath = legacyMappingFilePath
   }
 
-  #applyMcMetaModification(mcMetaOptions: {
-    compatible: boolean
-    format: number
-  }): ArchiveDetail | undefined {
+  #applyMcMetaModification(mcMetaOptions: TransformOptions): ArchiveDetail | undefined {
     const mcMetaDetail = this.entries.get('pack.mcmeta')
     if (mcMetaDetail) {
       mcMetaDetail.modification.nestedKey = {}
