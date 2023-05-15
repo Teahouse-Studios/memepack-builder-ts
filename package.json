@@ -29,7 +29,7 @@
     "@types/fs-extra": "^11.0.1",
     "@types/klaw": "^3.0.3",
     "@types/lodash": "^4.14.194",
-    "@types/node": "^18.15.11",
+    "@types/node": "^20.1.4",
     "@types/yazl": "^2.4.2",
     "@typescript-eslint/eslint-plugin": "^5.58.0",
     "@typescript-eslint/parser": "^5.58.0",
