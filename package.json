@@ -42,6 +42,9 @@
     "rimraf": "^5.0.1",
     "typescript": "^5.0.4"
   },
+  "engines": {
+    "node": "^16.10.0 || >=18.0.0"
+  },
   "keywords": [
     "minecraft",
     "resourcepack"
