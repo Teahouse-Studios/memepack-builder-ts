@@ -1,8 +1,11 @@
 import _ from 'lodash'
 import { JAVA_LEGACY_FORMAT_VERSION } from '../constants'
-import { JavaBuildOptions } from '../types'
+import type { JavaBuildOptions } from '../types'
 import { BaseOptionValidator } from './base'
 
+/**
+ * @public
+ */
 export class JavaOptionValidator extends BaseOptionValidator {
   #options: JavaBuildOptions
 

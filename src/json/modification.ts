@@ -1,7 +1,10 @@
 import fs from 'fs-extra'
-import { JsonFlatAdditionEntry, JsonFlatDeletionEntry, ResourceModule } from '../types'
+import type { JsonFlatAdditionEntry, JsonFlatDeletionEntry, ResourceModule } from '../types'
 import path from 'path'
 
+/**
+ * @public
+ */
 export class JsonModification {
   #addition: JsonFlatAdditionEntry
   #deletion: JsonFlatDeletionEntry

@@ -1,7 +1,14 @@
 import fse from 'fs-extra'
 import path from 'path'
-import { BedrockTextureFile, ResourceModule } from '../types'
+import type { BedrockTextureFile, ResourceModule } from '../types'
 
+/**
+ *
+ * @param textureFileName - output file name
+ * @param selectedModules - generate file from these modules
+ * @returns
+ * @public
+ */
 export async function getBedrockTextureFile(
   textureFileName: string,
   selectedModules: ResourceModule[]

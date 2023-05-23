@@ -1,4 +1,4 @@
-import {
+import type {
   ArchiveDetail,
   ArchiveMap,
   JavaBuildOptions,
@@ -9,8 +9,11 @@ import { PackBuilder } from './base'
 import fs from 'fs-extra'
 import { ZipFile } from 'yazl'
 import _ from 'lodash'
-import { jsonDumpEnsureAscii, JsonTransformation, LangFileConvertor } from '../json'
+import { _jsonDumpEnsureAscii, JsonTransformation, LangFileConvertor } from '../json'
 
+/**
+ * @public
+ */
 export class JavaPackBuilder extends PackBuilder {
   #legacyMappingFilePath: string
 
@@ -82,7 +85,7 @@ export class JavaPackBuilder extends PackBuilder {
             const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
             zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
           } else {
-            const storeContent = jsonDumpEnsureAscii(finalContent)
+            const storeContent = _jsonDumpEnsureAscii(finalContent)
             zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
           }
         }

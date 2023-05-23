@@ -106,6 +106,7 @@ dist
 package-lock.json
 
 builds/
+types/
 tests/java
 tests/bedrock
 *.zip

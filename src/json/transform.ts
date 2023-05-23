@@ -1,10 +1,13 @@
-import {
+import type {
   JsonContentModification,
   JsonFlatKeyModification,
   JsonNestedKeyModification,
 } from '../types'
 import fs from 'fs-extra'
 
+/**
+ * @public
+ */
 export class JsonTransformation {
   static applyJsonContentModification(
     content: Record<string, any>,

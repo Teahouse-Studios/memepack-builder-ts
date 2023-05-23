@@ -3,9 +3,12 @@ import _ from 'lodash'
 import { ZipFile } from 'yazl'
 import { JsonTransformation, LangFileConvertor } from '../json'
 import { getBedrockTextureFile } from '../module'
-import { ArchiveDetail, ArchiveMap, BedrockBuildOptions, BedrockTextureFile } from '../types'
+import type { ArchiveDetail, ArchiveMap, BedrockBuildOptions, BedrockTextureFile } from '../types'
 import { PackBuilder } from './base'
 
+/**
+ * @public
+ */
 export class BedrockPackBuilder extends PackBuilder {
   async build(options: BedrockBuildOptions): Promise<Buffer> {
     this.decideSelectedModules(options)
@@ -13,7 +16,7 @@ export class BedrockPackBuilder extends PackBuilder {
     const zipFile = new ZipFile()
     this.#addBedrockTextureFile()
     if (options.compatible) {
-      this.#applyCompatMoification()
+      this.#applyCompatModification()
     }
     this.entries.forEach(async (detail, key) => {
       if (/\.lang$/.test(key)) {
@@ -85,7 +88,7 @@ export class BedrockPackBuilder extends PackBuilder {
     })
   }
 
-  #applyCompatMoification() {
+  #applyCompatModification() {
     this.entries.delete('texts/languages.json')
     this.entries.delete('texts/language_names.json')
     const newEntries: ArchiveMap = new Map()

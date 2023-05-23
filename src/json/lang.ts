@@ -1,3 +1,6 @@
+/**
+ * @public
+ */
 export class LangFileConvertor {
   static parseJavaLang(rawContent: string) {
     const entries = rawContent

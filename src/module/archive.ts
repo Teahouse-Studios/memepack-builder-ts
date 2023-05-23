@@ -1,7 +1,13 @@
 import path from 'path'
-import { ArchiveMap, ResourceModule } from '../types'
+import type { ArchiveMap, ResourceModule } from '../types'
 import { JsonModification } from '../json'
 
+/**
+ *
+ * @param selectedModules - modules to be processed.
+ * @returns
+ * @public
+ */
 export async function getArchive(selectedModules: ResourceModule[]): Promise<ArchiveMap> {
   const result: ArchiveMap = new Map()
   const modification = await new JsonModification(selectedModules).getModification()

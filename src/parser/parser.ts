@@ -2,8 +2,11 @@ import fs from 'fs-extra'
 import klaw from 'klaw'
 import { MODULE_MANIFEST_FILENAME } from '../constants'
 import path from 'path'
-import { CollectionModule, Module, ResourceModule, ResourceModuleManifest } from '../types'
+import type { CollectionModule, Module, ResourceModule, ResourceModuleManifest } from '../types'
 
+/**
+ * @public
+ */
 export class ModuleParser {
   #searchPaths: string[] = []
 
@@ -43,10 +46,23 @@ export class ModuleParser {
   }
 }
 
+/**
+ *
+ * @param manifest
+ * @returns
+ * @internal
+ */
 function isResource(manifest: ResourceModuleManifest): manifest is ResourceModuleManifest {
   return manifest.type === 'resource'
 }
 
+/**
+ *
+ * @param rootPath
+ * @param manifest
+ * @returns
+ * @internal
+ */
 async function extractFiles(rootPath: string, manifest: ResourceModuleManifest): Promise<string[]> {
   const excludedFilePath = [path.resolve(rootPath, MODULE_MANIFEST_FILENAME)]
   const result: string[] = []

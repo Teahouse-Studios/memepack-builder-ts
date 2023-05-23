@@ -1,7 +1,10 @@
 import _ from 'lodash'
-import { BedrockBuildOptions } from '../types'
+import type { BedrockBuildOptions } from '../types'
 import { BaseOptionValidator } from './base'
 
+/**
+ * @public
+ */
 export class BedrockOptionValidator extends BaseOptionValidator {
   #options: BedrockBuildOptions
 

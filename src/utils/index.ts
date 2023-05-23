@@ -1,8 +1,14 @@
 import _ from 'lodash'
 import fs from 'fs-extra'
-import { CollectionModule, Module, ResourceModule } from '../types'
+import type { CollectionModule, Module, ResourceModule } from '../types'
 
-export async function priorityToArray(filePath: string): Promise<string[]> {
+/**
+ *
+ * @param filePath - the priority file path
+ * @returns
+ * @internal
+ */
+export async function _priorityToArray(filePath: string): Promise<string[]> {
   const content = await fs.readFile(filePath, 'utf-8')
   const entries = content
     .replace(/\r\n/g, '\n')
@@ -12,7 +18,14 @@ export async function priorityToArray(filePath: string): Promise<string[]> {
   return entries
 }
 
-export function mergeCollectionIntoResource(
+/**
+ *
+ * @param modules - modules to be searched
+ * @param object - object to store which modules are to be included
+ * @returns
+ * @internal
+ */
+export function _mergeCollectionIntoResource(
   modules: Module[],
   { resource, collection }: { resource: string[]; collection: string[] }
 ): ResourceModule[] {

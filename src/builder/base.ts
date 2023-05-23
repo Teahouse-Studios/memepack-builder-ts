@@ -1,8 +1,11 @@
 import { createHash } from 'crypto'
-import { ResourceModule, ArchiveMap, BaseBuildOptions, Module } from '../types'
-import { mergeCollectionIntoResource, priorityToArray } from '../utils'
+import type { ResourceModule, ArchiveMap, BaseBuildOptions, Module } from '../types'
+import { _mergeCollectionIntoResource, _priorityToArray } from '../utils'
 import { getArchive } from '../module'
 
+/**
+ * @public
+ */
 export class PackBuilder {
   parsedModules: Module[]
   #selectedModules: ResourceModule[] = []
@@ -19,7 +22,7 @@ export class PackBuilder {
   }
 
   protected async sortModules(): Promise<void> {
-    const priority = await priorityToArray(this.priorityFilePath)
+    const priority = await _priorityToArray(this.priorityFilePath)
     const sorted: ResourceModule[] = []
 
     priority.forEach((rank) => {
@@ -45,7 +48,7 @@ export class PackBuilder {
   }
 
   decideSelectedModules(options: BaseBuildOptions): ResourceModule[] {
-    const modules = mergeCollectionIntoResource(this.parsedModules, options.modules)
+    const modules = _mergeCollectionIntoResource(this.parsedModules, options.modules)
     this.#selectedModules = modules
     return modules
   }
