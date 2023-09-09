@@ -27,20 +27,20 @@
     "yazl": "^2.5.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.35.0",
+    "@microsoft/api-extractor": "^7.36.4",
     "@types/fs-extra": "^11.0.1",
     "@types/klaw": "^3.0.3",
-    "@types/lodash": "^4.14.194",
-    "@types/node": "^20.2.3",
+    "@types/lodash": "^4.14.198",
+    "@types/node": "^20.6.0",
     "@types/yazl": "^2.4.2",
-    "@typescript-eslint/eslint-plugin": "^6.2.0",
-    "@typescript-eslint/parser": "^6.3.0",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
     "esbuild": "^0.19.2",
-    "eslint": "^8.41.0",
+    "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.0",
+    "prettier": "^3.0.3",
     "rimraf": "^5.0.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": "^16.10.0 || >=18.0.0"
