@@ -18,11 +18,11 @@ importers:
         specifier: ^4.17.21
         version: 4.17.21
       yazl:
-        specifier: ^3.0.0
+        specifier: ^3.3.1
         version: 3.3.1
     devDependencies:
       '@microsoft/api-extractor':
-        specifier: ^7.47.10
+        specifier: ^7.48.0
         version: 7.48.0(@types/node@22.10.1)
       '@types/fs-extra':
         specifier: ^11.0.4
@@ -31,10 +31,10 @@ importers:
         specifier: ^3.0.6
         version: 3.0.6
       '@types/lodash':
-        specifier: ^4.17.10
+        specifier: ^4.17.13
         version: 4.17.13
       '@types/node':
-        specifier: ^22.0.0
+        specifier: ^22.10.1
         version: 22.10.1
       '@types/yazl':
         specifier: ^2.4.5
@@ -43,14 +43,14 @@ importers:
         specifier: ^0.24.0
         version: 0.24.0
       prettier:
-        specifier: ^3.3.3
-        version: 3.3.3
+        specifier: ^3.4.2
+        version: 3.4.2
       rimraf:
         specifier: ^6.0.1
         version: 6.0.1
       typescript:
-        specifier: ^5.6.3
-        version: 5.6.3
+        specifier: ^5.7.2
+        version: 5.7.2
 
 packages:
 
@@ -412,8 +412,8 @@ packages:
   lodash@4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
 
-  lru-cache@11.0.1:
-    resolution: {integrity: sha512-CgeuL5uom6j/ZVrg7G/+1IXqRY8JXX4Hghfy5YE0EhoYQWvndP1kufu58cmZLNIDKnRhZrXfdS9urVWx98AipQ==}
+  lru-cache@11.0.2:
+    resolution: {integrity: sha512-123qHRfJBmo2jXDbo/a5YOQrJoHF/GNQTLzQ5+IdK5pWpceK17yRc6ozlWd25FxvGKQbIUs91fDFkXmDHTKcyA==}
     engines: {node: 20 || >=22}
 
   lru-cache@6.0.0:
@@ -445,8 +445,8 @@ packages:
     resolution: {integrity: sha512-ypGJsmGtdXUOeM5u93TyeIEfEhM6s+ljAhrk5vAvSx8uyY/02OvrZnA0YNGUrPXfpJMgI1ODd3nwz8Npx4O4cg==}
     engines: {node: 20 || >=22}
 
-  prettier@3.3.3:
-    resolution: {integrity: sha512-i2tDNA0O5IrMO757lfrdQZCc2jPNDVntV0m/+4whiDfWaTKfMNgR7Qz0NAeGz/nRqF4m5/6CLzbP4/liHt12Ew==}
+  prettier@3.4.2:
+    resolution: {integrity: sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==}
     engines: {node: '>=14'}
     hasBin: true
 
@@ -528,8 +528,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  typescript@5.6.3:
-    resolution: {integrity: sha512-hjcS1mhfuyi4WW8IWtjP7brDrG2cuDZukyrYrSauoXGNgx0S7zceP07adYkJycEr56BOUTNPzbInooiN3fn1qw==}
+  typescript@5.7.2:
+    resolution: {integrity: sha512-i5t66RHxDvVN40HfDd1PsEThGNnlMCMT3jMUuoh9/0TaqWevNontacunWyN02LA9/fIbEWlcHZcgTKb9QoaLfg==}
     engines: {node: '>=14.17'}
     hasBin: true
 
@@ -909,7 +909,7 @@ snapshots:
 
   lodash@4.17.21: {}
 
-  lru-cache@11.0.1: {}
+  lru-cache@11.0.2: {}
 
   lru-cache@6.0.0:
     dependencies:
@@ -933,10 +933,10 @@ snapshots:
 
   path-scurry@2.0.0:
     dependencies:
-      lru-cache: 11.0.1
+      lru-cache: 11.0.2
       minipass: 7.1.2
 
-  prettier@3.3.3: {}
+  prettier@3.4.2: {}
 
   punycode@2.3.1: {}
 
@@ -1001,7 +1001,7 @@ snapshots:
 
   typescript@5.4.2: {}
 
-  typescript@5.6.3: {}
+  typescript@5.7.2: {}
 
   undici-types@6.20.0: {}
 
