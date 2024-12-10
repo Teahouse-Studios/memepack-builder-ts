@@ -103,15 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
-package-lock.json
-
-builds/
-types/
-tests/java
-tests/bedrock
+tests/
 *.zip
 lib/
 java/
 bedrock/
-yarn.lock
-pnpm-lock.yaml
+types/

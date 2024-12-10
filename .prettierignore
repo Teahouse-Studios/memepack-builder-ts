@@ -1,6 +1,5 @@
 .github
 .vscode
-.eslintrc.yml
 dist
 lib
 tests

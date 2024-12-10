@@ -3,6 +3,7 @@
   "version": "0.5.0",
   "description": "Build memified Minecraft resource pack",
   "types": "lib/index.d.ts",
+  "type": "module",
   "files": [
     "lib"
   ],
@@ -13,7 +14,6 @@
     "bundle": "esbuild src/index.ts --bundle --platform=node --target=node16 --packages=external --outdir=lib",
     "build": "pnpm clear && pnpm bundle && pnpm emit-type && api-extractor run --local --verbose && rimraf ./types",
     "clear": "rimraf ./lib ./types",
-    "lint": "eslint src/*.ts src/**/*.ts",
     "pretty": "prettier --write src/",
     "prepublish": "pnpm build"
   },
@@ -21,26 +21,22 @@
   "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
   "license": "Apache-2.0",
   "dependencies": {
-    "fs-extra": "^11.1.1",
+    "fs-extra": "^11.2.0",
     "klaw": "^4.1.0",
     "lodash": "^4.17.21",
     "yazl": "^2.5.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.36.4",
-    "@types/fs-extra": "^11.0.1",
-    "@types/klaw": "^3.0.3",
-    "@types/lodash": "^4.14.198",
-    "@types/node": "^20.6.0",
-    "@types/yazl": "^2.4.2",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
+    "@microsoft/api-extractor": "^7.47.10",
+    "@types/fs-extra": "^11.0.4",
+    "@types/klaw": "^3.0.6",
+    "@types/lodash": "^4.17.10",
+    "@types/node": "^20.16.11",
+    "@types/yazl": "^2.4.5",
     "esbuild": "^0.24.0",
-    "eslint": "^9.0.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "rimraf": "^6.0.0",
-    "typescript": "^5.2.2"
+    "prettier": "^3.3.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.6.3"
   },
   "engines": {
     "node": "^16.10.0 || >=18.0.0"
@@ -48,5 +44,6 @@
   "keywords": [
     "minecraft",
     "resourcepack"
-  ]
+  ],
+  "packageManager": "pnpm@9.15.0"
 }
