@@ -24,7 +24,7 @@
     "fs-extra": "^11.2.0",
     "klaw": "^4.1.0",
     "lodash": "^4.17.21",
-    "yazl": "^2.5.1"
+    "yazl": "^3.0.0"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "^7.47.10",
