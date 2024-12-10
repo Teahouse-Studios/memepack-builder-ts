@@ -23,7 +23,7 @@ importers:
     devDependencies:
       '@microsoft/api-extractor':
         specifier: ^7.47.10
-        version: 7.47.10(@types/node@20.16.11)
+        version: 7.47.10(@types/node@22.10.1)
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -34,8 +34,8 @@ importers:
         specifier: ^4.17.10
         version: 4.17.10
       '@types/node':
-        specifier: ^20.16.11
-        version: 20.16.11
+        specifier: ^22.0.0
+        version: 22.10.1
       '@types/yazl':
         specifier: ^2.4.5
         version: 2.4.5
@@ -252,8 +252,8 @@ packages:
   '@types/lodash@4.17.10':
     resolution: {integrity: sha512-YpS0zzoduEhuOWjAotS6A5AVCva7X4lVlYLF0FYHAY9sdraBfnatttHItlWeZdGhuEkf+OzMNg2ZYAx8t+52uQ==}
 
-  '@types/node@20.16.11':
-    resolution: {integrity: sha512-y+cTCACu92FyA5fgQSAI8A1H429g7aSK2HsO7K4XYUWc4dY5IUz55JSDIYT6/VsOLfGy8vmvQYC2hfb0iF16Uw==}
+  '@types/node@22.10.1':
+    resolution: {integrity: sha512-qKgsUwfHZV2WCWLAnVP1JqnpE6Im6h3Y0+fYgMTasNQ7V++CBX5OT1as0g0f+OyubbFqhf6XVNIsmN4IIhEgGQ==}
 
   '@types/yazl@2.4.5':
     resolution: {integrity: sha512-qpmPfx32HS7vlGJf7EsoM9qJnLZhXJBf1KH0hzfdc+D794rljQWh4H0I/UrZy+6Nhqn0l2jdBZXBGZtR1vnHqw==}
@@ -533,8 +533,8 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
-  undici-types@6.19.8:
-    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
+  undici-types@6.20.0:
+    resolution: {integrity: sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==}
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
@@ -649,23 +649,23 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
-  '@microsoft/api-extractor-model@7.29.8(@types/node@20.16.11)':
+  '@microsoft/api-extractor-model@7.29.8(@types/node@22.10.1)':
     dependencies:
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.9.0(@types/node@20.16.11)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.10.1)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.47.10(@types/node@20.16.11)':
+  '@microsoft/api-extractor@7.47.10(@types/node@22.10.1)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.29.8(@types/node@20.16.11)
+      '@microsoft/api-extractor-model': 7.29.8(@types/node@22.10.1)
       '@microsoft/tsdoc': 0.15.0
       '@microsoft/tsdoc-config': 0.17.0
-      '@rushstack/node-core-library': 5.9.0(@types/node@20.16.11)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.10.1)
       '@rushstack/rig-package': 0.5.3
-      '@rushstack/terminal': 0.14.2(@types/node@20.16.11)
-      '@rushstack/ts-command-line': 4.22.8(@types/node@20.16.11)
+      '@rushstack/terminal': 0.14.2(@types/node@22.10.1)
+      '@rushstack/ts-command-line': 4.22.8(@types/node@22.10.1)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.8
@@ -684,7 +684,7 @@ snapshots:
 
   '@microsoft/tsdoc@0.15.0': {}
 
-  '@rushstack/node-core-library@5.9.0(@types/node@20.16.11)':
+  '@rushstack/node-core-library@5.9.0(@types/node@22.10.1)':
     dependencies:
       ajv: 8.13.0
       ajv-draft-04: 1.0.0(ajv@8.13.0)
@@ -695,23 +695,23 @@ snapshots:
       resolve: 1.22.8
       semver: 7.5.4
     optionalDependencies:
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
   '@rushstack/rig-package@0.5.3':
     dependencies:
       resolve: 1.22.8
       strip-json-comments: 3.1.1
 
-  '@rushstack/terminal@0.14.2(@types/node@20.16.11)':
+  '@rushstack/terminal@0.14.2(@types/node@22.10.1)':
     dependencies:
-      '@rushstack/node-core-library': 5.9.0(@types/node@20.16.11)
+      '@rushstack/node-core-library': 5.9.0(@types/node@22.10.1)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
-  '@rushstack/ts-command-line@4.22.8(@types/node@20.16.11)':
+  '@rushstack/ts-command-line@4.22.8(@types/node@22.10.1)':
     dependencies:
-      '@rushstack/terminal': 0.14.2(@types/node@20.16.11)
+      '@rushstack/terminal': 0.14.2(@types/node@22.10.1)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -723,25 +723,25 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
   '@types/klaw@3.0.6':
     dependencies:
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
   '@types/lodash@4.17.10': {}
 
-  '@types/node@20.16.11':
+  '@types/node@22.10.1':
     dependencies:
-      undici-types: 6.19.8
+      undici-types: 6.20.0
 
   '@types/yazl@2.4.5':
     dependencies:
-      '@types/node': 20.16.11
+      '@types/node': 22.10.1
 
   ajv-draft-04@1.0.0(ajv@8.13.0):
     optionalDependencies:
@@ -1003,7 +1003,7 @@ snapshots:
 
   typescript@5.6.3: {}
 
-  undici-types@6.19.8: {}
+  undici-types@6.20.0: {}
 
   universalify@0.1.2: {}
 
