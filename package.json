@@ -33,7 +33,7 @@
     "@types/lodash": "^4.17.13",
     "@types/node": "^22.10.1",
     "@types/yazl": "^2.4.5",
-    "esbuild": "^0.24.0",
+    "esbuild": "^0.25.0",
     "prettier": "^3.4.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2"
