@@ -38,7 +38,7 @@ importers:
         version: 22.10.1
       '@types/yazl':
         specifier: ^2.4.5
-        version: 2.4.5
+        version: 2.4.6
       esbuild:
         specifier: ^0.25.0
         version: 0.25.0
@@ -261,8 +261,8 @@ packages:
   '@types/node@22.10.1':
     resolution: {integrity: sha512-qKgsUwfHZV2WCWLAnVP1JqnpE6Im6h3Y0+fYgMTasNQ7V++CBX5OT1as0g0f+OyubbFqhf6XVNIsmN4IIhEgGQ==}
 
-  '@types/yazl@2.4.5':
-    resolution: {integrity: sha512-qpmPfx32HS7vlGJf7EsoM9qJnLZhXJBf1KH0hzfdc+D794rljQWh4H0I/UrZy+6Nhqn0l2jdBZXBGZtR1vnHqw==}
+  '@types/yazl@2.4.6':
+    resolution: {integrity: sha512-/ifFjQtcKaoZOjl5NNCQRR0fAKafB3Foxd7J/WvFPTMea46zekapcR30uzkwIkKAAuq5T6d0dkwz754RFH27hg==}
 
   ajv-draft-04@1.0.0:
     resolution: {integrity: sha512-mv00Te6nmYbRp5DCwclxtt7yV/joXJPGS7nM+97GdxvuttCOfgI3K4U25zboyeX0O+myI8ERluxQe5wljMmVIw==}
@@ -748,7 +748,7 @@ snapshots:
     dependencies:
       undici-types: 6.20.0
 
-  '@types/yazl@2.4.5':
+  '@types/yazl@2.4.6':
     dependencies:
       '@types/node': 22.10.1
 
