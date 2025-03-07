@@ -1,15 +1,13 @@
-import type {
-  ArchiveDetail,
-  ArchiveMap,
-  JavaBuildOptions,
-  ResourceModule,
-  TransformOptions,
-} from '../types'
-import { PackBuilder } from './base'
-import fs from 'fs-extra'
+import { PackBuilder } from './index.js'
+import { readJSON } from 'fs-extra'
 import { ZipFile } from 'yazl'
-import _ from 'lodash'
-import { _jsonDumpEnsureAscii, JsonTransformation, LangFileConvertor } from '../json'
+import { _jsonDumpEnsureAscii } from '../json/index.js'
+import type { ArchiveDetail, ArchiveMap } from '../archive/index.js'
+import type { ResourceModule } from '../module/index.js'
+import type { JavaBuildOptions } from '../option/java.js'
+import type { TransformOptions } from '../option/index.js'
+import { LangFileConverter } from '../lang/converter.js'
+import { JsonPatch } from '../json/patch.js'
 
 /**
  * @public
@@ -42,7 +40,7 @@ export class JavaPackBuilder extends PackBuilder {
   }
 
   async #transformContentToLegacy(content: Record<string, any>): Promise<Record<string, any>> {
-    const legacyMapping: Record<string, string> = await fs.readJSON(this.#legacyMappingFilePath)
+    const legacyMapping: Record<string, string> = await readJSON(this.#legacyMappingFilePath)
     const contentKeys = Object.keys(content)
     for (const [k, v] of Object.entries(legacyMapping)) {
       if (contentKeys.includes(k)) {
@@ -73,6 +71,7 @@ export class JavaPackBuilder extends PackBuilder {
       this.#transformStoreToCompatible()
     }
     const toLegacy = options.type === 'legacy'
+    const legacyFilenames = ['']
     this.entries.forEach(async (detail, key) => {
       if (/\.(?:json|mcmeta|lang)$/.test(key)) {
         const finalContent = await this.#makeJsonFinalContent(detail, toLegacy)
@@ -80,8 +79,8 @@ export class JavaPackBuilder extends PackBuilder {
           const storeContent = JSON.stringify(finalContent, undefined, 4)
           zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
         } else {
-          if (toLegacy) {
-            const storeContent = LangFileConvertor.dumpJavaLang(finalContent)
+          if (toLegacy && detail.filePath && legacyFilenames.includes(detail.filePath)) {
+            const storeContent = LangFileConverter.dumpJavaLang(finalContent)
             const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
             zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
           } else {
@@ -99,7 +98,7 @@ export class JavaPackBuilder extends PackBuilder {
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
       zipFile.outputStream
-        .on('data', (data: Buffer | string) => bufs.push(Buffer.from(data)))
+        .on('data', (data) => bufs.push(Buffer.from(data)))
         .on('end', () => resolve(Buffer.concat(bufs)))
     })
   }
@@ -110,12 +109,12 @@ export class JavaPackBuilder extends PackBuilder {
   ): Promise<Record<string, any>> {
     let content: Record<string, any>
     if (detail.content) {
-      content = JsonTransformation.applyJsonContentModification(
-        _.cloneDeep(detail.content),
+      content = JsonPatch.applyJsonContentPatch(
+        structuredClone(detail.content),
         detail.modification
       )
     } else if (detail.filePath) {
-      content = await JsonTransformation.applyJsonModification(detail.filePath, detail.modification)
+      content = await JsonPatch.applyJsonPatch(detail.filePath, detail.modification)
     } else {
       content = {}
     }

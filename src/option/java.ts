@@ -1,16 +1,27 @@
-import _ from 'lodash'
-import { JAVA_LEGACY_FORMAT_VERSION } from '../constants'
-import type { JavaBuildOptions } from '../types'
-import { BaseOptionValidator } from './base'
+import type { BaseBuildOptions } from './index.js'
 
 /**
  * @public
  */
-export class JavaOptionValidator extends BaseOptionValidator {
+export const JAVA_LEGACY_FORMAT_VERSION = 3
+
+/**
+ * @public
+ */
+export interface JavaBuildOptions extends BaseBuildOptions {
+  platform: 'java'
+  type: 'normal' | 'legacy'
+  format: number
+  mod: string[]
+}
+
+/**
+ * @public
+ */
+export class JavaOptionValidator {
   #options: JavaBuildOptions
 
   constructor(options: JavaBuildOptions) {
-    super()
     this.#options = options
   }
 
@@ -21,9 +32,9 @@ export class JavaOptionValidator extends BaseOptionValidator {
   }
 
   #checkRequiredOptions(): boolean {
-    const requiredOptions = ['type', 'modules', 'mod', 'format']
-    const missingOptions = _.difference(requiredOptions, Object.keys(this.#options))
-    return missingOptions.length === 0
+    const requiredOptions = new Set(['type', 'modules', 'mod', 'format'])
+    const currentOptions = new Set(Object.keys(this.#options))
+    return requiredOptions.isSubsetOf(currentOptions)
   }
 
   #checkFormatVersion(): boolean {

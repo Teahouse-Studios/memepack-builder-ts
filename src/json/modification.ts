@@ -1,6 +1,17 @@
-import fs from 'fs-extra'
-import type { JsonFlatAdditionEntry, JsonFlatDeletionEntry, ResourceModule } from '../types'
-import path from 'path'
+import { readJSON } from 'fs-extra'
+import type { ResourceModule } from '../module/index.js'
+import { resolve, normalize } from 'node:path'
+import type { AdditionPatch, DeletionPatch } from './patch.js'
+
+/**
+ * @public
+ */
+export type JsonFlatAdditionEntry = Map<string, AdditionPatch>
+
+/**
+ * @public
+ */
+export type JsonFlatDeletionEntry = Map<string, DeletionPatch>
 
 /**
  * @public
@@ -28,10 +39,10 @@ export class JsonModification {
 
   async #updateModification(module: ResourceModule): Promise<void> {
     for (const definition of module.manifest.languageModification ?? []) {
-      const normalizedTargetFile = path.normalize(definition.file)
+      const normalizedTargetFile = normalize(definition.file)
       if (definition.add) {
-        const addContent: Record<string, string> = await fs.readJSON(
-          path.resolve(module.path, definition.add)
+        const addContent: Record<string, string> = await readJSON(
+          resolve(module.path, definition.add)
         )
         const updateFile = this.#addition.get(normalizedTargetFile)
         if (!updateFile) {
@@ -43,9 +54,7 @@ export class JsonModification {
         }
       }
       if (definition.remove) {
-        const removeContent: string[] = await fs.readJSON(
-          path.resolve(module.path, definition.remove)
-        )
+        const removeContent: string[] = await readJSON(resolve(module.path, definition.remove))
         const updateFile = this.#deletion.get(normalizedTargetFile)
         if (!updateFile) {
           this.#deletion.set(normalizedTargetFile, new Set(removeContent))

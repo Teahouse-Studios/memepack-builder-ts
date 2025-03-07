@@ -1,10 +1,47 @@
-import fs from 'fs-extra'
-import _ from 'lodash'
+import { exists, readJSON, readFile } from 'fs-extra'
+import { resolve } from 'node:path'
+import type { ResourceModule } from '../module/index.js'
+import { PackBuilder } from './index.js'
+import type { BedrockBuildOptions } from '../option/bedrock.js'
+import { LangFileConverter } from '../lang/converter.js'
 import { ZipFile } from 'yazl'
-import { JsonTransformation, LangFileConvertor } from '../json'
-import { getBedrockTextureFile } from '../module'
-import type { ArchiveDetail, ArchiveMap, BedrockBuildOptions, BedrockTextureFile } from '../types'
-import { PackBuilder } from './base'
+import type { ArchiveDetail, ArchiveMap } from '../archive/index.js'
+import { JsonPatch } from '../json/patch.js'
+
+/**
+ * @public
+ */
+export interface BedrockTextureFile {
+  texture_data: Record<string, unknown>
+}
+
+/**
+ *
+ * @param textureFileName - output file name
+ * @param selectedModules - generate file from these modules
+ * @returns
+ * @public
+ */
+export async function getBedrockTextureFile(
+  textureFileName: string,
+  selectedModules: ResourceModule[]
+): Promise<BedrockTextureFile> {
+  const texture: BedrockTextureFile = { texture_data: {} }
+  selectedModules.forEach(async (module) => {
+    const targetPath = resolve(module.path, 'textures', textureFileName)
+    if (await exists(targetPath)) {
+      Object.assign(
+        texture.texture_data,
+        (
+          await readJSON(targetPath, {
+            encoding: 'utf8',
+          })
+        ).texture_data
+      )
+    }
+  })
+  return texture
+}
 
 /**
  * @public
@@ -21,7 +58,7 @@ export class BedrockPackBuilder extends PackBuilder {
     this.entries.forEach(async (detail, key) => {
       if (/\.lang$/.test(key)) {
         const finalContent = await this.#makeLangFinalContent(detail)
-        const storeContent = LangFileConvertor.dumpBedrockLang(finalContent)
+        const storeContent = LangFileConverter.dumpBedrockLang(finalContent)
         zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
       } else if (/\.json$/.test(key)) {
         const finalContent = await this.#makeJsonFinalContent(detail)
@@ -37,26 +74,23 @@ export class BedrockPackBuilder extends PackBuilder {
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
       zipFile.outputStream
-        .on('data', (data: Buffer | string) => bufs.push(Buffer.from(data)))
+        .on('data', (data) => bufs.push(Buffer.from(data)))
         .on('end', () => resolve(Buffer.concat(bufs)))
     })
   }
 
   async #makeLangFinalContent(detail: ArchiveDetail) {
     if (detail.content) {
-      const content = JsonTransformation.applyJsonContentModification(
-        _.cloneDeep(detail.content),
+      const content = JsonPatch.applyJsonContentPatch(
+        structuredClone(detail.content),
         detail.modification
       )
       return content
     } else if (detail.filePath) {
-      const rawContent = LangFileConvertor.parseBedrockLang(
-        await fs.readFile(detail.filePath, { encoding: 'utf-8' })
+      const rawContent = LangFileConverter.parseBedrockLang(
+        await readFile(detail.filePath, { encoding: 'utf-8' })
       )
-      const modifiedContent = JsonTransformation.applyJsonContentModification(
-        rawContent,
-        detail.modification
-      )
+      const modifiedContent = JsonPatch.applyJsonContentPatch(rawContent, detail.modification)
       return modifiedContent
     } else {
       return {}
@@ -65,16 +99,13 @@ export class BedrockPackBuilder extends PackBuilder {
 
   async #makeJsonFinalContent(detail: ArchiveDetail) {
     if (detail.content) {
-      const content = JsonTransformation.applyJsonContentModification(
-        _.cloneDeep(detail.content),
+      const content = JsonPatch.applyJsonContentPatch(
+        structuredClone(detail.content),
         detail.modification
       )
       return content
     } else if (detail.filePath) {
-      const content = await JsonTransformation.applyJsonModification(
-        detail.filePath,
-        detail.modification
-      )
+      const content = await JsonPatch.applyJsonPatch(detail.filePath, detail.modification)
       return content
     } else {
       return {}

@@ -1,40 +1,66 @@
-import type {
-  JsonContentModification,
-  JsonFlatKeyModification,
-  JsonNestedKeyModification,
-} from '../types'
-import fs from 'fs-extra'
+import { readJSON } from 'fs-extra'
 
 /**
  * @public
  */
-export class JsonTransformation {
-  static applyJsonContentModification(
+export type AdditionPatch = Map<string, string>
+
+/**
+ * @public
+ */
+export type DeletionPatch = Set<string>
+
+/**
+ * @public
+ */
+export interface JsonFlatKeyPatch {
+  addition?: AdditionPatch
+  deletion?: DeletionPatch
+}
+
+/**
+ * @public
+ */
+export interface JsonNestedKeyPatch {
+  addition?: Map<string, any>
+  deletion?: DeletionPatch
+}
+
+/**
+ * @public
+ */
+export interface JsonContentPatch {
+  flatKey?: JsonFlatKeyPatch
+  nestedKey?: JsonNestedKeyPatch
+}
+
+/**
+ * @public
+ */
+export class JsonPatch {
+  static applyJsonContentPatch(
     content: Record<string, any>,
-    modification: JsonContentModification
+    modification: JsonContentPatch
   ): Record<string, any> {
     if (modification.flatKey) {
-      content = JsonTransformation.applyJsonFlatKeyModification(content, modification.flatKey)
+      content = JsonPatch.applyJsonFlatKeyPatch(content, modification.flatKey)
     }
     if (modification.nestedKey) {
-      content = JsonTransformation.applyJsonNestedKeyModification(content, modification.nestedKey)
+      content = JsonPatch.applyJsonNestedKeyPatch(content, modification.nestedKey)
     }
     return content
   }
 
-  static async applyJsonModification(
+  static async applyJsonPatch(
     filePath: string,
-    modification: JsonContentModification
+    modification: JsonContentPatch
   ): Promise<Record<string, any>> {
-    return JsonTransformation.applyJsonContentModification(
-      await fs.readJSON(filePath),
-      modification
-    )
+    return JsonPatch.applyJsonContentPatch(await readJSON(filePath), modification)
   }
 
-  static applyJsonFlatKeyModification(
+  static applyJsonFlatKeyPatch(
     content: Record<string, any>,
-    modification: JsonFlatKeyModification
+    modification: JsonFlatKeyPatch
   ): Record<string, any> {
     if (modification.addition) {
       for (const [k, v] of modification.addition) {
@@ -49,9 +75,9 @@ export class JsonTransformation {
     return content
   }
 
-  static applyJsonNestedKeyModification(
+  static applyJsonNestedKeyPatch(
     content: Record<string, any>,
-    modification: JsonNestedKeyModification
+    modification: JsonNestedKeyPatch
   ): Record<string, any> {
     if (modification.addition) {
       for (const [k, v] of modification.addition) {

@@ -1,6 +1,7 @@
-export * from './lang'
-export * from './modification'
-export * from './transform'
+/**
+ * @public
+ */
+export type PureJson = Record<string, string>
 
 /**
  *
@@ -8,7 +9,7 @@ export * from './transform'
  * @returns the string representation of the json, which is ascii-ensured
  * @internal
  */
-export function _jsonDumpEnsureAscii(obj: Record<string, string>): string {
+export function _jsonDumpEnsureAscii(obj: PureJson): string {
   const value = JSON.stringify(obj, undefined, 4)
   const arr: string[] = []
   for (let i = 0; i < value.length; i++) {

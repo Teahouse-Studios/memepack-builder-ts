@@ -1,6 +1,5 @@
-import _ from 'lodash'
-import fs from 'fs-extra'
-import type { CollectionModule, Module, ResourceModule } from '../types'
+import { readFile } from 'fs-extra'
+import type { CollectionModule, MemeModule, ResourceModule } from '../module/index.js'
 
 /**
  *
@@ -9,7 +8,7 @@ import type { CollectionModule, Module, ResourceModule } from '../types'
  * @internal
  */
 export async function _priorityToArray(filePath: string): Promise<string[]> {
-  const content = await fs.readFile(filePath, 'utf-8')
+  const content = await readFile(filePath, 'utf-8')
   const entries = content
     .replace(/\r\n/g, '\n')
     .split('\n')
@@ -26,28 +25,45 @@ export async function _priorityToArray(filePath: string): Promise<string[]> {
  * @internal
  */
 export function _mergeCollectionIntoResource(
-  modules: Module[],
+  modules: MemeModule[],
   { resource, collection }: { resource: string[]; collection: string[] }
 ): ResourceModule[] {
-  const resourceModules = modules.filter(
-    (value): value is ResourceModule => value.manifest.type === 'resource'
-  )
-  const collectionModules = modules.filter(
-    (value): value is CollectionModule => value.manifest.type === 'collection'
-  )
-  const result = new Set(
-    _.intersectionWith(resourceModules, resource, (a, b) => a.manifest.name === b)
-  )
-  for (const {
-    manifest: { contains },
-  } of _.intersectionWith(collectionModules, collection, (a, b) => a.manifest.name === b)) {
-    for (const item of _.intersectionWith(
-      resourceModules,
-      contains ?? [],
-      (a, b) => a.manifest.name === b
-    )) {
-      result.add(item)
+  const resourceModules = modules.filter((value) => isResource(value))
+  const collectionModules = modules.filter((value) => isCollection(value))
+
+  const pickedResourceModules = new Set<ResourceModule>()
+  for (const item of resourceModules) {
+    if (resource.includes(item.manifest.name)) {
+      pickedResourceModules.add(item)
     }
   }
-  return Array.from(result)
+
+  const pickedCollectionModules = new Set<CollectionModule>()
+  for (const item of collectionModules) {
+    if (collection.includes(item.manifest.name)) {
+      pickedCollectionModules.add(item)
+    }
+  }
+  for (const { manifest } of pickedCollectionModules) {
+    for (const item of resourceModules) {
+      if (manifest.contains?.includes(item.manifest.name)) {
+        pickedResourceModules.add(item)
+      }
+    }
+  }
+  return Array.from(pickedResourceModules)
+}
+
+/**
+ * @internal
+ */
+export function isResource(module: MemeModule): module is ResourceModule {
+  return module.manifest.type === 'resource'
+}
+
+/**
+ * @internal
+ */
+export function isCollection(module: MemeModule): module is CollectionModule {
+  return module.manifest.type === 'collection'
 }

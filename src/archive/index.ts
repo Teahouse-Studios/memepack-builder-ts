@@ -1,6 +1,21 @@
-import path from 'path'
-import type { ArchiveMap, ResourceModule } from '../types'
-import { JsonModification } from '../json'
+import { resolve } from 'node:path'
+import type { ResourceModule } from '../module/index.js'
+import type { JsonContentPatch } from '../json/patch.js'
+import { JsonModification } from '../json/modification.js'
+
+/**
+ * @public
+ */
+export interface ArchiveDetail {
+  filePath?: string
+  content?: Record<string, any>
+  modification: JsonContentPatch
+}
+
+/**
+ * @public
+ */
+export type ArchiveMap = Map<string, ArchiveDetail>
 
 /**
  *
@@ -14,7 +29,7 @@ export async function getArchive(selectedModules: ResourceModule[]): Promise<Arc
   selectedModules.forEach((module) => {
     module.files.forEach((file) => {
       result.set(file, {
-        filePath: path.resolve(module.path, file),
+        filePath: resolve(module.path, file),
         modification: {},
       })
     })

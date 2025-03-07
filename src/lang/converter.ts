@@ -1,7 +1,9 @@
+import type { PureJson } from '../json/index.js'
+
 /**
  * @public
  */
-export class LangFileConvertor {
+export class LangFileConverter {
   static parseJavaLang(rawContent: string) {
     const entries = rawContent
       .replace(/\r\n/g, '\n')
@@ -12,7 +14,7 @@ export class LangFileConvertor {
     return Object.fromEntries(entries)
   }
 
-  static dumpJavaLang(obj: Record<string, string>): string {
+  static dumpJavaLang(obj: PureJson): string {
     return Object.entries(obj)
       .map(([k, v]) => `${k}=${v}`)
       .join('\n')
@@ -28,7 +30,7 @@ export class LangFileConvertor {
     return Object.fromEntries(entries)
   }
 
-  static dumpBedrockLang(obj: Record<string, string>): string {
+  static dumpBedrockLang(obj: PureJson): string {
     return Object.entries(obj)
       .map(([k, v]) => `${k}=${v}\t#`)
       .join('\n')
