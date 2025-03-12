@@ -1,6 +1,22 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:base"
+  "extends": ["config:base"],
+  "packageRules": [
+    {
+      "groupName": "types",
+      "matchPackageNames": ["/^@types//"]
+    },
+    {
+      "groupName": "direct dependencies",
+      "matchPackageNames": ["fs-extra", "klaw", "yazl"]
+    },
+    {
+      "groupName": "build tools",
+      "matchPackageNames": ["esbuild"]
+    },
+    {
+      "groupName": "dev dependencies",
+      "matchPackageNames": ["prettier", "rimraf", "typescript"]
+    }
   ]
 }
