@@ -1,12 +1,21 @@
-import { exists, readJSON, readFile } from 'fs-extra'
 import { resolve } from 'node:path'
-import type { ResourceModule } from '../module/index.js'
-import { PackBuilder } from './index.js'
-import type { BedrockBuildOptions } from '../option/bedrock.js'
-import { LangFileConverter } from '../lang/converter.js'
+import { exists, readJSON, readFile } from 'fs-extra'
 import { ZipFile } from 'yazl'
-import type { ArchiveDetail, ArchiveMap } from '../archive/index.js'
+import { PackBuilder } from './index.js'
 import { JsonPatch } from '../json/patch.js'
+import { LangFileConverter } from '../lang/converter.js'
+import type { BedrockBuildOptions } from '../option/bedrock.js'
+import type { ResourceModule } from '../module/index.js'
+import {
+  _isJsonContentEntry,
+  type ArchiveMap,
+  _isLangFileEntry,
+  type ArchiveJsonContentEntry,
+  type ArchiveLangFileEntry,
+  type ArchiveJsonEntry,
+  _isFileEntry,
+  _isJsonEntry,
+} from '../archive/index.js'
 
 /**
  * @public
@@ -22,7 +31,7 @@ export interface BedrockTextureFile {
  * @returns
  * @public
  */
-export async function getBedrockTextureFile(
+export async function generateBedrockTextureFile(
   textureFileName: string,
   selectedModules: ResourceModule[]
 ): Promise<BedrockTextureFile> {
@@ -55,21 +64,24 @@ export class BedrockPackBuilder extends PackBuilder {
     if (options.compatible) {
       this.#applyCompatModification()
     }
-    this.entries.forEach(async (detail, key) => {
-      if (/\.lang$/.test(key)) {
-        const finalContent = await this.#makeLangFinalContent(detail)
+    for (const [key, entry] of this.entries) {
+      if (_isLangFileEntry(entry)) {
+        const finalContent = await this.#makeLangPatchedContent(entry)
         const storeContent = LangFileConverter.dumpBedrockLang(finalContent)
         zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
-      } else if (/\.json$/.test(key)) {
-        const finalContent = await this.#makeJsonFinalContent(detail)
+        continue
+      }
+      if (_isJsonEntry(entry)) {
+        const finalContent = await this.#makeJsonPatchedContent(entry)
         const storeContent = JSON.stringify(finalContent, null, 2)
         zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
-      } else {
-        if (detail.filePath) {
-          zipFile.addFile(detail.filePath, key)
-        }
+        continue
       }
-    })
+      if (_isFileEntry(entry) && !_isLangFileEntry(entry)) {
+        zipFile.addFile(entry.filePath, key)
+        continue
+      }
+    }
     zipFile.end()
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
@@ -79,43 +91,48 @@ export class BedrockPackBuilder extends PackBuilder {
     })
   }
 
-  async #makeLangFinalContent(detail: ArchiveDetail) {
-    if (detail.content) {
-      const content = JsonPatch.applyJsonContentPatch(
-        structuredClone(detail.content),
-        detail.modification
-      )
-      return content
-    } else if (detail.filePath) {
-      const rawContent = LangFileConverter.parseBedrockLang(
-        await readFile(detail.filePath, { encoding: 'utf-8' })
-      )
-      const modifiedContent = JsonPatch.applyJsonContentPatch(rawContent, detail.modification)
-      return modifiedContent
+  async #makeLangPatchedContent(entry: ArchiveJsonEntry | ArchiveLangFileEntry) {
+    if (_isJsonContentEntry(entry)) {
+      if (entry.patch) {
+        return JsonPatch.applyJsonContentPatch(structuredClone(entry.content), entry.patch)
+      } else {
+        return entry.content
+      }
     } else {
-      return {}
+      const rawContent = LangFileConverter.parseBedrockLang(
+        await readFile(entry.filePath, { encoding: 'utf-8' })
+      )
+      if (entry.patch) {
+        return JsonPatch.applyJsonContentPatch(rawContent, entry.patch)
+      } else {
+        return rawContent
+      }
     }
   }
 
-  async #makeJsonFinalContent(detail: ArchiveDetail) {
-    if (detail.content) {
-      const content = JsonPatch.applyJsonContentPatch(
-        structuredClone(detail.content),
-        detail.modification
-      )
-      return content
-    } else if (detail.filePath) {
-      const content = await JsonPatch.applyJsonPatch(detail.filePath, detail.modification)
-      return content
+  async #makeJsonPatchedContent(entry: ArchiveJsonEntry) {
+    if (_isJsonContentEntry(entry)) {
+      if (entry.patch) {
+        return JsonPatch.applyJsonContentPatch(structuredClone(entry.content), entry.patch)
+      } else {
+        return entry.content
+      }
     } else {
-      return {}
+      if (entry.patch) {
+        return await JsonPatch.applyJsonFilePatch(entry.filePath, entry.patch)
+      } else {
+        return await readJSON(entry.filePath)
+      }
     }
   }
 
   async #addBedrockTextureFile() {
     ;['item_texture.json', 'terrain_texture.json'].forEach(async (value) => {
-      const content: BedrockTextureFile = await getBedrockTextureFile(value, this.selectedModules)
-      this.entries.set(`textures/${value}`, { content, modification: {} })
+      const content: BedrockTextureFile = await generateBedrockTextureFile(
+        value,
+        this.selectedModules
+      )
+      this.entries.set(`textures/${value}`, { content, patch: {} } as ArchiveJsonContentEntry)
     })
   }
 

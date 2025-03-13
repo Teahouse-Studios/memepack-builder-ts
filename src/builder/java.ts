@@ -2,12 +2,24 @@ import { PackBuilder } from './index.js'
 import { readJSON } from 'fs-extra'
 import { ZipFile } from 'yazl'
 import { _jsonDumpEnsureAscii } from '../json/index.js'
-import type { ArchiveDetail, ArchiveMap } from '../archive/index.js'
+import {
+  _isJsonContentEntry,
+  type ArchiveJsonContentEntry,
+  type ArchiveMap,
+  _isFileEntry,
+  _isPatchableEntry,
+  type ArchivePatchableEntry,
+} from '../archive/index.js'
 import type { ResourceModule } from '../module/index.js'
 import type { JavaBuildOptions } from '../option/java.js'
 import type { TransformOptions } from '../option/index.js'
 import { LangFileConverter } from '../lang/converter.js'
 import { JsonPatch } from '../json/patch.js'
+
+/**
+ * @public
+ */
+export const LEGACY_FILENAMES = ['']
 
 /**
  * @public
@@ -24,18 +36,22 @@ export class JavaPackBuilder extends PackBuilder {
     this.#legacyMappingFilePath = legacyMappingFilePath
   }
 
-  #applyMcMetaModification(mcMetaOptions: TransformOptions): ArchiveDetail | undefined {
+  #applyMcMetaModification(mcMetaOptions: TransformOptions): ArchiveJsonContentEntry {
     const mcMetaDetail = this.entries.get('pack.mcmeta')
-    if (mcMetaDetail) {
-      mcMetaDetail.modification.nestedKey = {}
-      if (mcMetaOptions.compatible) {
-        mcMetaDetail.modification.nestedKey.deletion = new Set('language')
-      }
-      mcMetaDetail.modification.nestedKey.addition = new Map([
-        ['pack.pack_format', mcMetaOptions.format],
-      ])
-      this.entries.set('pack.mcmeta', mcMetaDetail)
+    if (!mcMetaDetail) {
+      throw new Error('pack.mcmeta does not exist')
     }
+    if (!_isJsonContentEntry(mcMetaDetail)) {
+      throw new Error('pack.mcmeta is not a json file')
+    }
+    mcMetaDetail.patch = {}
+    mcMetaDetail.patch.nestedKey = {}
+    if (mcMetaOptions.compatible) {
+      mcMetaDetail.patch.nestedKey.deletion = new Set('language')
+    }
+    mcMetaDetail.patch.nestedKey.addition = new Map([['pack.pack_format', mcMetaOptions.format]])
+    this.entries.set('pack.mcmeta', mcMetaDetail)
+
     return mcMetaDetail
   }
 
@@ -71,29 +87,31 @@ export class JavaPackBuilder extends PackBuilder {
       this.#transformStoreToCompatible()
     }
     const toLegacy = options.type === 'legacy'
-    const legacyFilenames = ['']
-    this.entries.forEach(async (detail, key) => {
-      if (/\.(?:json|mcmeta|lang)$/.test(key)) {
-        const finalContent = await this.#makeJsonFinalContent(detail, toLegacy)
+    for (const [key, entry] of this.entries) {
+      if (_isPatchableEntry(entry)) {
+        const patchedContent = await this.#makePatchedContent(entry)
         if (key.endsWith('.mcmeta')) {
-          const storeContent = JSON.stringify(finalContent, undefined, 4)
+          const storeContent = JSON.stringify(patchedContent, undefined, 4)
           zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
         } else {
-          if (toLegacy && detail.filePath && legacyFilenames.includes(detail.filePath)) {
-            const storeContent = LangFileConverter.dumpJavaLang(finalContent)
+          if (toLegacy && LEGACY_FILENAMES.some((name) => key.includes(name))) {
             const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
+            const storeContent = LangFileConverter.dumpJavaLang(
+              await this.#transformContentToLegacy(patchedContent)
+            )
             zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
           } else {
-            const storeContent = _jsonDumpEnsureAscii(finalContent)
+            const storeContent = _jsonDumpEnsureAscii(patchedContent)
             zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
           }
         }
-      } else {
-        if (detail.filePath) {
-          zipFile.addFile(detail.filePath, key)
-        }
+        continue
       }
-    })
+      if (_isFileEntry(entry)) {
+        zipFile.addFile(entry.filePath, key)
+        continue
+      }
+    }
     zipFile.end()
     return new Promise((resolve) => {
       const bufs: Buffer[] = []
@@ -103,25 +121,19 @@ export class JavaPackBuilder extends PackBuilder {
     })
   }
 
-  async #makeJsonFinalContent(
-    detail: ArchiveDetail,
-    toLegacy: boolean
-  ): Promise<Record<string, any>> {
-    let content: Record<string, any>
-    if (detail.content) {
-      content = JsonPatch.applyJsonContentPatch(
-        structuredClone(detail.content),
-        detail.modification
-      )
-    } else if (detail.filePath) {
-      content = await JsonPatch.applyJsonPatch(detail.filePath, detail.modification)
+  async #makePatchedContent(entry: ArchivePatchableEntry): Promise<Record<string, any>> {
+    if (_isJsonContentEntry(entry)) {
+      if (entry.patch) {
+        return JsonPatch.applyJsonContentPatch(structuredClone(entry.content), entry.patch)
+      } else {
+        return entry.content
+      }
     } else {
-      content = {}
-    }
-    if (toLegacy) {
-      return await this.#transformContentToLegacy(content)
-    } else {
-      return content
+      if (entry.patch) {
+        return await JsonPatch.applyJsonFilePatch(entry.filePath, entry.patch)
+      } else {
+        return await readJSON(entry.filePath)
+      }
     }
   }
 }

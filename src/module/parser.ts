@@ -2,12 +2,13 @@ import { readdir, readJSON } from 'fs-extra'
 import { default as klaw } from 'klaw'
 import { resolve, relative } from 'node:path'
 import {
-  isResource,
+  _isResource,
   type CollectionModule,
-  type MemeModule,
   type ResourceModule,
-  type ResourceModuleManifest,
+  type MemeModule,
 } from './index.js'
+import type { ResourceModuleManifest } from './manifest/index.js'
+import { ManifestNormalizer } from './manifest/normalizer.js'
 
 /**
  * @public
@@ -19,6 +20,7 @@ export const MODULE_MANIFEST_FILENAME = 'module_manifest.json'
  */
 export class ModuleParser {
   #searchPaths: string[] = []
+  #manifestNormalizer = new ManifestNormalizer()
 
   addSearchPaths(...paths: string[]) {
     this.#searchPaths.push(...paths)
@@ -31,14 +33,15 @@ export class ModuleParser {
         withFileTypes: true,
       }).then((items) => items.filter((item) => item.isDirectory()))
       for await (const dir of candidates) {
-        const manifest: ResourceModuleManifest = await readJSON(
+        const rawManifest: ResourceModuleManifest = await readJSON(
           resolve(searchPath, dir.name, MODULE_MANIFEST_FILENAME)
         )
-        if (isResource(manifest)) {
+        const manifest: ResourceModuleManifest = this.#manifestNormalizer.normalize(rawManifest)
+        if (_isResource(manifest)) {
           const m: ResourceModule = {
             path: resolve(searchPath, dir.name),
             manifest,
-            files: await listFiles(resolve(searchPath, dir.name), manifest),
+            files: await _listFiles(resolve(searchPath, dir.name), manifest),
           }
           modules.push(m)
         } else {
@@ -61,7 +64,7 @@ export class ModuleParser {
  * @returns
  * @internal
  */
-export async function listFiles(
+export async function _listFiles(
   rootPath: string,
   manifest: ResourceModuleManifest
 ): Promise<string[]> {

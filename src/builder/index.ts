@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import type { ResourceModule, MemeModule } from '../module/index.js'
-import { type ArchiveMap, getArchive } from '../archive/index.js'
+import { type ArchiveMap, generateArchiveEntries } from '../archive/index.js'
 import { _mergeCollectionIntoResource, _priorityToArray } from '../utils/index.js'
 import type { BaseBuildOptions } from '../option/index.js'
 
@@ -38,7 +38,7 @@ export class PackBuilder {
   }
 
   async getPackEntries(): Promise<ArchiveMap> {
-    const entries = await getArchive(this.#selectedModules)
+    const entries = await generateArchiveEntries(this.#selectedModules)
     this.entries = entries
     return entries
   }

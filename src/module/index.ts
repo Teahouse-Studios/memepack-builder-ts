@@ -1,4 +1,8 @@
-import type { LanguageModificationDefinition } from '../lang/index.js'
+import type {
+  ResourceModuleManifest,
+  CollectionModuleManifest,
+  MemeModuleManifest,
+} from './manifest/index.js'
 
 /**
  * @public
@@ -23,43 +27,12 @@ export interface CollectionModule {
 export type MemeModule = ResourceModule | CollectionModule
 
 /**
- * @public
- */
-export interface BaseModuleManifest {
-  name: string
-  description: string
-  author: string[]
-  incompatibleWith?: string[]
-}
-
-/**
- * @public
- */
-export interface ResourceModuleManifest extends BaseModuleManifest {
-  type: 'resource'
-  languageModification?: LanguageModificationDefinition[]
-}
-
-/**
- * @public
- */
-export interface CollectionModuleManifest extends BaseModuleManifest {
-  type: 'collection'
-  contains?: string[]
-}
-
-/**
- * @public
- */
-export type MemeModuleManifest = ResourceModuleManifest | CollectionModuleManifest
-
-/**
  *
  * @param manifest - the manifest to be checked
  * @returns
  * @internal
  */
-export function isResource(manifest: MemeModuleManifest): manifest is ResourceModuleManifest {
+export function _isResource(manifest: MemeModuleManifest): manifest is ResourceModuleManifest {
   return manifest.type === 'resource'
 }
 
@@ -69,6 +42,6 @@ export function isResource(manifest: MemeModuleManifest): manifest is ResourceMo
  * @returns
  * @internal
  */
-export function isCollection(manifest: MemeModuleManifest): manifest is CollectionModuleManifest {
+export function _isCollection(manifest: MemeModuleManifest): manifest is CollectionModuleManifest {
   return manifest.type === 'collection'
 }

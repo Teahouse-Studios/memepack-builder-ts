@@ -1,69 +1,97 @@
 import { readJSON } from 'fs-extra'
 import type { ResourceModule } from '../module/index.js'
 import { resolve, normalize } from 'node:path'
-import type { AdditionPatch, DeletionPatch } from './patch.js'
+import type { JsonAdditionPatch, JsonDeletionPatch } from './patch.js'
 
 /**
  * @public
  */
-export type JsonFlatAdditionEntry = Map<string, AdditionPatch>
+export type JsonFlatAdditionMap = Map<string, JsonAdditionPatch>
 
 /**
  * @public
  */
-export type JsonFlatDeletionEntry = Map<string, DeletionPatch>
+export type JsonFlatDeletionMap = Map<string, JsonDeletionPatch>
 
 /**
  * @public
  */
-export class JsonModification {
-  #addition: JsonFlatAdditionEntry
-  #deletion: JsonFlatDeletionEntry
-  #selectedModules: ResourceModule[]
+export interface JsonModification {
+  addition: JsonFlatAdditionMap
+  deletion: JsonFlatDeletionMap
+}
 
-  constructor(selectedModules: ResourceModule[]) {
-    this.#addition = new Map()
-    this.#deletion = new Map()
-    this.#selectedModules = selectedModules
+/**
+ * @public
+ */
+export async function generateJsonModification(
+  selectedModules: ResourceModule[]
+): Promise<JsonModification> {
+  const modification: JsonModification = {
+    addition: new Map(),
+    deletion: new Map(),
   }
+  for (const module of selectedModules) {
+    await updateModification(module, modification)
+  }
+  return modification
+}
 
-  async getModification(): Promise<{
-    addition: JsonFlatAdditionEntry
-    deletion: JsonFlatDeletionEntry
-  }> {
-    for (const module of this.#selectedModules) {
-      await this.#updateModification(module)
+/**
+ * @public
+ * @param module
+ */
+export async function updateModification(
+  module: ResourceModule,
+  modification: JsonModification
+): Promise<void> {
+  for (const definition of module.manifest.languageModification ?? []) {
+    const normalizedTargetFile = normalize(definition.file)
+    if (definition.add) {
+      const addContent: Record<string, string> = await readJSON(
+        resolve(module.path, definition.add)
+      )
+      await _updateAdditionEntry(modification.addition, normalizedTargetFile, addContent)
     }
-    return { addition: this.#addition, deletion: this.#deletion }
+    if (definition.remove) {
+      const removeContent: string[] = await readJSON(resolve(module.path, definition.remove))
+      await _updateDeletionEntry(modification.deletion, normalizedTargetFile, removeContent)
+    }
   }
+}
 
-  async #updateModification(module: ResourceModule): Promise<void> {
-    for (const definition of module.manifest.languageModification ?? []) {
-      const normalizedTargetFile = normalize(definition.file)
-      if (definition.add) {
-        const addContent: Record<string, string> = await readJSON(
-          resolve(module.path, definition.add)
-        )
-        const updateFile = this.#addition.get(normalizedTargetFile)
-        if (!updateFile) {
-          this.#addition.set(normalizedTargetFile, new Map(Object.entries(addContent)))
-        } else {
-          for (const [k, v] of Object.entries(addContent)) {
-            updateFile.set(k, v)
-          }
-        }
-      }
-      if (definition.remove) {
-        const removeContent: string[] = await readJSON(resolve(module.path, definition.remove))
-        const updateFile = this.#deletion.get(normalizedTargetFile)
-        if (!updateFile) {
-          this.#deletion.set(normalizedTargetFile, new Set(removeContent))
-        } else {
-          for (const k of removeContent) {
-            updateFile.add(k)
-          }
-        }
-      }
+/**
+ * @internal
+ */
+export async function _updateAdditionEntry(
+  entry: JsonFlatAdditionMap,
+  targetFile: string,
+  content: Record<string, string>
+): Promise<void> {
+  const updateFile = entry.get(targetFile)
+  if (!updateFile) {
+    entry.set(targetFile, new Map(Object.entries(content)))
+  } else {
+    for (const [k, v] of Object.entries(content)) {
+      updateFile.set(k, v)
+    }
+  }
+}
+
+/**
+ * @internal
+ */
+export async function _updateDeletionEntry(
+  entry: JsonFlatDeletionMap,
+  targetFile: string,
+  content: string[]
+): Promise<void> {
+  const updateFile = entry.get(targetFile)
+  if (!updateFile) {
+    entry.set(targetFile, new Set(content))
+  } else {
+    for (const k of content) {
+      updateFile.add(k)
     }
   }
 }

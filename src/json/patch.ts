@@ -1,21 +1,29 @@
 import { readJSON } from 'fs-extra'
+/**
+ * @public
+ */
+export interface JsonPatchDefinition {
+  file: string
+  add?: string
+  remove?: string
+}
 
 /**
  * @public
  */
-export type AdditionPatch = Map<string, string>
+export type JsonAdditionPatch = Map<string, string>
 
 /**
  * @public
  */
-export type DeletionPatch = Set<string>
+export type JsonDeletionPatch = Set<string>
 
 /**
  * @public
  */
 export interface JsonFlatKeyPatch {
-  addition?: AdditionPatch
-  deletion?: DeletionPatch
+  addition?: JsonAdditionPatch
+  deletion?: JsonDeletionPatch
 }
 
 /**
@@ -23,7 +31,7 @@ export interface JsonFlatKeyPatch {
  */
 export interface JsonNestedKeyPatch {
   addition?: Map<string, any>
-  deletion?: DeletionPatch
+  deletion?: JsonDeletionPatch
 }
 
 /**
@@ -40,35 +48,35 @@ export interface JsonContentPatch {
 export class JsonPatch {
   static applyJsonContentPatch(
     content: Record<string, any>,
-    modification: JsonContentPatch
+    patch: JsonContentPatch
   ): Record<string, any> {
-    if (modification.flatKey) {
-      content = JsonPatch.applyJsonFlatKeyPatch(content, modification.flatKey)
+    if (patch.flatKey) {
+      content = JsonPatch.applyJsonFlatKeyPatch(content, patch.flatKey)
     }
-    if (modification.nestedKey) {
-      content = JsonPatch.applyJsonNestedKeyPatch(content, modification.nestedKey)
+    if (patch.nestedKey) {
+      content = JsonPatch.applyJsonNestedKeyPatch(content, patch.nestedKey)
     }
     return content
   }
 
-  static async applyJsonPatch(
+  static async applyJsonFilePatch(
     filePath: string,
-    modification: JsonContentPatch
+    patch: JsonContentPatch
   ): Promise<Record<string, any>> {
-    return JsonPatch.applyJsonContentPatch(await readJSON(filePath), modification)
+    return JsonPatch.applyJsonContentPatch(await readJSON(filePath), patch)
   }
 
   static applyJsonFlatKeyPatch(
     content: Record<string, any>,
-    modification: JsonFlatKeyPatch
+    patch: JsonFlatKeyPatch
   ): Record<string, any> {
-    if (modification.addition) {
-      for (const [k, v] of modification.addition) {
+    if (patch.addition) {
+      for (const [k, v] of patch.addition) {
         content[k] = v
       }
     }
-    if (modification.deletion) {
-      for (const k of modification.deletion) {
+    if (patch.deletion) {
+      for (const k of patch.deletion) {
         delete content[k]
       }
     }
@@ -77,10 +85,10 @@ export class JsonPatch {
 
   static applyJsonNestedKeyPatch(
     content: Record<string, any>,
-    modification: JsonNestedKeyPatch
+    patch: JsonNestedKeyPatch
   ): Record<string, any> {
-    if (modification.addition) {
-      for (const [k, v] of modification.addition) {
+    if (patch.addition) {
+      for (const [k, v] of patch.addition) {
         const segments = k.split('.').filter((v) => v !== '__proto__')
         const lastKey = segments.pop() ?? ''
         let ref = content
@@ -91,8 +99,8 @@ export class JsonPatch {
         ref[lastKey] = v
       }
     }
-    if (modification.deletion) {
-      for (const k of modification.deletion) {
+    if (patch.deletion) {
+      for (const k of patch.deletion) {
         const segments = k.split('.').filter((v) => v !== '__proto__')
         const lastKey = segments.pop() ?? ''
         let ref = content
