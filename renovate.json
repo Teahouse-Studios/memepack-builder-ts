@@ -2,6 +2,13 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:recommended", "group:allNonMajor", ":semanticCommitTypeAll(chore)"],
   "rangeStrategy": "bump",
+  "meteor": {
+    "enabled": false
+  },
+  "ignoreDeps": ["node"],
+  "npm": {
+    "commitMessageTopic": "{{prettyDepType}} {{depName}}"
+  },
   "packageRules": [
     {
       "groupName": "types",
