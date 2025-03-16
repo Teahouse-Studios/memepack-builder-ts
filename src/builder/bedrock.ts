@@ -1,5 +1,6 @@
 import { resolve } from 'node:path'
-import { exists, readJSON, readFile } from 'fs-extra'
+import { pathExists, readJSON } from 'fs-extra/esm'
+import { readFile } from 'node:fs/promises'
 import { ZipFile } from 'yazl'
 import { PackBuilder } from './index.js'
 import { JsonPatch } from '../json/patch.js'
@@ -38,7 +39,7 @@ export async function generateBedrockTextureFile(
   const texture: BedrockTextureFile = { texture_data: {} }
   selectedModules.forEach(async (module) => {
     const targetPath = resolve(module.path, 'textures', textureFileName)
-    if (await exists(targetPath)) {
+    if (await pathExists(targetPath)) {
       Object.assign(
         texture.texture_data,
         (

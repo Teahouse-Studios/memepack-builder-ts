@@ -1,4 +1,4 @@
-import { readFile } from 'fs-extra'
+import { readFile } from 'node:fs/promises'
 import type { CollectionModule, MemeModule, ResourceModule } from '../module/index.js'
 
 /**

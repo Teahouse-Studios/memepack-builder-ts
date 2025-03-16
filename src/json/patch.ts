@@ -1,4 +1,4 @@
-import { readJSON } from 'fs-extra'
+import { readJSON } from 'fs-extra/esm'
 /**
  * @public
  */

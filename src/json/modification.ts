@@ -1,4 +1,4 @@
-import { readJSON } from 'fs-extra'
+import { readJSON } from 'fs-extra/esm'
 import type { ResourceModule } from '../module/index.js'
 import { resolve, normalize } from 'node:path'
 import type { JsonAdditionPatch, JsonDeletionPatch } from './patch.js'

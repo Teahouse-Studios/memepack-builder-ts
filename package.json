@@ -11,7 +11,7 @@
   "scripts": {
     "watch": "tsc --watch",
     "emit-type": "tsc --emitDeclarationOnly",
-    "bundle": "esbuild src/index.ts --bundle --format=esm --platform=node --target=node18 --packages=external --outdir=lib",
+    "bundle": "esbuild src/index.ts --bundle --minify --format=esm --platform=node --target=node18 --packages=external --outdir=lib --sourcemap",
     "build": "pnpm clear && pnpm bundle && pnpm emit-type && api-extractor run --local --verbose && rimraf ./types",
     "clear": "rimraf ./lib ./types",
     "pretty": "prettier --write src/",

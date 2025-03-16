@@ -1,5 +1,5 @@
-const a = require('../lib')
-const fs = require('node:fs')
+const a = await import('../lib/index.js')
+const fs = await import('node:fs')
 const javaParser = new a.ModuleParser()
 javaParser.addSearchPaths('./java/modules')
 javaParser.searchModules().then((m) => {

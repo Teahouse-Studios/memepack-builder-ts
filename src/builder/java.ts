@@ -1,5 +1,5 @@
 import { PackBuilder } from './index.js'
-import { readJSON } from 'fs-extra'
+import { readJSON } from 'fs-extra/esm'
 import { ZipFile } from 'yazl'
 import { _jsonDumpEnsureAscii } from '../json/index.js'
 import {

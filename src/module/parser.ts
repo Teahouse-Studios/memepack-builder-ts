@@ -1,5 +1,6 @@
-import { readdir, readJSON } from 'fs-extra'
-import { default as klaw } from 'klaw'
+import { readdir } from 'node:fs/promises'
+import { readJSON } from 'fs-extra/esm'
+import klaw from 'klaw'
 import { resolve, relative } from 'node:path'
 import {
   _isResource,
