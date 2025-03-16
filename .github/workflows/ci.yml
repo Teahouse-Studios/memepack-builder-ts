@@ -47,6 +47,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: build
-          path: tests/out/*.zip
+          name: test build
+          path: tests/out/
           compression-level: 0

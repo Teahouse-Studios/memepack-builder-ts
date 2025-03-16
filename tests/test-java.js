@@ -56,8 +56,8 @@ export async function TestJava() {
   )
   for (const option of javaOptions) {
     const buffer = await builder.build(option)
-    const filename = `./out/java-${option.type}.zip`
-    const fd = await fs.open(filename, 'w')
+    const filename = `java-${option.type}.zip`
+    const fd = await fs.open(`./out/${filename}`, 'w')
     await fs.writeFile(fd, buffer)
     await fd.close()
     console.log(`generated ${filename}`)
