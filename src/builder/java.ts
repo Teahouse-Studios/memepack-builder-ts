@@ -16,6 +16,7 @@ import type { JavaBuildOptions } from '../option/java.js'
 import type { TransformOptions } from '../option/index.js'
 import { LangFileConverter } from '../lang/converter.js'
 import { JsonPatch } from '../json/patch.js'
+import { normalize } from 'node:path'
 
 /**
  * @public
@@ -97,7 +98,7 @@ export class JavaPackBuilder extends PackBuilder {
         } else {
           if (toLegacy) {
             const legacyKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
-            if (LEGACY_FILENAMES.some((name) => key.includes(name))) {
+            if (LEGACY_FILENAMES.some((name) => legacyKey.includes(normalize(name)))) {
               const storeContent = LangFileConverter.dumpJavaLang(
                 await this.#transformContentToLegacy(patchedContent)
               )
