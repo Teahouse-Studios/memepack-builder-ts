@@ -4,11 +4,12 @@ import { ZipFile } from 'yazl'
 import { _jsonDumpEnsureAscii } from '../json/index.js'
 import {
   _isJsonContentEntry,
-  type ArchiveJsonContentEntry,
   type ArchiveMap,
   _isFileEntry,
   _isPatchableEntry,
   type ArchivePatchableEntry,
+  _isJsonEntry,
+  type ArchiveJsonEntry,
 } from '../archive/index.js'
 import type { ResourceModule } from '../module/index.js'
 import type { JavaBuildOptions } from '../option/java.js'
@@ -36,12 +37,12 @@ export class JavaPackBuilder extends PackBuilder {
     this.#legacyMappingFilePath = legacyMappingFilePath
   }
 
-  #applyMcMetaModification(mcMetaOptions: TransformOptions): ArchiveJsonContentEntry {
+  #applyMcMetaModification(mcMetaOptions: TransformOptions): ArchiveJsonEntry {
     const mcMetaDetail = this.entries.get('pack.mcmeta')
     if (!mcMetaDetail) {
       throw new Error('pack.mcmeta does not exist')
     }
-    if (!_isJsonContentEntry(mcMetaDetail)) {
+    if (!_isJsonEntry(mcMetaDetail)) {
       throw new Error('pack.mcmeta is not a json file')
     }
     mcMetaDetail.patch = {}
