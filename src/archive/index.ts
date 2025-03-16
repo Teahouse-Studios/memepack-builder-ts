@@ -116,7 +116,9 @@ export function _isFileEntry(entry: ArchiveEntry): entry is ArchiveFileEntry {
  * @internal
  */
 export function _isJsonFileEntry(entry: ArchiveEntry): entry is ArchiveJsonFileEntry {
-  return _isFileEntry(entry) && entry.filePath.endsWith('.json')
+  return (
+    _isFileEntry(entry) && (entry.filePath.endsWith('.json') || entry.filePath.endsWith('.mcmeta'))
+  )
 }
 
 /**

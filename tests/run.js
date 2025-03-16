@@ -1,6 +1,10 @@
 const a = await import('../lib/index.js')
 const fs = await import('node:fs/promises')
 
+if (!(await fs.stat('./out').catch(() => false))) {
+  await fs.mkdir('./out')
+}
+
 let parser = new a.ModuleParser()
 parser.addSearchPaths('./java/modules')
 let modules = await parser.searchModules()
@@ -23,7 +27,7 @@ const javaOptions = {
 }
 let buffer = await builder.build(javaOptions)
 let fd = await fs.open('./out/java.zip', 'w')
-await fs.writeFile(fd, javaBuffer)
+await fs.writeFile(fd, buffer)
 console.log('generated java.zip')
 
 parser = new a.ModuleParser()
@@ -42,5 +46,5 @@ const bedrockOptions = {
 }
 buffer = await builder.build(bedrockOptions)
 fd = await fs.open('./out/bedrock.zip', 'w')
-await fs.write(fd, buffer)
+await fs.writeFile(fd, buffer)
 console.log('generated bedrock.zip')

@@ -105,3 +105,6 @@ dist
 
 *.zip
 lib/
+tests/java
+tests/bedrock
+tests/out
