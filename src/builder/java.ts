@@ -19,7 +19,7 @@ import { JsonPatch } from '../json/patch.js'
 /**
  * @public
  */
-export const LEGACY_FILENAMES = ['']
+export const LEGACY_FILENAMES = ['assets/minecraft/lang/zh_cn.lang']
 
 /**
  * @public
@@ -94,12 +94,18 @@ export class JavaPackBuilder extends PackBuilder {
           const storeContent = JSON.stringify(patchedContent, undefined, 4)
           zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
         } else {
-          if (toLegacy && LEGACY_FILENAMES.some((name) => key.includes(name))) {
-            const storeKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
-            const storeContent = LangFileConverter.dumpJavaLang(
-              await this.#transformContentToLegacy(patchedContent)
-            )
-            zipFile.addBuffer(Buffer.from(storeContent), storeKey, { mtime: new Date(0) })
+          if (toLegacy) {
+            const legacyKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
+            if (LEGACY_FILENAMES.some((name) => key.includes(name))) {
+              const storeContent = LangFileConverter.dumpJavaLang(
+                await this.#transformContentToLegacy(patchedContent)
+              )
+              zipFile.addBuffer(Buffer.from(storeContent), legacyKey, { mtime: new Date(0) })
+              continue
+            } else {
+              const storeContent = _jsonDumpEnsureAscii(patchedContent)
+              zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+            }
           } else {
             const storeContent = _jsonDumpEnsureAscii(patchedContent)
             zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })

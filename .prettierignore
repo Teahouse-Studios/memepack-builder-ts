@@ -1,4 +1,7 @@
 .vscode
 dist
 lib
-tests
+tests/java
+tests/bedrock
+tests/out
+node_modules

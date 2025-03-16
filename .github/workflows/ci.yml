@@ -1,0 +1,51 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - master
+
+permissions: {}
+
+jobs:
+  ci:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Checkout java repo
+        uses: actions/checkout@v4
+        with:
+          repository: Teahouse-Studios/mcwzh-meme-resourcepack
+          path: tests/java
+
+      - name: Checkout bedrock repo
+        uses: actions/checkout@v4
+        with:
+          repository: Teahouse-Studios/mcwzh-meme-resourcepack-bedrock
+          path: tests/bedrock
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm bundle
+
+      - name: Run tests
+        run: |
+          node ./tests/run.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build
+          path: tests/out/*.zip
+          compression-level: 0
