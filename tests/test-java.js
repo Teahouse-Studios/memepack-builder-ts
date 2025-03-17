@@ -38,7 +38,7 @@ const javaOptions = [
     hash: false,
     mod: [],
     modules: {
-      resource: ['meme_resourcepack', 'lang_sfw'],
+      resource: ['meme_resourcepack', 'lang_sfw', 'bagify'],
       collection: ['version_1.12.2-1.15.2'],
     },
   },

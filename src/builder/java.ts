@@ -21,7 +21,26 @@ import { normalize } from 'node:path'
 /**
  * @public
  */
-export const LEGACY_FILENAMES = ['assets/minecraft/lang/zh_cn.lang']
+export const LEGACY_FILENAME_CONFIG = {
+  'assets/minecraft/lang/zh_meme\\.(.+)': 'assets/minecraft/lang/zh_cn.lang',
+  'assets/minecraft/lang/zh_cn\\.(.+)': 'assets/minecraft/lang/zh_cn.lang',
+  'assets/minecraft/textures/block/(.+)': 'assets/minecraft/textures/blocks/$1',
+  'assets/minecraft/textures/item/(.+)': 'assets/minecraft/textures/items/$1',
+}
+
+/**
+ * @public
+ */
+export const LEGACY_FILE_CONTENT_CONFIG = {
+  'assets/minecraft/lang/zh_cn.lang': { requireLegacyMapping: true },
+}
+
+/**
+ * @public
+ */
+export const COMPATIBLE_FILENAME_CONFIG = {
+  'assets/minecraft/lang/zh_meme\\.(.+)': 'assets/minecraft/lang/zh_cn.$1',
+}
 
 /**
  * @public
@@ -72,7 +91,12 @@ export class JavaPackBuilder extends PackBuilder {
   #transformStoreToCompatible() {
     const newEntries: ArchiveMap = new Map()
     for (const [k, v] of this.entries) {
-      newEntries.set(k.replace(/zh_meme/, 'zh_cn'), v)
+      let newKey = k.replaceAll('\\', '/')
+      for (const [pattern, replacement] of Object.entries(COMPATIBLE_FILENAME_CONFIG)) {
+        newKey = newKey.replaceAll(new RegExp(`^${pattern}$`, 'g'), replacement)
+      }
+      newKey = normalize(newKey)
+      newEntries.set(newKey, v)
     }
     this.entries = newEntries
   }
@@ -81,44 +105,15 @@ export class JavaPackBuilder extends PackBuilder {
     this.decideSelectedModules(options)
     await this.getPackEntries()
     const zipFile = new ZipFile()
-    this.#applyMcMetaModification({
-      compatible: options.compatible,
-      format: options.format,
-    })
     if (options.compatible) {
       this.#transformStoreToCompatible()
     }
+    await this.#addMcMetaEntry(zipFile, options)
     const toLegacy = options.type === 'legacy'
-    for (const [key, entry] of this.entries) {
-      if (_isPatchableEntry(entry)) {
-        const patchedContent = await this.#makePatchedContent(entry)
-        if (key.endsWith('.mcmeta')) {
-          const storeContent = JSON.stringify(patchedContent, undefined, 4)
-          zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
-        } else {
-          if (toLegacy) {
-            const legacyKey = key.replace(/zh_(?:meme|cn)\.json/g, 'zh_cn.lang')
-            if (LEGACY_FILENAMES.some((name) => legacyKey.includes(normalize(name)))) {
-              const storeContent = LangFileConverter.dumpJavaLang(
-                await this.#transformContentToLegacy(patchedContent)
-              )
-              zipFile.addBuffer(Buffer.from(storeContent), legacyKey, { mtime: new Date(0) })
-              continue
-            } else {
-              const storeContent = _jsonDumpEnsureAscii(patchedContent)
-              zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
-            }
-          } else {
-            const storeContent = _jsonDumpEnsureAscii(patchedContent)
-            zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
-          }
-        }
-        continue
-      }
-      if (_isFileEntry(entry)) {
-        zipFile.addFile(entry.filePath, key)
-        continue
-      }
+    if (toLegacy) {
+      await this.#addLegacyEntries(zipFile)
+    } else {
+      await this.#addEntries(zipFile)
     }
     zipFile.end()
     return new Promise((resolve) => {
@@ -141,6 +136,79 @@ export class JavaPackBuilder extends PackBuilder {
         return await JsonPatch.applyJsonFilePatch(entry.filePath, entry.patch)
       } else {
         return await readJSON(entry.filePath)
+      }
+    }
+  }
+
+  async #addMcMetaEntry(zipFile: ZipFile, mcMetaOptions: TransformOptions) {
+    const mcMetaDetail = this.entries.get('pack.mcmeta')
+    if (!mcMetaDetail) {
+      throw new Error('pack.mcmeta does not exist')
+    }
+    if (!_isJsonEntry(mcMetaDetail)) {
+      throw new Error('pack.mcmeta is not a json file')
+    }
+    this.entries.delete('pack.mcmeta')
+    mcMetaDetail.patch = {}
+    mcMetaDetail.patch.nestedKey = {}
+    if (mcMetaOptions.compatible) {
+      mcMetaDetail.patch.nestedKey.deletion = new Set('language')
+    }
+    mcMetaDetail.patch.nestedKey.addition = new Map([['pack.pack_format', mcMetaOptions.format]])
+
+    const patchedContent = await this.#makePatchedContent(mcMetaDetail)
+    const storeContent = JSON.stringify(patchedContent, undefined, 4)
+    zipFile.addBuffer(Buffer.from(storeContent), 'pack.mcmeta', { mtime: new Date(0) })
+  }
+
+  async #addEntries(zipFile: ZipFile) {
+    for (const [key, entry] of this.entries) {
+      if (_isPatchableEntry(entry)) {
+        const patchedContent = await this.#makePatchedContent(entry)
+        const storeContent = _jsonDumpEnsureAscii(patchedContent)
+        zipFile.addBuffer(Buffer.from(storeContent), key, { mtime: new Date(0) })
+        continue
+      }
+      if (_isFileEntry(entry)) {
+        zipFile.addFile(entry.filePath, key)
+        continue
+      }
+    }
+  }
+
+  async #addLegacyEntries(zipFile: ZipFile) {
+    for (const [key, entry] of this.entries) {
+      // key handling
+      let legacyKey = key
+      legacyKey = key.replaceAll('\\', '/')
+      for (const [pattern, replacement] of Object.entries(LEGACY_FILENAME_CONFIG)) {
+        legacyKey = legacyKey.replaceAll(new RegExp(`^${pattern}$`, 'g'), replacement)
+      }
+      legacyKey = normalize(legacyKey)
+
+      // content handling
+      if (_isPatchableEntry(entry)) {
+        const patchedContent = await this.#makePatchedContent(entry)
+        let handled = false
+        for (const [key, config] of Object.entries(LEGACY_FILE_CONTENT_CONFIG)) {
+          if (normalize(key) === legacyKey && config.requireLegacyMapping) {
+            const storeContent = LangFileConverter.dumpJavaLang(
+              await this.#transformContentToLegacy(patchedContent)
+            )
+            zipFile.addBuffer(Buffer.from(storeContent), legacyKey, { mtime: new Date(0) })
+            handled = true
+            break
+          }
+        }
+        if (!handled) {
+          const storeContent = _jsonDumpEnsureAscii(patchedContent)
+          zipFile.addBuffer(Buffer.from(storeContent), legacyKey, { mtime: new Date(0) })
+        }
+        continue
+      }
+      if (_isFileEntry(entry)) {
+        zipFile.addFile(entry.filePath, legacyKey)
+        continue
       }
     }
   }
