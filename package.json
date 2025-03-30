@@ -31,7 +31,7 @@
     "@types/klaw": "^3.0.6",
     "@types/node": "^22.13.10",
     "@types/yazl": "^2.4.6",
-    "esbuild": "^0.25.1",
+    "esbuild": "^0.25.2",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.2"
