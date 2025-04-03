@@ -32,7 +32,7 @@ jobs:
         run: pnpm build
 
       - name: Release
-        run: pnpm publish --access public --tag latest
+        run: pnpm publish --access public --no-git-checks --tag latest
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
           NPM_CONFIG_PROVENANCE: true
