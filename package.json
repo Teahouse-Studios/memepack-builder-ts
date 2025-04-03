@@ -1,6 +1,6 @@
 {
   "name": "memepack-builder",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Build memified Minecraft resource pack",
   "types": "lib/index.d.ts",
   "type": "module",
