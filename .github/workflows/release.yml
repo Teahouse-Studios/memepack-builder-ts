@@ -28,10 +28,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build packages
-        run: pnpm build
-
-      - name: Release
+      - name: Build and release package
         run: pnpm publish --access public --no-git-checks --tag latest
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_AUTH_TOKEN}}
