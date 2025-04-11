@@ -26,7 +26,7 @@
     "yazl": "^3.3.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.52.1",
+    "@microsoft/api-extractor": "^7.52.3",
     "@types/fs-extra": "^11.0.4",
     "@types/klaw": "^3.0.6",
     "@types/node": "^22.14.0",
@@ -34,7 +34,7 @@
     "esbuild": "^0.25.2",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -43,5 +43,5 @@
     "minecraft",
     "resourcepack"
   ],
-  "packageManager": "pnpm@10.7.1"
+  "packageManager": "pnpm@10.8.0"
 }
