@@ -28,8 +28,8 @@
   "devDependencies": {
     "@microsoft/api-extractor": "^7.52.8",
     "@types/fs-extra": "^11.0.4",
-    "@types/klaw": "^3.0.6",
-    "@types/node": "^22.14.0",
+    "@types/klaw": "^3.0.7",
+    "@types/node": "^22.16.0",
     "@types/yazl": "^2.4.6",
     "esbuild": "^0.25.5",
     "prettier": "^3.6.2",
