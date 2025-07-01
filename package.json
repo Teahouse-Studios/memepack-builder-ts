@@ -26,13 +26,13 @@
     "yazl": "^3.3.1"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "^7.52.3",
+    "@microsoft/api-extractor": "^7.52.8",
     "@types/fs-extra": "^11.0.4",
     "@types/klaw": "^3.0.6",
     "@types/node": "^22.14.0",
     "@types/yazl": "^2.4.6",
     "esbuild": "^0.25.2",
-    "prettier": "^3.5.3",
+    "prettier": "^3.6.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   },
