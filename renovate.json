@@ -25,6 +25,10 @@
     {
       "groupName": "dev dependencies",
       "matchPackageNames": ["prettier", "rimraf", "typescript", "@microsoft/api-extractor"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
     }
   ]
 }
