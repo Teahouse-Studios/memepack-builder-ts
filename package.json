@@ -21,7 +21,7 @@
   "repository": "https://github.com/Teahouse-Studios/memepack-builder-ts.git",
   "license": "Apache-2.0",
   "dependencies": {
-    "fs-extra": "^11.3.0",
+    "fs-extra": "^11.3.1",
     "klaw": "^4.1.0",
     "yazl": "^3.3.1"
   },
