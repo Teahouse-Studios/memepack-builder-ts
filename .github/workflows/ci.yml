@@ -13,16 +13,16 @@ jobs:
       id-token: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Checkout java repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: Teahouse-Studios/mcwzh-meme-resourcepack
           path: tests/java
 
       - name: Checkout bedrock repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           repository: Teahouse-Studios/mcwzh-meme-resourcepack-bedrock
           path: tests/bedrock
