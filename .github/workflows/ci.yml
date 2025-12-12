@@ -45,7 +45,7 @@ jobs:
           cd tests
           node run.js
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: test build
           path: tests/out/
