@@ -19,8 +19,8 @@ importers:
         version: 3.3.1
     devDependencies:
       '@microsoft/api-extractor':
-        specifier: ^7.56.2
-        version: 7.56.2(@types/node@24.10.11)
+        specifier: ^7.56.3
+        version: 7.56.3(@types/node@24.10.11)
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -219,8 +219,8 @@ packages:
   '@microsoft/api-extractor-model@7.32.2':
     resolution: {integrity: sha512-Ussc25rAalc+4JJs9HNQE7TuO9y6jpYQX9nWD1DhqUzYPBr3Lr7O9intf+ZY8kD5HnIqeIRJX7ccCT0QyBy2Ww==}
 
-  '@microsoft/api-extractor@7.56.2':
-    resolution: {integrity: sha512-d94f7S+H43jDxY/YIyp5UOE9N12HZmEPP5Ct96us+fw1FVKBoy4itTopdVM1VrcpduuA7fK/t31CgA2jM8AqSA==}
+  '@microsoft/api-extractor@7.56.3':
+    resolution: {integrity: sha512-fRqok4aRNq5GpgGBv2fKlSSKbirPKTJ75vQefthB5x9dwt4Zz+AezUzdc1p/AG4wUBIgmhjcEwn/Rj+N4Wh4Mw==}
     hasBin: true
 
   '@microsoft/tsdoc-config@0.18.0':
@@ -361,8 +361,8 @@ packages:
     resolution: {integrity: sha512-1zGZ9MF9H22UnkpVeuaGKOjfA2t6WrfdrJmGjy16ykcjnKQDmHVX+KI477rpbGevz/5FD4MC3xf1oxylBgcaQw==}
     engines: {node: '>=14.14.0'}
 
-  lodash@4.17.21:
-    resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
+  lodash@4.17.23:
+    resolution: {integrity: sha512-LgVTMpQtIopCi79SJeDiP0TfWi5CNEc/L/aRdTh3yIvmZXTnheWpKjSZhnvMl8iXbC1tFg9gdHHDMLoV7CnG+w==}
 
   lru-cache@11.2.4:
     resolution: {integrity: sha512-B5Y16Jr9LB9dHVkh6ZevG+vAbOsNOYCX+sXvFWFu7B3Iz5mijW3zdbMyhsh8ANd2mSWBYdJgnqi+mL7/LrOPYg==}
@@ -569,7 +569,7 @@ snapshots:
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.56.2(@types/node@24.10.11)':
+  '@microsoft/api-extractor@7.56.3(@types/node@24.10.11)':
     dependencies:
       '@microsoft/api-extractor-model': 7.32.2(@types/node@24.10.11)
       '@microsoft/tsdoc': 0.16.0
@@ -579,7 +579,7 @@ snapshots:
       '@rushstack/terminal': 0.21.0(@types/node@24.10.11)
       '@rushstack/ts-command-line': 5.2.0(@types/node@24.10.11)
       diff: 8.0.2
-      lodash: 4.17.21
+      lodash: 4.17.23
       minimatch: 10.1.2
       resolve: 1.22.11
       semver: 7.5.4
@@ -760,7 +760,7 @@ snapshots:
 
   klaw@4.1.0: {}
 
-  lodash@4.17.21: {}
+  lodash@4.17.23: {}
 
   lru-cache@11.2.4: {}
 
