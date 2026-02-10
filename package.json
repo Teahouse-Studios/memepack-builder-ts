@@ -29,7 +29,7 @@
     "@microsoft/api-extractor": "^7.56.3",
     "@types/fs-extra": "^11.0.4",
     "@types/klaw": "^3.0.7",
-    "@types/node": "^24.10.12",
+    "@types/node": "^24.10.13",
     "@types/yazl": "^3.3.0",
     "esbuild": "^0.27.3",
     "prettier": "^3.8.1",
