@@ -6,9 +6,6 @@
     "enabled": false
   },
   "ignoreDeps": ["node"],
-  "npm": {
-    "commitMessageTopic": "{{prettyDepType}} {{depName}}"
-  },
   "packageRules": [
     {
       "groupName": "types",
