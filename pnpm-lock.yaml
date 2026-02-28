@@ -20,7 +20,7 @@ importers:
     devDependencies:
       '@microsoft/api-extractor':
         specifier: ^7.57.6
-        version: 7.57.6(@types/node@24.10.15)
+        version: 7.57.6(@types/node@24.11.0)
       '@types/fs-extra':
         specifier: ^11.0.4
         version: 11.0.4
@@ -28,8 +28,8 @@ importers:
         specifier: ^3.0.7
         version: 3.0.7
       '@types/node':
-        specifier: ^24.10.15
-        version: 24.10.15
+        specifier: ^24.11.0
+        version: 24.11.0
       '@types/yazl':
         specifier: ^3.3.0
         version: 3.3.0
@@ -259,8 +259,8 @@ packages:
   '@types/klaw@3.0.7':
     resolution: {integrity: sha512-ooZ+dVfTfg8RIUzwCBnHR6NirCB0amo1MNneUbL+Votca1H/eaMwkB31uDU9O6yKWNY5ngdYP3ywduOxm4KtMg==}
 
-  '@types/node@24.10.15':
-    resolution: {integrity: sha512-BgjLoRuSr0MTI5wA6gMw9Xy0sFudAaUuvrnjgGx9wZ522fYYLA5SYJ+1Y30vTcJEG+DRCyDHx/gzQVfofYzSdg==}
+  '@types/node@24.11.0':
+    resolution: {integrity: sha512-fPxQqz4VTgPI/IQ+lj9r0h+fDR66bzoeMGHp8ASee+32OSGIkeASsoZuJixsQoVef1QJbeubcPBxKk22QVoWdw==}
 
   '@types/yazl@3.3.0':
     resolution: {integrity: sha512-mFL6lGkk2N5u5nIxpNV/K5LW3qVSbxhJrMxYGOOxZndWxMgCamr/iCsq/1t9kd8pEwhuNP91LC5qZm/qS9pOEw==}
@@ -540,23 +540,23 @@ snapshots:
   '@esbuild/win32-x64@0.27.3':
     optional: true
 
-  '@microsoft/api-extractor-model@7.33.4(@types/node@24.10.15)':
+  '@microsoft/api-extractor-model@7.33.4(@types/node@24.11.0)':
     dependencies:
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
-      '@rushstack/node-core-library': 5.20.3(@types/node@24.10.15)
+      '@rushstack/node-core-library': 5.20.3(@types/node@24.11.0)
     transitivePeerDependencies:
       - '@types/node'
 
-  '@microsoft/api-extractor@7.57.6(@types/node@24.10.15)':
+  '@microsoft/api-extractor@7.57.6(@types/node@24.11.0)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.33.4(@types/node@24.10.15)
+      '@microsoft/api-extractor-model': 7.33.4(@types/node@24.11.0)
       '@microsoft/tsdoc': 0.16.0
       '@microsoft/tsdoc-config': 0.18.1
-      '@rushstack/node-core-library': 5.20.3(@types/node@24.10.15)
+      '@rushstack/node-core-library': 5.20.3(@types/node@24.11.0)
       '@rushstack/rig-package': 0.7.2
-      '@rushstack/terminal': 0.22.3(@types/node@24.10.15)
-      '@rushstack/ts-command-line': 5.3.3(@types/node@24.10.15)
+      '@rushstack/terminal': 0.22.3(@types/node@24.11.0)
+      '@rushstack/ts-command-line': 5.3.3(@types/node@24.11.0)
       diff: 8.0.3
       lodash: 4.17.23
       minimatch: 10.2.1
@@ -576,7 +576,7 @@ snapshots:
 
   '@microsoft/tsdoc@0.16.0': {}
 
-  '@rushstack/node-core-library@5.20.3(@types/node@24.10.15)':
+  '@rushstack/node-core-library@5.20.3(@types/node@24.11.0)':
     dependencies:
       ajv: 8.18.0
       ajv-draft-04: 1.0.0(ajv@8.18.0)
@@ -587,28 +587,28 @@ snapshots:
       resolve: 1.22.11
       semver: 7.5.4
     optionalDependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
-  '@rushstack/problem-matcher@0.2.1(@types/node@24.10.15)':
+  '@rushstack/problem-matcher@0.2.1(@types/node@24.11.0)':
     optionalDependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
   '@rushstack/rig-package@0.7.2':
     dependencies:
       resolve: 1.22.11
       strip-json-comments: 3.1.1
 
-  '@rushstack/terminal@0.22.3(@types/node@24.10.15)':
+  '@rushstack/terminal@0.22.3(@types/node@24.11.0)':
     dependencies:
-      '@rushstack/node-core-library': 5.20.3(@types/node@24.10.15)
-      '@rushstack/problem-matcher': 0.2.1(@types/node@24.10.15)
+      '@rushstack/node-core-library': 5.20.3(@types/node@24.11.0)
+      '@rushstack/problem-matcher': 0.2.1(@types/node@24.11.0)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
-  '@rushstack/ts-command-line@5.3.3(@types/node@24.10.15)':
+  '@rushstack/ts-command-line@5.3.3(@types/node@24.11.0)':
     dependencies:
-      '@rushstack/terminal': 0.22.3(@types/node@24.10.15)
+      '@rushstack/terminal': 0.22.3(@types/node@24.11.0)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -620,23 +620,23 @@ snapshots:
   '@types/fs-extra@11.0.4':
     dependencies:
       '@types/jsonfile': 6.1.4
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
   '@types/jsonfile@6.1.4':
     dependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
   '@types/klaw@3.0.7':
     dependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
-  '@types/node@24.10.15':
+  '@types/node@24.11.0':
     dependencies:
       undici-types: 7.16.0
 
   '@types/yazl@3.3.0':
     dependencies:
-      '@types/node': 24.10.15
+      '@types/node': 24.11.0
 
   ajv-draft-04@1.0.0(ajv@8.18.0):
     optionalDependencies:
