@@ -27,7 +27,7 @@ jobs:
           repository: Teahouse-Studios/mcwzh-meme-resourcepack-bedrock
           path: tests/bedrock
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v5
 
       - uses: actions/setup-node@v6
         with:
